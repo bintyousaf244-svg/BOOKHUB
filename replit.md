@@ -15,6 +15,32 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Frontend**: React + Vite + TailwindCSS + shadcn/ui
+
+## Project: Al-Qalam Bookstore
+
+A complete professional online bookstore for learning books in English and Arabic.
+
+### Features
+- **Storefront**: Home page with featured books, on-sale section, free books strip, categories
+- **Catalog**: Full book catalog with filters (category, language, age group, free/paid/sale), search, pagination
+- **Book Detail**: Cover, description, author, price/sale badge, add to cart
+- **Shopping Cart**: Cart context (localStorage-backed), item management
+- **Checkout**: Customer info form, payment method selector (Bank Transfer, JazzCash, EasyPaisa)
+- **Order Success**: Confirmation page with payment instructions
+- **Free Resources**: Free books and articles with download links
+- **Admin Panel**: Dashboard, book management (CRUD), order management with status updates
+- **Admin Login**: Username/password (default: admin / bookstore2024)
+
+### DB Tables
+- `books` — All book data including sale, free, featured flags
+- `orders` — Orders with items (JSONB), payment method, status
+- `categories` — Book categories with counts
+
+### Admin Credentials
+- Username: `admin`
+- Password: `bookstore2024`
+- Can be overridden via env vars: `ADMIN_USERNAME`, `ADMIN_PASSWORD`
 
 ## Key Commands
 
