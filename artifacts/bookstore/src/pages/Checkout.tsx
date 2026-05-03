@@ -62,8 +62,7 @@ export default function Checkout() {
     return null;
   }
 
-  const shipping = 200;
-  const total = Math.max(0, subtotal + shipping - discountAmount);
+  const total = Math.max(0, subtotal - discountAmount);
 
   const handleApplyCode = async () => {
     const code = discountInput.trim().toUpperCase();
@@ -74,7 +73,7 @@ export default function Checkout() {
       const res = await fetch("/api/discount-codes/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, orderAmount: subtotal + shipping }),
+        body: JSON.stringify({ code, orderAmount: subtotal }),
       });
       const data = await res.json();
       if (data.valid) {
@@ -307,10 +306,6 @@ export default function Checkout() {
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
                   <span>Rs. {subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Shipping</span>
-                  <span>Rs. {shipping}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-green-600 font-medium">
