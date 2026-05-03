@@ -25,7 +25,7 @@ export default function AdminLogin() {
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      setLocation("/admin/dashboard");
+      setLocation("/dashboard");
     }
   }, [isAuthenticated, setLocation]);
 
@@ -43,7 +43,7 @@ export default function AdminLogin() {
         if (res.success && res.token) {
           setAuth(res.token);
           toast({ title: "Welcome back!" });
-          setLocation("/admin/dashboard");
+          setLocation("/dashboard");
         } else {
           toast({ title: "Login failed", description: res.message, variant: "destructive" });
         }

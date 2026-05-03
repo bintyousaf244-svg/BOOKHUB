@@ -7,9 +7,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { logout, isAuthenticated } = useAuth();
   const [location] = useLocation();
 
-  if (!isAuthenticated && location !== "/admin") {
-    // Render empty or redirect logic is handled at the page level typically
-    // but just to be safe:
+  if (!isAuthenticated && location !== "/") {
     return <>{children}</>;
   }
 
@@ -25,23 +23,23 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <span className="font-serif font-bold text-xl tracking-tight text-sidebar-primary">Admin Panel</span>
         </div>
         <nav className="flex-1 py-6 px-4 space-y-2">
-          <Link href="/admin/dashboard" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location === '/admin/dashboard' ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
+          <Link href="/dashboard" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location === '/dashboard' ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <LayoutDashboard className="h-5 w-5" /> Dashboard
           </Link>
-          <Link href="/admin/books" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/admin/books') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
+          <Link href="/books" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/books') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <Book className="h-5 w-5" /> Books
           </Link>
-          <Link href="/admin/orders" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/admin/orders') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
+          <Link href="/orders" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/orders') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <ShoppingCart className="h-5 w-5" /> Orders
           </Link>
-          <Link href="/admin/discounts" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/admin/discounts') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
+          <Link href="/discounts" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/discounts') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <Tag className="h-5 w-5" /> Discount Codes
           </Link>
         </nav>
         <div className="p-4 border-t border-sidebar-border">
-          <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors mb-2">
+          <a href="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-sidebar-accent/50 transition-colors mb-2">
             <Store className="h-5 w-5" /> Back to Store
-          </Link>
+          </a>
           <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors">
             <LogOut className="h-5 w-5" /> Logout
           </button>

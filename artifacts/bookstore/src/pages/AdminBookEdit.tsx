@@ -162,7 +162,7 @@ export default function AdminBookEdit() {
           toast({ title: "Book updated successfully" });
           queryClient.invalidateQueries({ queryKey: getGetBookQueryKey(bookId) });
           queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
-          setLocation("/admin/books");
+          setLocation("/books");
         },
         onError: () => toast({ title: "Failed to update book", variant: "destructive" })
       });
@@ -171,7 +171,7 @@ export default function AdminBookEdit() {
         onSuccess: () => {
           toast({ title: "Book created successfully" });
           queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
-          setLocation("/admin/books");
+          setLocation("/books");
         },
         onError: () => toast({ title: "Failed to create book", variant: "destructive" })
       });
@@ -189,7 +189,7 @@ export default function AdminBookEdit() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
       <div className="flex items-center gap-4">
-        <Link href="/admin/books">
+        <Link href="/books">
           <Button variant="outline" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
         </Link>
         <h1 className="text-3xl font-serif font-bold text-foreground">
@@ -432,7 +432,7 @@ export default function AdminBookEdit() {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Link href="/admin/books">
+            <Link href="/books">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
             <Button type="submit" disabled={createBook.isPending || updateBook.isPending || isAnyUploading} className="bg-primary text-primary-foreground px-8">

@@ -33,7 +33,7 @@ export default function AdminBooks() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-serif font-bold text-foreground">Manage Books</h1>
-        <Link href="/admin/books/new">
+        <Link href="/books/new">
           <Button className="bg-primary text-primary-foreground">
             <Plus className="mr-2 h-4 w-4" /> Add New Book
           </Button>
@@ -117,7 +117,7 @@ export default function AdminBooks() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/admin/books/${book.id}/edit`}>
+                        <Link href={`/books/${book.id}/edit`}>
                           <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4 text-muted-foreground" /></Button>
                         </Link>
                         

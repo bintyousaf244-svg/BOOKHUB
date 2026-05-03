@@ -98,7 +98,7 @@ export default function AdminDashboard() {
                 ))
               )}
             </div>
-            <Link href="/admin/orders" className="text-sm text-accent hover:underline mt-4 block">View all orders &rarr;</Link>
+            <Link href="/orders" className="text-sm text-accent hover:underline mt-4 block">View all orders &rarr;</Link>
           </CardContent>
         </Card>
 
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
                 ))
               )}
             </div>
-            <Link href="/admin/books" className="text-sm text-accent hover:underline mt-4 block">Manage books &rarr;</Link>
+            <Link href="/books" className="text-sm text-accent hover:underline mt-4 block">Manage books &rarr;</Link>
           </CardContent>
         </Card>
       </div>
