@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "wouter";
-import { BookOpen } from "lucide-react";
 
 export function Footer() {
   return (
@@ -8,13 +7,13 @@ export function Footer() {
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
           <Link href="/" className="flex items-center gap-2 mb-4">
-            <BookOpen className="h-6 w-6 text-accent" />
+            <img src="/logo.png" alt="Learner's Grove" className="h-10 w-10 object-contain" />
             <span className="text-xl font-bold font-serif tracking-tight">
-              Al-Qalam Bookstore
+              Learner's Grove
             </span>
           </Link>
           <p className="text-primary-foreground/70 max-w-sm mb-6">
-            Handcrafted learning books for kids and adults, bridging English and Arabic. A curated library run by a passionate educator.
+            Handcrafted learning books for kids and adults, bridging English and Arabic. A home for minds to bloom.
           </p>
         </div>
         
@@ -39,7 +38,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container mx-auto px-4 mt-12 pt-8 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/50">
-        &copy; {new Date().getFullYear()} Al-Qalam Bookstore. All rights reserved.
+        &copy; {new Date().getFullYear()} Learner's Grove. All rights reserved.
       </div>
     </footer>
   );

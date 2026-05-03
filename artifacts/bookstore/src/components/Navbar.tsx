@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "wouter";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { ShoppingCart, BookOpen, Menu, User } from "lucide-react";
+import { ShoppingCart, Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -15,10 +15,10 @@ export function Navbar() {
       <Link href="/books" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
         All Books
       </Link>
-      <Link href="/books?category=kids" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+      <Link href="/books?ageGroup=Kids" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
         Kids
       </Link>
-      <Link href="/books?category=adults" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+      <Link href="/books?ageGroup=Adults" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
         Adults
       </Link>
       <Link href="/free" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
@@ -32,9 +32,13 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-accent" />
-            <span className="text-xl font-bold font-serif tracking-tight text-primary">
-              Al-Qalam
+            <img
+              src="/logo.png"
+              alt="Learner's Grove"
+              className="h-10 w-10 object-contain"
+            />
+            <span className="text-xl font-bold font-serif tracking-tight text-primary leading-tight">
+              Learner's Grove
             </span>
           </Link>
           <nav className="hidden md:flex gap-6">

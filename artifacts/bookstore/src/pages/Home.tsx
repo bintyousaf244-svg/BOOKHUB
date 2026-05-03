@@ -29,7 +29,7 @@ export default function Home() {
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
-            <Badge variant="secondary" className="mb-6 bg-accent text-accent-foreground border-none font-bold px-3 py-1">Welcome to Al-Qalam</Badge>
+            <Badge variant="secondary" className="mb-6 bg-accent text-accent-foreground border-none font-bold px-3 py-1">Welcome to Learner's Grove</Badge>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight mb-6 text-primary-foreground">
               Cultivate minds with handcrafted knowledge
             </h1>

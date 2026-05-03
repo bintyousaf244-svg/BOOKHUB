@@ -70,7 +70,7 @@ export default function OrderSuccess() {
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground block mb-1">Account Title</span>
-                  <span className="font-bold">Al-Qalam Bookstore</span>
+                  <span className="font-bold">Learner's Grove</span>
                 </div>
                 <div className="md:col-span-2">
                   <span className="text-sm text-muted-foreground block mb-1">IBAN / Account Number</span>
