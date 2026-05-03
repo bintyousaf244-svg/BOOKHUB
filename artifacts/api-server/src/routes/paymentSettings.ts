@@ -15,6 +15,9 @@ const updateBody = z.object({
   bankAccountName: z.string().optional(),
   bankIban: z.string().optional(),
   whatsappNumber: z.string().optional(),
+  facebookUrl: z.string().optional(),
+  instagramUrl: z.string().optional(),
+  websiteUrl: z.string().optional(),
 });
 
 async function getOrCreateSettings() {
@@ -44,6 +47,9 @@ function mapSettings(s: typeof paymentSettingsTable.$inferSelect) {
     bankAccountName: s.bankAccountName ?? "",
     bankIban: s.bankIban ?? "",
     whatsappNumber: s.whatsappNumber ?? "",
+    facebookUrl: s.facebookUrl ?? "",
+    instagramUrl: s.instagramUrl ?? "",
+    websiteUrl: s.websiteUrl ?? "",
     updatedAt: s.updatedAt.toISOString(),
   };
 }

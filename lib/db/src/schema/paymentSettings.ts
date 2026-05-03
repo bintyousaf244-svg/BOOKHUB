@@ -11,6 +11,9 @@ export const paymentSettingsTable = pgTable("payment_settings", {
   bankAccountName: text("bank_account_name").default(""),
   bankIban: text("bank_iban").default(""),
   whatsappNumber: text("whatsapp_number").default(""),
+  facebookUrl: text("facebook_url").default(""),
+  instagramUrl: text("instagram_url").default(""),
+  websiteUrl: text("website_url").default(""),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

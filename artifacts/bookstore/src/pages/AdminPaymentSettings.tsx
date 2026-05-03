@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, Smartphone, Building2, Wallet, MessageCircle } from "lucide-react";
+import { Save, Smartphone, Building2, Wallet, MessageCircle, Globe, Share2 } from "lucide-react";
 
 interface PaymentSettings {
   jazzcashNumber: string;
@@ -16,6 +16,9 @@ interface PaymentSettings {
   bankAccountName: string;
   bankIban: string;
   whatsappNumber: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  websiteUrl: string;
 }
 
 const empty: PaymentSettings = {
@@ -28,6 +31,9 @@ const empty: PaymentSettings = {
   bankAccountName: "",
   bankIban: "",
   whatsappNumber: "",
+  facebookUrl: "",
+  instagramUrl: "",
+  websiteUrl: "",
 };
 
 export default function AdminPaymentSettings() {
@@ -142,6 +148,36 @@ export default function AdminPaymentSettings() {
             <Label>IBAN (Optional)</Label>
             <Input placeholder="PK36SCBL0000001123456702" {...f("bankIban")} />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Social & Website Links */}
+      <Card className="border-border shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Share2 className="h-5 w-5 text-primary" /> Social Media & Website
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5">
+              <span className="inline-block w-4 h-4 rounded-sm bg-[#1877f2]" /> Facebook Page URL
+            </Label>
+            <Input placeholder="https://facebook.com/yourpage" {...f("facebookUrl")} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5">
+              <span className="inline-block w-4 h-4 rounded-sm bg-gradient-to-br from-[#f09433] to-[#dc2743]" /> Instagram Page URL
+            </Label>
+            <Input placeholder="https://instagram.com/yourhandle" {...f("instagramUrl")} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5">
+              <Globe className="h-4 w-4 text-muted-foreground" /> Your Website URL
+            </Label>
+            <Input placeholder="https://yourwebsite.com" {...f("websiteUrl")} />
+          </div>
+          <p className="text-xs text-muted-foreground">These links appear in the store footer so visitors can find you on social media.</p>
         </CardContent>
       </Card>
 
