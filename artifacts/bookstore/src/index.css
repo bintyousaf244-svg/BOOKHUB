@@ -67,12 +67,11 @@
 }
 
 /* LIGHT MODE */
-/* Colors drawn from the Learner's Grove logo:
-   - Logo pink (tree foliage)   → primary (hero, footer, headings)
-   - Plum / deep purple         → accent + foreground (buttons, text)
-   - Warm amber/gold glow       → secondary highlights
-   - Soft ivory cream           → background
-   - Teal / green foliage       → chart accents
+/* Colors matched to learner-s-grove.vercel.app:
+   - Deep purple/plum    → primary (navbar, main buttons)
+   - Hot pink            → accent (highlights, secondary buttons, headings)
+   - Warm cream          → background
+   - White               → cards
 */
 :root {
   --button-outline: rgba(0,0,0, .10);
@@ -83,53 +82,53 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 345 30% 98%;           /* very soft blush-white, echoes the pink */
-  --foreground: 300 35% 18%;           /* deep plum — all body text */
+  --background: 33 33% 94%;            /* warm cream #f5f0eb */
+  --foreground: 270 55% 18%;           /* deep purple-dark body text */
 
-  --border: 330 20% 88%;              /* soft pink-tinted border */
+  --border: 33 20% 85%;               /* warm cream border */
 
   --card: 0 0% 100%;
-  --card-foreground: 300 35% 18%;
-  --card-border: 330 20% 88%;
+  --card-foreground: 270 55% 18%;
+  --card-border: 33 20% 85%;
 
-  /* Sidebar uses rich pink (logo primary) */
-  --sidebar: 335 55% 40%;
+  /* Sidebar: deep purple */
+  --sidebar: 270 62% 28%;
   --sidebar-foreground: 0 0% 100%;
-  --sidebar-border: 335 40% 32%;
+  --sidebar-border: 270 50% 22%;
   --sidebar-primary: 0 0% 100%;
-  --sidebar-primary-foreground: 335 55% 40%;
-  --sidebar-accent: 335 40% 34%;
+  --sidebar-primary-foreground: 270 62% 28%;
+  --sidebar-accent: 270 50% 22%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 0 0% 100%;
+  --sidebar-ring: 330 77% 63%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 300 35% 18%;
-  --popover-border: 330 20% 88%;
+  --popover-foreground: 270 55% 18%;
+  --popover-border: 33 20% 85%;
 
-  /* Primary = logo pink (the pink tree foliage) */
-  --primary: 335 58% 42%;
+  /* Primary = deep purple (matches website nav/buttons #4a228a) */
+  --primary: 270 62% 34%;
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary = warm amber/gold glow from centre of tree */
-  --secondary: 42 80% 92%;
-  --secondary-foreground: 300 35% 20%;
+  /* Secondary = light warm lavender for section backgrounds */
+  --secondary: 270 30% 94%;
+  --secondary-foreground: 270 55% 22%;
 
-  --muted: 330 18% 94%;
-  --muted-foreground: 300 15% 45%;
+  --muted: 33 20% 90%;
+  --muted-foreground: 270 20% 48%;
 
-  /* Accent = rich plum (used for buttons, links, highlights) */
-  --accent: 300 50% 32%;
+  /* Accent = hot pink (matches website highlight color #e85d9a) */
+  --accent: 330 77% 58%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 80% 58%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 330 20% 88%;
-  --ring: 300 50% 32%;
+  --input: 33 20% 85%;
+  --ring: 330 77% 58%;
 
-  /* Chart palette: pink, plum, amber, teal, green */
-  --chart-1: 335 58% 50%;   /* logo pink */
-  --chart-2: 300 50% 35%;   /* plum */
+  /* Chart palette */
+  --chart-1: 330 77% 58%;   /* hot pink */
+  --chart-2: 270 62% 40%;   /* purple */
   --chart-3: 42 85% 55%;    /* amber gold */
   --chart-4: 175 50% 40%;   /* teal */
   --chart-5: 145 45% 38%;   /* forest green */
@@ -137,15 +136,15 @@
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
-  --radius: .5rem;
-  --shadow-2xs: 0px 1px 3px 0px hsl(335 58% 42% / 0.08);
-  --shadow-xs:  0px 1px 3px 0px hsl(335 58% 42% / 0.10);
-  --shadow-sm:  0px 2px 4px -1px hsl(335 58% 42% / 0.12), 0px 1px 2px -1px hsl(335 58% 42% / 0.07);
-  --shadow:     0px 3px 6px -1px hsl(335 58% 42% / 0.14), 0px 2px 4px -1px hsl(335 58% 42% / 0.08);
-  --shadow-md:  0px 4px 8px -2px hsl(335 58% 42% / 0.14), 0px 2px 4px -2px hsl(335 58% 42% / 0.09);
-  --shadow-lg:  0px 8px 16px -4px hsl(335 58% 42% / 0.16), 0px 4px 6px -2px hsl(335 58% 42% / 0.07);
-  --shadow-xl:  0px 16px 24px -6px hsl(335 58% 42% / 0.16), 0px 8px 10px -3px hsl(335 58% 42% / 0.09);
-  --shadow-2xl: 0px 24px 48px -8px hsl(335 58% 42% / 0.20);
+  --radius: .75rem;
+  --shadow-2xs: 0px 1px 3px 0px hsl(270 62% 34% / 0.08);
+  --shadow-xs:  0px 1px 3px 0px hsl(270 62% 34% / 0.10);
+  --shadow-sm:  0px 2px 4px -1px hsl(270 62% 34% / 0.12), 0px 1px 2px -1px hsl(270 62% 34% / 0.07);
+  --shadow:     0px 3px 6px -1px hsl(270 62% 34% / 0.14), 0px 2px 4px -1px hsl(270 62% 34% / 0.08);
+  --shadow-md:  0px 4px 8px -2px hsl(270 62% 34% / 0.14), 0px 2px 4px -2px hsl(270 62% 34% / 0.09);
+  --shadow-lg:  0px 8px 16px -4px hsl(270 62% 34% / 0.16), 0px 4px 6px -2px hsl(270 62% 34% / 0.07);
+  --shadow-xl:  0px 16px 24px -6px hsl(270 62% 34% / 0.16), 0px 8px 10px -3px hsl(270 62% 34% / 0.09);
+  --shadow-2xl: 0px 24px 48px -8px hsl(270 62% 34% / 0.20);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
