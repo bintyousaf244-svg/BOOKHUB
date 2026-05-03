@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "wouter";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Tag, CheckCircle, X, Loader2 } from "lucide-react";
+import { Tag, CheckCircle, X, Loader2, Copy, Check } from "lucide-react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -28,20 +28,143 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
+interface PaymentSettings {
+  jazzcashNumber: string;
+  jazzcashName: string;
+  easypaisaNumber: string;
+  easypaisaName: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+  bankIban: string;
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button onClick={handleCopy} className="ml-2 text-muted-foreground hover:text-foreground transition-colors">
+      {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
+  );
+}
+
+function PaymentInstructions({ method, settings, total }: { method: string; settings: PaymentSettings | null; total: number }) {
+  if (!settings) return null;
+
+  const rowClass = "flex items-center justify-between py-1.5 text-sm";
+  const labelClass = "text-muted-foreground";
+  const valueClass = "font-semibold text-foreground flex items-center";
+
+  if (method === "JazzCash") {
+    if (!settings.jazzcashNumber) return (
+      <p className="text-sm text-muted-foreground italic mt-3">JazzCash details not configured yet.</p>
+    );
+    return (
+      <div className="mt-4 p-4 bg-accent/5 border border-accent/20 rounded-lg">
+        <p className="text-sm font-semibold text-accent mb-3">Send Rs. {total.toLocaleString()} via JazzCash to:</p>
+        <div className="space-y-1 divide-y divide-border/50">
+          <div className={rowClass}>
+            <span className={labelClass}>Mobile Number</span>
+            <span className={valueClass}>{settings.jazzcashNumber}<CopyButton text={settings.jazzcashNumber} /></span>
+          </div>
+          {settings.jazzcashName && (
+            <div className={rowClass}>
+              <span className={labelClass}>Account Name</span>
+              <span className={valueClass}>{settings.jazzcashName}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (method === "EasyPaisa") {
+    if (!settings.easypaisaNumber) return (
+      <p className="text-sm text-muted-foreground italic mt-3">EasyPaisa details not configured yet.</p>
+    );
+    return (
+      <div className="mt-4 p-4 bg-accent/5 border border-accent/20 rounded-lg">
+        <p className="text-sm font-semibold text-accent mb-3">Send Rs. {total.toLocaleString()} via EasyPaisa to:</p>
+        <div className="space-y-1 divide-y divide-border/50">
+          <div className={rowClass}>
+            <span className={labelClass}>Mobile Number</span>
+            <span className={valueClass}>{settings.easypaisaNumber}<CopyButton text={settings.easypaisaNumber} /></span>
+          </div>
+          {settings.easypaisaName && (
+            <div className={rowClass}>
+              <span className={labelClass}>Account Name</span>
+              <span className={valueClass}>{settings.easypaisaName}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (method === "Bank Transfer") {
+    if (!settings.bankAccountNumber) return (
+      <p className="text-sm text-muted-foreground italic mt-3">Bank transfer details not configured yet.</p>
+    );
+    return (
+      <div className="mt-4 p-4 bg-accent/5 border border-accent/20 rounded-lg">
+        <p className="text-sm font-semibold text-accent mb-3">Transfer Rs. {total.toLocaleString()} to this bank account:</p>
+        <div className="space-y-1 divide-y divide-border/50">
+          {settings.bankName && (
+            <div className={rowClass}>
+              <span className={labelClass}>Bank</span>
+              <span className={valueClass}>{settings.bankName}</span>
+            </div>
+          )}
+          {settings.bankAccountName && (
+            <div className={rowClass}>
+              <span className={labelClass}>Account Name</span>
+              <span className={valueClass}>{settings.bankAccountName}</span>
+            </div>
+          )}
+          <div className={rowClass}>
+            <span className={labelClass}>Account Number</span>
+            <span className={valueClass}>{settings.bankAccountNumber}<CopyButton text={settings.bankAccountNumber} /></span>
+          </div>
+          {settings.bankIban && (
+            <div className={rowClass}>
+              <span className={labelClass}>IBAN</span>
+              <span className={valueClass + " font-mono text-xs"}>{settings.bankIban}<CopyButton text={settings.bankIban} /></span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export default function Checkout() {
   const { items, subtotal, clearCart } = useCart();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const createOrder = useCreateOrder();
 
-  const [paymentMethod, setPaymentMethod] = useState("Bank Transfer");
+  const [paymentMethod, setPaymentMethod] = useState("JazzCash");
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
 
-  // Discount code state
   const [discountInput, setDiscountInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountMsg, setDiscountMsg] = useState("");
   const [isValidating, setIsValidating] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/payment-settings")
+      .then((r) => r.json())
+      .then(setPaymentSettings)
+      .catch(() => {});
+  }, []);
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -51,7 +174,7 @@ export default function Checkout() {
       customerPhone: "",
       address: "",
       city: "",
-      paymentMethod: "Bank Transfer",
+      paymentMethod: "JazzCash",
       paymentReference: "",
       notes: "",
     }
@@ -118,7 +241,7 @@ export default function Checkout() {
         setLocation(`/order-success?id=${order.id}&method=${data.paymentMethod}`);
       },
       onError: () => {
-        toast({ title: "Failed to place order", variant: "destructive" });
+        toast({ title: "Failed to place order. Please try again.", variant: "destructive" });
       }
     });
   };
@@ -134,7 +257,7 @@ export default function Checkout() {
 
               {/* Contact Info */}
               <section className="bg-card p-6 md:p-8 rounded-xl border border-border shadow-sm">
-                <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Contact & Shipping Details</h2>
+                <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Your Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="customerName" render={({ field }) => (
                     <FormItem>
@@ -151,8 +274,8 @@ export default function Checkout() {
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="customerPhone" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Phone / WhatsApp Number</FormLabel>
                       <FormControl><Input placeholder="0300 1234567" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -162,64 +285,58 @@ export default function Checkout() {
 
               {/* Payment Method */}
               <section className="bg-card p-6 md:p-8 rounded-xl border border-border shadow-sm">
-                <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Payment Method</h2>
-                <p className="text-sm text-muted-foreground mb-6">Please select how you would like to pay. Payment instructions will be provided on the next screen.</p>
+                <h2 className="text-xl font-serif font-bold mb-2 text-foreground">Payment Method</h2>
+                <p className="text-sm text-muted-foreground mb-6">Select your payment method and transfer the amount shown below. Then enter your transaction ID / reference number.</p>
 
                 <FormField control={form.control} name="paymentMethod" render={({ field }) => (
-                  <FormItem className="space-y-4">
+                  <FormItem className="space-y-3">
                     <FormControl>
                       <RadioGroup
                         onValueChange={(val) => { field.onChange(val); setPaymentMethod(val); }}
                         defaultValue={field.value}
-                        className="flex flex-col space-y-3"
+                        className="flex flex-col space-y-2"
                       >
-                        <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                          <FormControl><RadioGroupItem value="Bank Transfer" /></FormControl>
-                          <FormLabel className="font-normal cursor-pointer flex-1">Direct Bank Transfer</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                          <FormControl><RadioGroupItem value="JazzCash" /></FormControl>
-                          <FormLabel className="font-normal cursor-pointer flex-1">JazzCash</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                          <FormControl><RadioGroupItem value="EasyPaisa" /></FormControl>
-                          <FormLabel className="font-normal cursor-pointer flex-1">EasyPaisa</FormLabel>
-                        </FormItem>
+                        {["JazzCash", "EasyPaisa", "Bank Transfer"].map((method) => (
+                          <FormItem key={method} className={`flex items-center space-x-3 space-y-0 rounded-lg border-2 p-4 cursor-pointer transition-colors ${paymentMethod === method ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'}`}>
+                            <FormControl><RadioGroupItem value={method} /></FormControl>
+                            <FormLabel className="font-medium cursor-pointer flex-1 text-base">{method}</FormLabel>
+                          </FormItem>
+                        ))}
                       </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
 
-                <div className="mt-6 pt-6 border-t border-border">
+                {/* Inline payment instructions */}
+                <PaymentInstructions method={paymentMethod} settings={paymentSettings} total={total} />
+
+                <div className="mt-6 pt-6 border-t border-border space-y-4">
                   <FormField control={form.control} name="paymentReference" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Reference (Optional)</FormLabel>
-                      <FormControl><Input placeholder="If you've already transferred, enter reference here" {...field} /></FormControl>
+                      <FormLabel>Transaction ID / Reference Number</FormLabel>
+                      <FormControl><Input placeholder="Enter your transaction ID after payment" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
-                </div>
-
-                <div className="mt-4">
                   <FormField control={form.control} name="notes" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Order Notes (Optional)</FormLabel>
-                      <FormControl><Textarea placeholder="Special instructions for delivery" {...field} /></FormControl>
+                      <FormControl><Textarea placeholder="Any special requests or notes..." {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                 </div>
               </section>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-2">
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full md:w-auto px-12 h-14 rounded-full bg-accent text-accent-foreground font-bold shadow-md hover:bg-accent/90"
                   disabled={createOrder.isPending}
                 >
-                  {createOrder.isPending ? "Placing Order..." : `Place Order — Rs. ${total.toLocaleString()}`}
+                  {createOrder.isPending ? "Placing Order..." : `Confirm Order — Rs. ${total.toLocaleString()}`}
                 </Button>
               </div>
             </form>

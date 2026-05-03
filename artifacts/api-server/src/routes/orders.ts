@@ -7,7 +7,7 @@ import {
   UpdateOrderStatusParams,
   UpdateOrderStatusBody,
 } from "@workspace/api-zod";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, inArray } from "drizzle-orm";
 
 const router = Router();
 
@@ -49,9 +49,9 @@ router.post("/orders", async (req, res) => {
 
   // Fetch all books for order items
   const bookIds = data.items.map((i) => i.bookId);
-  const books = await db.select().from(booksTable).where(
-    sql`${booksTable.id} = ANY(${bookIds})`
-  );
+  const books = bookIds.length > 0
+    ? await db.select().from(booksTable).where(inArray(booksTable.id, bookIds))
+    : [];
   const bookMap = new Map(books.map((b) => [b.id, b]));
 
   let total = 0;
