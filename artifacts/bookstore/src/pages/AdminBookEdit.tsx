@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,8 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Upload, X, ImageIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useUpload } from "@workspace/object-storage-web";
 
 const bookSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -24,7 +25,7 @@ const bookSchema = z.object({
   isOnSale: z.boolean().default(false),
   isFree: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  coverImage: z.string().url("Must be a valid URL"),
+  coverImage: z.string().min(1, "Cover image is required"),
   category: z.string().min(1, "Category is required"),
   language: z.string().min(1, "Language is required"),
   ageGroup: z.string().min(1, "Age group is required"),
@@ -39,10 +40,12 @@ export default function AdminBookEdit() {
   const { id } = useParams();
   const isEditing = !!id && id !== "new";
   const bookId = isEditing ? parseInt(id!, 10) : 0;
-  
+
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
 
   const { data: book, isLoading } = useGetBook(bookId, {
     query: { enabled: isEditing, queryKey: getGetBookQueryKey(bookId) }
@@ -50,6 +53,18 @@ export default function AdminBookEdit() {
 
   const createBook = useCreateBook();
   const updateBook = useUpdateBook();
+
+  const { uploadFile, isUploading, progress } = useUpload({
+    onSuccess: (response) => {
+      const servingUrl = `/api/storage${response.objectPath}`;
+      form.setValue("coverImage", servingUrl, { shouldValidate: true });
+      setUploadedPreview(servingUrl);
+      toast({ title: "Image uploaded successfully" });
+    },
+    onError: (err) => {
+      toast({ title: `Upload failed: ${err.message}`, variant: "destructive" });
+    },
+  });
 
   const form = useForm<BookFormValues>({
     resolver: zodResolver(bookSchema),
@@ -94,6 +109,22 @@ export default function AdminBookEdit() {
     }
   }, [isEditing, book, form]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    await uploadFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleClearUpload = () => {
+    setUploadedPreview(null);
+    form.setValue("coverImage", "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop");
+  };
+
   const onSubmit = (data: BookFormValues) => {
     const payload = {
       ...data,
@@ -126,6 +157,7 @@ export default function AdminBookEdit() {
 
   const isFree = form.watch("isFree");
   const isOnSale = form.watch("isOnSale");
+  const currentCoverImage = form.watch("coverImage");
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
@@ -150,6 +182,7 @@ export default function AdminBookEdit() {
                     <FormMessage />
                   </FormItem>
                 )} />
+
                 <FormField control={form.control} name="author" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Author</FormLabel>
@@ -157,13 +190,87 @@ export default function AdminBookEdit() {
                     <FormMessage />
                   </FormItem>
                 )} />
+
+                {/* Cover Image Field with Upload */}
                 <FormField control={form.control} name="coverImage" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cover Image URL</FormLabel>
-                    <FormControl><Input placeholder="https://..." {...field} /></FormControl>
-                    <FormMessage />
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Cover Image</FormLabel>
+                    <div className="flex gap-4 items-start">
+                      {/* Preview */}
+                      <div className="flex-shrink-0 w-28 h-36 rounded-lg border border-border overflow-hidden bg-muted flex items-center justify-center">
+                        {currentCoverImage ? (
+                          <img
+                            src={currentCoverImage}
+                            alt="Cover preview"
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        ) : (
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 space-y-3">
+                        {/* Upload button */}
+                        <div className="flex gap-2 items-center">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="flex items-center gap-2"
+                          >
+                            <Upload className="h-4 w-4" />
+                            {isUploading ? `Uploading… ${progress}%` : "Upload Image"}
+                          </Button>
+                          {uploadedPreview && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleClearUpload}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="h-4 w-4 mr-1" /> Clear
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Progress bar */}
+                        {isUploading && (
+                          <div className="w-full bg-muted rounded-full h-1.5">
+                            <div
+                              className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        )}
+
+                        {/* URL fallback */}
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground">Or paste an image URL directly:</p>
+                          <FormControl>
+                            <Input
+                              placeholder="https://example.com/cover.jpg"
+                              {...field}
+                              disabled={isUploading}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </div>
+                    </div>
                   </FormItem>
                 )} />
+
                 <FormField control={form.control} name="category" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category Slug</FormLabel>
@@ -219,7 +326,7 @@ export default function AdminBookEdit() {
           <Card className="border-border shadow-sm">
             <CardContent className="p-6 space-y-6">
               <h2 className="text-xl font-serif font-bold text-foreground">Pricing & Status</h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField control={form.control} name="isFree" render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -296,7 +403,7 @@ export default function AdminBookEdit() {
             <Link href="/admin/books">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={createBook.isPending || updateBook.isPending} className="bg-primary text-primary-foreground px-8">
+            <Button type="submit" disabled={createBook.isPending || updateBook.isPending || isUploading} className="bg-primary text-primary-foreground px-8">
               <Save className="mr-2 h-4 w-4" /> Save Book
             </Button>
           </div>

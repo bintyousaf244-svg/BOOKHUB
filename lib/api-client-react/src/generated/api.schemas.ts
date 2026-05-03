@@ -5,6 +5,17 @@
  * Bookstore API
  * OpenAPI spec version: 0.1.0
  */
+export interface RequestUploadUrlBody {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export interface RequestUploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
