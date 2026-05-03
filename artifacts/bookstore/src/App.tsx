@@ -25,6 +25,7 @@ import AdminBookEdit from "@/pages/AdminBookEdit";
 import AdminOrders from "@/pages/AdminOrders";
 import AdminDiscountCodes from "@/pages/AdminDiscountCodes";
 import AdminPaymentSettings from "@/pages/AdminPaymentSettings";
+import AdminCategories from "@/pages/AdminCategories";
 import MyOrders from "@/pages/MyOrders";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ function Router() {
             <Route path="/books/new" component={AdminBookEdit} />
             <Route path="/books/:id/edit" component={AdminBookEdit} />
             <Route path="/orders" component={AdminOrders} />
+            <Route path="/categories" component={AdminCategories} />
             <Route path="/discounts" component={AdminDiscountCodes} />
             <Route path="/payment-settings" component={AdminPaymentSettings} />
             <Route component={NotFound} />

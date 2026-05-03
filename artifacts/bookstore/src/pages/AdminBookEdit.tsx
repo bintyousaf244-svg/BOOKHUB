@@ -3,7 +3,7 @@ import { useParams, useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useGetBook, useCreateBook, useUpdateBook, getGetBookQueryKey, getListBooksQueryKey } from "@workspace/api-client-react";
+import { useGetBook, useCreateBook, useUpdateBook, useListCategories, getGetBookQueryKey, getListBooksQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,7 @@ export default function AdminBookEdit() {
   const { data: book, isLoading } = useGetBook(bookId, {
     query: { enabled: isEditing, queryKey: getGetBookQueryKey(bookId) }
   });
+  const { data: categoriesData } = useListCategories();
 
   const createBook = useCreateBook();
   const updateBook = useUpdateBook();
@@ -265,8 +266,30 @@ export default function AdminBookEdit() {
 
                 <FormField control={form.control} name="category" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category Slug</FormLabel>
-                    <FormControl><Input placeholder="e.g. kids-learning" {...field} /></FormControl>
+                    <FormLabel>Category</FormLabel>
+                    {categoriesData && categoriesData.length > 0 ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categoriesData.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.slug}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <FormControl>
+                        <Input placeholder="e.g. kids-learning" {...field} />
+                      </FormControl>
+                    )}
+                    <FormDescription className="text-xs">
+                      Manage categories under <a href="/admin/categories" className="underline text-primary">Admin → Categories</a>.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )} />

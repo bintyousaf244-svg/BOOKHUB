@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { LayoutDashboard, Book, ShoppingCart, LogOut, Store, Tag, CreditCard } from "lucide-react";
+import { LayoutDashboard, Book, ShoppingCart, LogOut, Store, Tag, CreditCard, FolderOpen } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { logout, isAuthenticated } = useAuth();
@@ -31,6 +31,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <Link href="/orders" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/orders') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <ShoppingCart className="h-5 w-5" /> Orders
+          </Link>
+          <Link href="/categories" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/categories') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
+            <FolderOpen className="h-5 w-5" /> Categories
           </Link>
           <Link href="/discounts" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/discounts') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <Tag className="h-5 w-5" /> Discount Codes
