@@ -19,8 +19,8 @@ const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
   customerEmail: z.string().email("Invalid email address"),
   customerPhone: z.string().min(10, "Valid phone number required"),
-  address: z.string().min(5, "Full address required"),
-  city: z.string().min(2, "City is required"),
+  address: z.string().optional(),
+  city: z.string().optional(),
   paymentMethod: z.string(),
   paymentReference: z.string().optional(),
   notes: z.string().optional(),
@@ -157,22 +157,6 @@ export default function Checkout() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="city" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl><Input placeholder="Lahore" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <div className="md:col-span-2">
-                    <FormField control={form.control} name="address" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Address</FormLabel>
-                        <FormControl><Textarea placeholder="House 123, Street 4, Phase 5..." {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
                 </div>
               </section>
 
