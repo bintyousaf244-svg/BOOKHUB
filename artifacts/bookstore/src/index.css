@@ -68,11 +68,11 @@
 
 /* LIGHT MODE */
 /* Colors drawn from the Learner's Grove logo:
-   - Deep forest green (tree)   → primary
-   - Vibrant purple (the "L")   → accent
-   - Warm amber/gold glow       → secondary / highlights
+   - Logo pink (tree foliage)   → primary (hero, footer, headings)
+   - Plum / deep purple         → accent + foreground (buttons, text)
+   - Warm amber/gold glow       → secondary highlights
    - Soft ivory cream           → background
-   - Teal / pink foliage        → charts
+   - Teal / green foliage       → chart accents
 */
 :root {
   --button-outline: rgba(0,0,0, .10);
@@ -83,69 +83,69 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 48 40% 97%;            /* warm ivory — logo background */
-  --foreground: 145 40% 10%;           /* very dark forest green for text */
+  --background: 345 30% 98%;           /* very soft blush-white, echoes the pink */
+  --foreground: 300 35% 18%;           /* deep plum — all body text */
 
-  --border: 145 18% 88%;              /* soft green-tinted border */
+  --border: 330 20% 88%;              /* soft pink-tinted border */
 
   --card: 0 0% 100%;
-  --card-foreground: 145 40% 10%;
-  --card-border: 145 18% 88%;
+  --card-foreground: 300 35% 18%;
+  --card-border: 330 20% 88%;
 
-  /* Sidebar uses deep forest green */
-  --sidebar: 145 42% 14%;
-  --sidebar-foreground: 48 40% 97%;
-  --sidebar-border: 145 30% 20%;
-  --sidebar-primary: 48 40% 97%;
-  --sidebar-primary-foreground: 145 42% 14%;
-  --sidebar-accent: 145 30% 22%;
-  --sidebar-accent-foreground: 48 40% 97%;
-  --sidebar-ring: 48 40% 97%;
+  /* Sidebar uses rich pink (logo primary) */
+  --sidebar: 335 55% 40%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-border: 335 40% 32%;
+  --sidebar-primary: 0 0% 100%;
+  --sidebar-primary-foreground: 335 55% 40%;
+  --sidebar-accent: 335 40% 34%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 0 0% 100%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 145 40% 10%;
-  --popover-border: 145 18% 88%;
+  --popover-foreground: 300 35% 18%;
+  --popover-border: 330 20% 88%;
 
-  /* Primary = deep forest green (dominant tree color) */
-  --primary: 145 42% 16%;
-  --primary-foreground: 48 40% 97%;
+  /* Primary = logo pink (the pink tree foliage) */
+  --primary: 335 58% 42%;
+  --primary-foreground: 0 0% 100%;
 
-  /* Secondary = warm amber/gold (the glowing centre of the tree) */
-  --secondary: 42 75% 90%;
-  --secondary-foreground: 145 40% 14%;
+  /* Secondary = warm amber/gold glow from centre of tree */
+  --secondary: 42 80% 92%;
+  --secondary-foreground: 300 35% 20%;
 
-  --muted: 145 15% 94%;
-  --muted-foreground: 145 12% 42%;
+  --muted: 330 18% 94%;
+  --muted-foreground: 300 15% 45%;
 
-  /* Accent = vibrant purple (the "L" lettermark in logo) */
-  --accent: 268 65% 50%;
+  /* Accent = rich plum (used for buttons, links, highlights) */
+  --accent: 300 50% 32%;
   --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 80% 58%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 145 18% 88%;
-  --ring: 268 65% 50%;
+  --input: 330 20% 88%;
+  --ring: 300 50% 32%;
 
-  /* Chart palette mirrors logo foliage colours */
-  --chart-1: 145 42% 30%;   /* forest green */
-  --chart-2: 268 65% 50%;   /* purple */
+  /* Chart palette: pink, plum, amber, teal, green */
+  --chart-1: 335 58% 50%;   /* logo pink */
+  --chart-2: 300 50% 35%;   /* plum */
   --chart-3: 42 85% 55%;    /* amber gold */
-  --chart-4: 175 55% 38%;   /* teal */
-  --chart-5: 330 65% 58%;   /* pink */
+  --chart-4: 175 50% 40%;   /* teal */
+  --chart-5: 145 45% 38%;   /* forest green */
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: .5rem;
-  --shadow-2xs: 0px 1px 3px 0px hsl(145 42% 16% / 0.07);
-  --shadow-xs:  0px 1px 3px 0px hsl(145 42% 16% / 0.09);
-  --shadow-sm:  0px 2px 4px -1px hsl(145 42% 16% / 0.10), 0px 1px 2px -1px hsl(145 42% 16% / 0.06);
-  --shadow:     0px 3px 6px -1px hsl(145 42% 16% / 0.12), 0px 2px 4px -1px hsl(145 42% 16% / 0.07);
-  --shadow-md:  0px 4px 8px -2px hsl(145 42% 16% / 0.12), 0px 2px 4px -2px hsl(145 42% 16% / 0.08);
-  --shadow-lg:  0px 8px 16px -4px hsl(145 42% 16% / 0.14), 0px 4px 6px -2px hsl(145 42% 16% / 0.06);
-  --shadow-xl:  0px 16px 24px -6px hsl(145 42% 16% / 0.14), 0px 8px 10px -3px hsl(145 42% 16% / 0.08);
-  --shadow-2xl: 0px 24px 48px -8px hsl(145 42% 16% / 0.18);
+  --shadow-2xs: 0px 1px 3px 0px hsl(335 58% 42% / 0.08);
+  --shadow-xs:  0px 1px 3px 0px hsl(335 58% 42% / 0.10);
+  --shadow-sm:  0px 2px 4px -1px hsl(335 58% 42% / 0.12), 0px 1px 2px -1px hsl(335 58% 42% / 0.07);
+  --shadow:     0px 3px 6px -1px hsl(335 58% 42% / 0.14), 0px 2px 4px -1px hsl(335 58% 42% / 0.08);
+  --shadow-md:  0px 4px 8px -2px hsl(335 58% 42% / 0.14), 0px 2px 4px -2px hsl(335 58% 42% / 0.09);
+  --shadow-lg:  0px 8px 16px -4px hsl(335 58% 42% / 0.16), 0px 4px 6px -2px hsl(335 58% 42% / 0.07);
+  --shadow-xl:  0px 16px 24px -6px hsl(335 58% 42% / 0.16), 0px 8px 10px -3px hsl(335 58% 42% / 0.09);
+  --shadow-2xl: 0px 24px 48px -8px hsl(335 58% 42% / 0.20);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -174,62 +174,62 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 145 40% 7%;            /* very deep forest — like the night under a grove */
-  --foreground: 48 40% 95%;            /* warm ivory text */
+  --background: 300 30% 8%;            /* very deep plum-dark background */
+  --foreground: 345 30% 95%;           /* soft blush-white text */
 
-  --border: 145 25% 18%;
+  --border: 300 20% 20%;
 
-  --card: 145 38% 10%;
-  --card-foreground: 48 40% 95%;
-  --card-border: 145 25% 18%;
+  --card: 300 28% 11%;
+  --card-foreground: 345 30% 95%;
+  --card-border: 300 20% 20%;
 
-  --sidebar: 145 40% 8%;
-  --sidebar-foreground: 48 40% 95%;
-  --sidebar-border: 145 28% 16%;
-  --sidebar-primary: 48 40% 95%;
-  --sidebar-primary-foreground: 145 40% 8%;
-  --sidebar-accent: 145 28% 16%;
-  --sidebar-accent-foreground: 48 40% 95%;
-  --sidebar-ring: 268 65% 60%;
+  --sidebar: 300 28% 10%;
+  --sidebar-foreground: 345 30% 95%;
+  --sidebar-border: 300 22% 18%;
+  --sidebar-primary: 345 30% 95%;
+  --sidebar-primary-foreground: 300 28% 10%;
+  --sidebar-accent: 300 22% 18%;
+  --sidebar-accent-foreground: 345 30% 95%;
+  --sidebar-ring: 335 65% 70%;
 
-  --popover: 145 38% 10%;
-  --popover-foreground: 48 40% 95%;
-  --popover-border: 145 25% 18%;
+  --popover: 300 28% 11%;
+  --popover-foreground: 345 30% 95%;
+  --popover-border: 300 20% 20%;
 
-  /* Primary lightens so it reads on dark background */
-  --primary: 145 50% 72%;
-  --primary-foreground: 145 40% 8%;
+  /* Primary lightens in dark mode */
+  --primary: 335 65% 68%;
+  --primary-foreground: 300 30% 8%;
 
-  --secondary: 42 40% 18%;
-  --secondary-foreground: 42 75% 90%;
+  --secondary: 300 20% 18%;
+  --secondary-foreground: 42 80% 90%;
 
-  --muted: 145 28% 15%;
-  --muted-foreground: 145 12% 60%;
+  --muted: 300 22% 15%;
+  --muted-foreground: 300 12% 60%;
 
-  /* Accent stays purple, slightly brighter in dark mode */
-  --accent: 268 70% 62%;
+  /* Accent plum brightens slightly in dark */
+  --accent: 300 55% 58%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 72% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 145 25% 18%;
-  --ring: 268 70% 62%;
+  --input: 300 20% 20%;
+  --ring: 300 55% 58%;
 
-  --chart-1: 145 50% 55%;
-  --chart-2: 268 70% 62%;
+  --chart-1: 335 65% 65%;
+  --chart-2: 300 55% 58%;
   --chart-3: 42 85% 60%;
   --chart-4: 175 55% 50%;
-  --chart-5: 330 65% 65%;
+  --chart-5: 145 45% 50%;
 
-  --shadow-2xs: 0px 1px 3px 0px hsl(145 40% 4% / 0.40);
-  --shadow-xs:  0px 1px 3px 0px hsl(145 40% 4% / 0.50);
-  --shadow-sm:  0px 2px 4px -1px hsl(145 40% 4% / 0.55), 0px 1px 2px -1px hsl(145 40% 4% / 0.40);
-  --shadow:     0px 3px 6px -1px hsl(145 40% 4% / 0.55), 0px 2px 4px -1px hsl(145 40% 4% / 0.40);
-  --shadow-md:  0px 4px 8px -2px hsl(145 40% 4% / 0.55), 0px 2px 4px -2px hsl(145 40% 4% / 0.40);
-  --shadow-lg:  0px 8px 16px -4px hsl(145 40% 4% / 0.55), 0px 4px 6px -2px hsl(145 40% 4% / 0.30);
-  --shadow-xl:  0px 16px 24px -6px hsl(145 40% 4% / 0.55), 0px 8px 10px -3px hsl(145 40% 4% / 0.35);
-  --shadow-2xl: 0px 24px 48px -8px hsl(145 40% 4% / 0.65);
+  --shadow-2xs: 0px 1px 3px 0px hsl(300 30% 4% / 0.45);
+  --shadow-xs:  0px 1px 3px 0px hsl(300 30% 4% / 0.55);
+  --shadow-sm:  0px 2px 4px -1px hsl(300 30% 4% / 0.60), 0px 1px 2px -1px hsl(300 30% 4% / 0.45);
+  --shadow:     0px 3px 6px -1px hsl(300 30% 4% / 0.60), 0px 2px 4px -1px hsl(300 30% 4% / 0.45);
+  --shadow-md:  0px 4px 8px -2px hsl(300 30% 4% / 0.60), 0px 2px 4px -2px hsl(300 30% 4% / 0.45);
+  --shadow-lg:  0px 8px 16px -4px hsl(300 30% 4% / 0.60), 0px 4px 6px -2px hsl(300 30% 4% / 0.35);
+  --shadow-xl:  0px 16px 24px -6px hsl(300 30% 4% / 0.60), 0px 8px 10px -3px hsl(300 30% 4% / 0.40);
+  --shadow-2xl: 0px 24px 48px -8px hsl(300 30% 4% / 0.70);
 }
 
 @layer base {
