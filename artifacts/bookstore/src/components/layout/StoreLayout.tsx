@@ -1,6 +1,7 @@
 import React from "react";
 import { Navbar } from "../Navbar";
 import { Footer } from "../Footer";
+import { WhatsAppFloat } from "../WhatsAppFloat";
 
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export function StoreLayout({ children }: { children: React.ReactNode }) {
       <Navbar />
       <main className="flex-grow flex flex-col">{children}</main>
       <Footer />
+      <WhatsAppFloat />
     </div>
   );
 }
