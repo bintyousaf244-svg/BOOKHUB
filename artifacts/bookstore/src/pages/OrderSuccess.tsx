@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useGetOrder, getGetOrderQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, ChevronRight, Copy, Check, Wallet, Building2, Phone } from "lucide-react";
+import { CheckCircle2, ChevronRight, Copy, Check, Wallet, Building2, Phone, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -185,9 +185,14 @@ export default function OrderSuccess() {
         </div>
       </div>
 
-      <div className="text-center">
-        <Link href="/books">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <Link href={`/my-orders?id=${order.id}`}>
           <Button size="lg" className="rounded-full font-bold px-8 bg-accent text-accent-foreground hover:bg-accent/90">
+            <Download className="mr-2 h-4 w-4" /> Download My Books
+          </Button>
+        </Link>
+        <Link href="/books">
+          <Button size="lg" variant="outline" className="rounded-full font-bold px-8">
             Continue Shopping <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>

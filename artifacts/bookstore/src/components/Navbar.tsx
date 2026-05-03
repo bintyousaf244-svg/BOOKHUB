@@ -24,6 +24,9 @@ export function Navbar() {
       <Link href="/free" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
         Free Resources
       </Link>
+      <Link href="/my-orders" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+        My Orders
+      </Link>
     </>
   );
 

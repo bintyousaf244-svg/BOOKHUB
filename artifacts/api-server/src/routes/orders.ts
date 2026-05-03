@@ -126,6 +126,45 @@ router.put("/orders/:id", async (req, res) => {
   res.json(mapOrder(order));
 });
 
+router.get("/orders/:id/downloads", async (req, res) => {
+  const orderId = Number(req.params.id);
+  const email = (req.query.email as string || "").trim().toLowerCase();
+
+  if (!orderId || !email) {
+    res.status(400).json({ error: "Order ID and email are required" });
+    return;
+  }
+
+  const rows = await db.select().from(ordersTable).where(eq(ordersTable.id, orderId)).limit(1);
+  const order = rows[0];
+
+  if (!order || order.customerEmail.toLowerCase() !== email) {
+    res.status(404).json({ error: "Order not found or email does not match" });
+    return;
+  }
+
+  if (order.status !== "completed") {
+    res.json({ allowed: false, status: order.status, books: [] });
+    return;
+  }
+
+  const items = order.items as Array<{ bookId: number; title: string; price: number; quantity: number; coverImage: string }>;
+  const bookIds = items.map((i) => i.bookId);
+  const books = bookIds.length > 0
+    ? await db.select({ id: booksTable.id, title: booksTable.title, downloadUrl: booksTable.downloadUrl }).from(booksTable).where(inArray(booksTable.id, bookIds))
+    : [];
+  const bookMap = new Map(books.map((b) => [b.id, b]));
+
+  const downloadable = items.map((item) => ({
+    bookId: item.bookId,
+    title: item.title,
+    coverImage: item.coverImage,
+    downloadUrl: bookMap.get(item.bookId)?.downloadUrl ?? null,
+  }));
+
+  res.json({ allowed: true, status: order.status, books: downloadable });
+});
+
 function mapOrder(o: typeof ordersTable.$inferSelect) {
   return {
     id: o.id,

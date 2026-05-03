@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, Clock } from "lucide-react";
+import { Eye, CheckCircle2 } from "lucide-react";
 
 export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState("all");
@@ -35,6 +35,7 @@ export default function AdminOrders() {
     switch (status) {
       case 'pending': return <Badge variant="destructive">Pending</Badge>;
       case 'processing': return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Processing</Badge>;
+      case 'completed': return <Badge variant="secondary" className="bg-green-100 text-green-800">Completed ✓</Badge>;
       case 'shipped': return <Badge variant="secondary" className="bg-purple-100 text-purple-800">Shipped</Badge>;
       case 'delivered': return <Badge variant="secondary" className="bg-green-100 text-green-800">Delivered</Badge>;
       case 'cancelled': return <Badge variant="outline" className="text-muted-foreground">Cancelled</Badge>;
@@ -56,6 +57,7 @@ export default function AdminOrders() {
               <SelectItem value="all">All Orders</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="shipped">Shipped</SelectItem>
               <SelectItem value="delivered">Delivered</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -117,13 +119,25 @@ export default function AdminOrders() {
                         <SelectContent>
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="processing">Processing</SelectItem>
+                          <SelectItem value="completed">Completed ✓</SelectItem>
                           <SelectItem value="shipped">Shipped</SelectItem>
                           <SelectItem value="delivered">Delivered</SelectItem>
                           <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right flex items-center justify-end gap-1">
+                      {order.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-green-700 hover:text-green-900 hover:bg-green-50 gap-1"
+                          onClick={() => handleStatusChange(order.id, "completed")}
+                          disabled={updateStatus.isPending}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                        </Button>
+                      )}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="h-4 w-4" /></Button>

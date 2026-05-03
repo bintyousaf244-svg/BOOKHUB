@@ -25,6 +25,7 @@ import AdminBookEdit from "@/pages/AdminBookEdit";
 import AdminOrders from "@/pages/AdminOrders";
 import AdminDiscountCodes from "@/pages/AdminDiscountCodes";
 import AdminPaymentSettings from "@/pages/AdminPaymentSettings";
+import MyOrders from "@/pages/MyOrders";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ function Router() {
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-success" component={OrderSuccess} />
             <Route path="/free" component={FreeBooks} />
+            <Route path="/my-orders" component={MyOrders} />
             <Route component={NotFound} />
           </Switch>
         </StoreLayout>
