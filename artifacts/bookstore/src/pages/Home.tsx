@@ -44,7 +44,7 @@ export default function Home() {
         <div className="absolute -left-16 -bottom-24 w-72 h-72 rounded-full opacity-10"
           style={{ background: PINK }} />
 
-        <div className="relative z-10 container mx-auto px-4 py-24 md:py-32 flex flex-col md:flex-row items-center gap-12">
+        <div className="relative z-10 container mx-auto px-4 py-16 md:py-32 flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="flex-1 text-center md:text-left">
             {/* Pill tag */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
@@ -76,8 +76,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero stats */}
-          <div className="flex-shrink-0 grid grid-cols-2 gap-4 w-full md:w-auto">
+          {/* Hero stats — hidden on small screens, 2×2 grid on md+ */}
+          <div className="hidden md:grid flex-shrink-0 grid-cols-2 gap-4 w-64">
             {[
               { value: "100+", label: "Books & Articles" },
               { value: "2", label: "Languages" },
@@ -90,6 +90,14 @@ export default function Home() {
                 <span className="text-white/60 text-xs mt-1">{s.label}</span>
               </div>
             ))}
+          </div>
+          {/* Mobile-only inline stats strip */}
+          <div className="flex md:hidden items-center justify-center gap-6 pt-2 text-white/70 text-sm flex-wrap">
+            <span><strong className="text-white">100+</strong> Books</span>
+            <span className="opacity-40">·</span>
+            <span><strong className="text-white">2</strong> Languages</span>
+            <span className="opacity-40">·</span>
+            <span><strong className="text-white">Free</strong> Resources</span>
           </div>
         </div>
       </section>

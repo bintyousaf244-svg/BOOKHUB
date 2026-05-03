@@ -250,8 +250,88 @@ export default function Checkout() {
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-serif font-bold mb-8 text-foreground">Checkout</h1>
 
-      <div className="flex flex-col lg:flex-row gap-12">
-        <div className="flex-1">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* Order Summary — first on mobile, right column on desktop */}
+        <div className="w-full lg:w-96 flex-shrink-0 lg:order-last">
+          <div className="rounded-2xl border border-border shadow-md bg-card lg:sticky lg:top-24 p-5 md:p-6">
+            <h2 className="text-lg font-serif font-bold mb-4 text-foreground">Order Summary</h2>
+
+            <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
+              {items.map((item) => (
+                <div key={item.bookId} className="flex gap-3 text-sm">
+                  <img src={item.coverImage} alt={item.title} className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0" />
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <span className="font-medium text-foreground line-clamp-2 text-xs leading-snug">{item.title}</span>
+                    <span className="text-muted-foreground text-xs mt-1">Qty: {item.quantity}</span>
+                  </div>
+                  <div className="font-bold text-foreground text-xs flex-shrink-0">
+                    Rs. {(item.isOnSale && item.salePrice ? item.salePrice : item.price) * item.quantity}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Separator className="my-3 border-border/50" />
+
+            {/* Discount Code */}
+            <div className="mb-4">
+              {appliedCode ? (
+                <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-green-800 font-mono">{appliedCode}</p>
+                    <p className="text-xs text-green-600">{discountMsg}</p>
+                  </div>
+                  <button onClick={handleRemoveCode} className="text-green-600 hover:text-red-500 transition-colors">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Tag className="h-3 w-3" /> Have a discount code?
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter code"
+                      value={discountInput}
+                      onChange={(e) => setDiscountInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleApplyCode())}
+                      className="font-mono uppercase text-sm"
+                    />
+                    <button type="button" onClick={handleApplyCode} disabled={isValidating || !discountInput.trim()}
+                      className="px-3 py-1.5 rounded-lg border border-border text-sm font-semibold flex-shrink-0 disabled:opacity-50 transition-all hover:bg-muted">
+                      {isValidating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Apply"}
+                    </button>
+                  </div>
+                  {discountMsg && !appliedCode && (
+                    <p className="text-xs text-destructive">{discountMsg}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Subtotal</span>
+                <span>Rs. {subtotal.toLocaleString()}</span>
+              </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>Discount ({appliedCode})</span>
+                  <span>− Rs. {discountAmount.toLocaleString()}</span>
+                </div>
+              )}
+              <Separator className="my-2 border-border/50" />
+              <div className="flex justify-between text-xl font-bold text-foreground">
+                <span>Total</span>
+                <span>Rs. {total.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
@@ -343,86 +423,6 @@ export default function Checkout() {
           </Form>
         </div>
 
-        {/* Order Summary */}
-        <div className="w-full lg:w-96 flex-shrink-0">
-          <Card className="border-border shadow-md sticky top-24 bg-card">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Order Summary</h2>
-
-              <div className="space-y-4 mb-6 max-h-[35vh] overflow-y-auto pr-2">
-                {items.map((item) => (
-                  <div key={item.bookId} className="flex gap-4 text-sm">
-                    <img src={item.coverImage} alt={item.title} className="w-12 h-16 object-cover rounded shadow-sm" />
-                    <div className="flex-1 flex flex-col">
-                      <span className="font-medium text-foreground line-clamp-2">{item.title}</span>
-                      <span className="text-muted-foreground mt-1">Qty: {item.quantity}</span>
-                    </div>
-                    <div className="font-bold text-foreground">
-                      Rs. {(item.isOnSale && item.salePrice ? item.salePrice : item.price) * item.quantity}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Separator className="my-4 border-border/50" />
-
-              {/* Discount Code Input */}
-              <div className="mb-4">
-                {appliedCode ? (
-                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-green-800 font-mono">{appliedCode}</p>
-                      <p className="text-xs text-green-600">{discountMsg}</p>
-                    </div>
-                    <button onClick={handleRemoveCode} className="text-green-600 hover:text-red-500 transition-colors">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                      <Tag className="h-3 w-3" /> Have a discount code?
-                    </p>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter code"
-                        value={discountInput}
-                        onChange={(e) => setDiscountInput(e.target.value.toUpperCase())}
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleApplyCode())}
-                        className="font-mono uppercase text-sm"
-                      />
-                      <Button type="button" variant="outline" size="sm" onClick={handleApplyCode} disabled={isValidating || !discountInput.trim()} className="px-4 flex-shrink-0">
-                        {isValidating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Apply"}
-                      </Button>
-                    </div>
-                    {discountMsg && !appliedCode && (
-                      <p className="text-xs text-destructive">{discountMsg}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Subtotal</span>
-                  <span>Rs. {subtotal.toLocaleString()}</span>
-                </div>
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-green-600 font-medium">
-                    <span>Discount ({appliedCode})</span>
-                    <span>− Rs. {discountAmount.toLocaleString()}</span>
-                  </div>
-                )}
-                <Separator className="my-3 border-border/50" />
-                <div className="flex justify-between text-xl font-bold text-foreground">
-                  <span>Total</span>
-                  <span>Rs. {total.toLocaleString()}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
