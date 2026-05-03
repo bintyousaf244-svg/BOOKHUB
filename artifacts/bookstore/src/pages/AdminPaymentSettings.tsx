@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, Smartphone, Building2, Wallet } from "lucide-react";
+import { Save, Smartphone, Building2, Wallet, MessageCircle } from "lucide-react";
 
 interface PaymentSettings {
   jazzcashNumber: string;
@@ -15,6 +15,7 @@ interface PaymentSettings {
   bankAccountNumber: string;
   bankAccountName: string;
   bankIban: string;
+  whatsappNumber: string;
 }
 
 const empty: PaymentSettings = {
@@ -26,6 +27,7 @@ const empty: PaymentSettings = {
   bankAccountNumber: "",
   bankAccountName: "",
   bankIban: "",
+  whatsappNumber: "",
 };
 
 export default function AdminPaymentSettings() {
@@ -139,6 +141,22 @@ export default function AdminPaymentSettings() {
           <div className="space-y-1.5">
             <Label>IBAN (Optional)</Label>
             <Input placeholder="PK36SCBL0000001123456702" {...f("bankIban")} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* WhatsApp */}
+      <Card className="border-border shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MessageCircle className="h-5 w-5 text-primary" /> WhatsApp Contact
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>WhatsApp Number</Label>
+            <Input placeholder="03XX-XXXXXXX" {...f("whatsappNumber")} />
+            <p className="text-xs text-muted-foreground">Customers will use this to send you their payment receipt. Enter with local format (e.g. 03319347345).</p>
           </div>
         </CardContent>
       </Card>

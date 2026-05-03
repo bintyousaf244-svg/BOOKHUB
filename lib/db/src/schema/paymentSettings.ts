@@ -10,6 +10,7 @@ export const paymentSettingsTable = pgTable("payment_settings", {
   bankAccountNumber: text("bank_account_number").default(""),
   bankAccountName: text("bank_account_name").default(""),
   bankIban: text("bank_iban").default(""),
+  whatsappNumber: text("whatsapp_number").default(""),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

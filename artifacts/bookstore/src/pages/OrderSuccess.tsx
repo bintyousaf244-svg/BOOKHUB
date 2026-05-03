@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useGetOrder, getGetOrderQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, ChevronRight, Copy, Check, Wallet, Building2, Phone, Download } from "lucide-react";
+import { CheckCircle2, ChevronRight, Copy, Check, Wallet, Building2, Phone, Download, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,7 @@ interface PaymentSettings {
   bankAccountNumber: string;
   bankAccountName: string;
   bankIban: string;
+  whatsappNumber: string;
 }
 
 function CopyField({ label, value }: { label: string; value: string }) {
@@ -180,12 +181,30 @@ export default function OrderSuccess() {
 
         <PaymentBlock method={method} settings={paymentSettings} total={order.total} />
 
-        <div className="mt-6 p-4 bg-accent/10 text-foreground text-sm rounded-lg border border-accent/20">
-          <strong>Important:</strong> After completing the payment, please WhatsApp us your transaction receipt. Your digital books will be sent to <strong>{order.customerEmail}</strong> once payment is verified.
+        {/* WhatsApp CTA */}
+        {paymentSettings.whatsappNumber && (() => {
+          const raw = paymentSettings.whatsappNumber.replace(/\D/g, "");
+          const wa = raw.startsWith("0") ? "92" + raw.slice(1) : raw;
+          const bookList = order.items.map((i: { title: string; quantity: number }) => `${i.title} (x${i.quantity})`).join(", ");
+          const msg = encodeURIComponent(
+            `Assalamu Alaikum! I placed Order #${order.id} for: ${bookList}. Total: Rs. ${order.total}. I have sent the payment via ${method}. Please find my receipt attached.`
+          );
+          return (
+            <a href={`https://wa.me/${wa}?text=${msg}`} target="_blank" rel="noopener noreferrer" className="block mt-6">
+              <button className="w-full flex items-center justify-center gap-3 bg-[#25d366] hover:bg-[#20bd5c] text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-md">
+                <MessageCircle className="h-5 w-5" />
+                Send Payment Receipt on WhatsApp
+              </button>
+            </a>
+          );
+        })()}
+
+        <div className="mt-4 p-4 bg-accent/10 text-foreground text-sm rounded-lg border border-accent/20">
+          <strong>Next step:</strong> After sending payment, tap the WhatsApp button above to share your receipt. Your books will be unlocked for download at <strong>{order.customerEmail}</strong> once verified.
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
         <Link href={`/my-orders?id=${order.id}`}>
           <Button size="lg" className="rounded-full font-bold px-8 bg-accent text-accent-foreground hover:bg-accent/90">
             <Download className="mr-2 h-4 w-4" /> Download My Books
