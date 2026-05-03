@@ -8,6 +8,7 @@ import {
   UpdateOrderStatusBody,
 } from "@workspace/api-zod";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
+import { sendDownloadEmail } from "../email";
 
 const router = Router();
 
@@ -114,6 +115,10 @@ router.put("/orders/:id", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+
+  const prevRows = await db.select().from(ordersTable).where(eq(ordersTable.id, paramsParsed.data.id)).limit(1);
+  const prevStatus = prevRows[0]?.status;
+
   const [order] = await db
     .update(ordersTable)
     .set({ status: parsed.data.status })
@@ -123,6 +128,27 @@ router.put("/orders/:id", async (req, res) => {
     res.status(404).json({ error: "Order not found" });
     return;
   }
+
+  // Send download email when order is first marked as completed
+  if (parsed.data.status === "completed" && prevStatus !== "completed") {
+    const items = order.items as Array<{ bookId: number; title: string; price: number; quantity: number; coverImage: string }>;
+    sendDownloadEmail({
+      to: order.customerEmail,
+      customerName: order.customerName,
+      orderId: order.id,
+      items,
+      total: Number(order.total),
+    }).then((result) => {
+      if (!result.sent) {
+        req.log.warn({ reason: result.reason }, "Failed to send download email");
+      } else {
+        req.log.info({ orderId: order.id, to: order.customerEmail }, "Download email sent");
+      }
+    }).catch((err) => {
+      req.log.error({ err }, "Error sending download email");
+    });
+  }
+
   res.json(mapOrder(order));
 });
 
