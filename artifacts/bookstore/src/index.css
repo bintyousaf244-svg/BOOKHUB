@@ -82,69 +82,69 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 33 33% 94%;            /* warm cream #f5f0eb */
-  --foreground: 270 55% 18%;           /* deep purple-dark body text */
+  --background: 40 30% 96%;            /* warm cream */
+  --foreground: 279 43% 15%;           /* very dark purple for body text */
 
-  --border: 33 20% 85%;               /* warm cream border */
+  --border: 144 12% 82%;              /* subtle green-tinted border */
 
   --card: 0 0% 100%;
-  --card-foreground: 270 55% 18%;
-  --card-border: 33 20% 85%;
+  --card-foreground: 279 43% 15%;
+  --card-border: 40 20% 86%;
 
-  /* Sidebar: deep purple */
-  --sidebar: 270 62% 28%;
+  /* Sidebar: brand purple #582C6F */
+  --sidebar: 279 43% 24%;
   --sidebar-foreground: 0 0% 100%;
-  --sidebar-border: 270 50% 22%;
+  --sidebar-border: 279 40% 18%;
   --sidebar-primary: 0 0% 100%;
-  --sidebar-primary-foreground: 270 62% 28%;
-  --sidebar-accent: 270 50% 22%;
+  --sidebar-primary-foreground: 279 43% 30%;
+  --sidebar-accent: 279 40% 20%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 330 77% 63%;
+  --sidebar-ring: 347 55% 67%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 270 55% 18%;
-  --popover-border: 33 20% 85%;
+  --popover-foreground: 279 43% 15%;
+  --popover-border: 40 20% 86%;
 
-  /* Primary = deep purple (matches website nav/buttons #4a228a) */
-  --primary: 270 62% 34%;
+  /* Primary = #582C6F deep purple */
+  --primary: 279 43% 30%;
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary = light warm lavender for section backgrounds */
-  --secondary: 270 30% 94%;
-  --secondary-foreground: 270 55% 22%;
+  /* Secondary = soft green-tinted bg (#416D53 lightened) */
+  --secondary: 144 20% 92%;
+  --secondary-foreground: 144 25% 20%;
 
-  --muted: 33 20% 90%;
-  --muted-foreground: 270 20% 48%;
+  --muted: 40 20% 91%;
+  --muted-foreground: 279 15% 48%;
 
-  /* Accent = hot pink (matches website highlight color #e85d9a) */
-  --accent: 330 77% 58%;
+  /* Accent = #D97B8F pink/rose */
+  --accent: 347 55% 67%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 80% 58%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 33 20% 85%;
-  --ring: 330 77% 58%;
+  --input: 40 20% 86%;
+  --ring: 347 55% 67%;
 
-  /* Chart palette */
-  --chart-1: 330 77% 58%;   /* hot pink */
-  --chart-2: 270 62% 40%;   /* purple */
-  --chart-3: 42 85% 55%;    /* amber gold */
-  --chart-4: 175 50% 40%;   /* teal */
-  --chart-5: 145 45% 38%;   /* forest green */
+  /* Chart palette — all 4 brand colors */
+  --chart-1: 347 55% 67%;   /* #D97B8F pink */
+  --chart-2: 279 43% 30%;   /* #582C6F purple */
+  --chart-3: 45 71% 40%;    /* #B08B1E gold */
+  --chart-4: 144 25% 34%;   /* #416D53 green */
+  --chart-5: 40 60% 55%;    /* warm amber */
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: .75rem;
-  --shadow-2xs: 0px 1px 3px 0px hsl(270 62% 34% / 0.08);
-  --shadow-xs:  0px 1px 3px 0px hsl(270 62% 34% / 0.10);
-  --shadow-sm:  0px 2px 4px -1px hsl(270 62% 34% / 0.12), 0px 1px 2px -1px hsl(270 62% 34% / 0.07);
-  --shadow:     0px 3px 6px -1px hsl(270 62% 34% / 0.14), 0px 2px 4px -1px hsl(270 62% 34% / 0.08);
-  --shadow-md:  0px 4px 8px -2px hsl(270 62% 34% / 0.14), 0px 2px 4px -2px hsl(270 62% 34% / 0.09);
-  --shadow-lg:  0px 8px 16px -4px hsl(270 62% 34% / 0.16), 0px 4px 6px -2px hsl(270 62% 34% / 0.07);
-  --shadow-xl:  0px 16px 24px -6px hsl(270 62% 34% / 0.16), 0px 8px 10px -3px hsl(270 62% 34% / 0.09);
-  --shadow-2xl: 0px 24px 48px -8px hsl(270 62% 34% / 0.20);
+  --shadow-2xs: 0px 1px 3px 0px rgba(88,44,111,0.08);
+  --shadow-xs:  0px 1px 3px 0px rgba(88,44,111,0.10);
+  --shadow-sm:  0px 2px 4px -1px rgba(88,44,111,0.12), 0px 1px 2px -1px rgba(88,44,111,0.07);
+  --shadow:     0px 3px 6px -1px rgba(88,44,111,0.14), 0px 2px 4px -1px rgba(88,44,111,0.08);
+  --shadow-md:  0px 4px 8px -2px rgba(88,44,111,0.14), 0px 2px 4px -2px rgba(88,44,111,0.09);
+  --shadow-lg:  0px 8px 16px -4px rgba(88,44,111,0.16), 0px 4px 6px -2px rgba(88,44,111,0.07);
+  --shadow-xl:  0px 16px 24px -6px rgba(88,44,111,0.16), 0px 8px 10px -3px rgba(88,44,111,0.09);
+  --shadow-2xl: 0px 24px 48px -8px rgba(88,44,111,0.20);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 

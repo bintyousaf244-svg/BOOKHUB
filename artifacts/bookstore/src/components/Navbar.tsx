@@ -31,7 +31,7 @@ export function Navbar() {
   return (
     <>
       <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? "shadow-lg" : ""}`}
-        style={{ background: "hsl(270,62%,34%)" }}>
+        style={{ background: "#582C6F" }}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
@@ -58,7 +58,7 @@ export function Navbar() {
                 <ShoppingCart className="h-5 w-5" />
                 {itemCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                    style={{ background: "hsl(330,77%,58%)" }}>
+                    style={{ background: "#D97B8F" }}>
                     {itemCount}
                   </span>
                 )}
@@ -67,7 +67,7 @@ export function Navbar() {
 
             <Link href="/books">
               <button className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "hsl(330,77%,58%)" }}>
+                style={{ background: "#D97B8F" }}>
                 <BookOpen className="h-4 w-4" /> Shop Now
               </button>
             </Link>
@@ -94,7 +94,7 @@ export function Navbar() {
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <nav className="absolute top-16 left-0 right-0 shadow-2xl border-b"
-            style={{ background: "hsl(270,62%,28%)" }}
+            style={{ background: "#4a2360" }}
             onClick={(e) => e.stopPropagation()}>
             <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
               {links.map((l) => (
@@ -112,7 +112,7 @@ export function Navbar() {
               <div className="pt-2 pb-1">
                 <Link href="/books">
                   <button className="w-full py-3 rounded-full text-sm font-bold text-white transition-all"
-                    style={{ background: "hsl(330,77%,58%)" }}>
+                    style={{ background: "#D97B8F" }}>
                     Shop All Books
                   </button>
                 </Link>

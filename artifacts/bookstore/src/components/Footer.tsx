@@ -7,9 +7,9 @@ interface SocialLinks {
   websiteUrl: string;
 }
 
-const PURPLE = "hsl(270,62%,34%)";
-const PURPLE_DARK = "hsl(270,62%,22%)";
-const PINK = "hsl(330,77%,58%)";
+const PURPLE = "#582C6F";
+const PURPLE_DARK = "#3a1d49";
+const PINK = "#D97B8F";
 
 function FacebookIcon() {
   return (

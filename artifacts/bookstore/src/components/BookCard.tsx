@@ -26,7 +26,7 @@ export function BookCard({ book }: { book: Book }) {
 
   return (
     <Link href={`/books/${book.id}`}>
-      <div className="group relative flex flex-col h-full cursor-pointer rounded-2xl overflow-hidden bg-white border border-[hsl(33,20%,85%)] hover:border-[hsl(330,77%,58%)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+      <div className="group relative flex flex-col h-full cursor-pointer rounded-2xl overflow-hidden bg-white border border-[#e0d8c8] hover:border-[#D97B8F] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
 
         {/* Cover image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[hsl(33,33%,94%)]">
@@ -42,7 +42,7 @@ export function BookCard({ book }: { book: Book }) {
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
             {book.isFree && (
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white shadow-md"
-                style={{ background: "hsl(330,77%,58%)" }}>FREE</span>
+                style={{ background: "#416D53" }}>FREE</span>
             )}
             {!book.isFree && book.isOnSale && (
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white shadow-md bg-orange-500">SALE</span>
@@ -51,7 +51,8 @@ export function BookCard({ book }: { book: Book }) {
 
           {/* Top-right language badge */}
           <div className="absolute top-2.5 right-2.5">
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/85 backdrop-blur text-[hsl(270,62%,34%)] shadow-sm">
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/85 backdrop-blur shadow-sm"
+              style={{ color: "#582C6F" }}>
               {book.language === "Arabic" ? "عربي" : "EN"}
             </span>
           </div>
@@ -59,24 +60,28 @@ export function BookCard({ book }: { book: Book }) {
 
         {/* Card body */}
         <div className="flex flex-col flex-1 p-4 gap-2">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-[hsl(270,62%,34%)] opacity-70">
+          <div className="text-[10px] font-bold uppercase tracking-widest opacity-60"
+            style={{ color: "#416D53" }}>
             {book.category} · {book.ageGroup}
           </div>
-          <h3 className="font-serif font-bold text-base leading-snug text-[hsl(270,55%,18%)] group-hover:text-[hsl(330,77%,48%)] transition-colors line-clamp-2 flex-1">
+          <h3 className="font-serif font-bold text-base leading-snug transition-colors line-clamp-2 flex-1"
+            style={{ color: "#582C6F" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#D97B8F")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#582C6F")}>
             {book.title}
           </h3>
-          <p className="text-xs text-[hsl(270,20%,48%)] line-clamp-1">{book.author}</p>
+          <p className="text-xs line-clamp-1" style={{ color: "#6b6080" }}>{book.author}</p>
 
           {/* Price row */}
-          <div className="flex items-center justify-between pt-3 mt-auto border-t border-[hsl(33,20%,88%)]">
+          <div className="flex items-center justify-between pt-3 mt-auto border-t border-[#e8e0d0]">
             <div>
               {book.isFree ? (
-                <span className="font-bold text-sm" style={{ color: "hsl(330,77%,58%)" }}>Free</span>
+                <span className="font-bold text-sm" style={{ color: "#416D53" }}>Free</span>
               ) : (
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-bold text-base text-[hsl(270,55%,18%)]">Rs. {displayPrice}</span>
+                  <span className="font-bold text-base" style={{ color: "#582C6F" }}>Rs. {displayPrice}</span>
                   {book.isOnSale && book.salePrice && (
-                    <span className="text-xs text-[hsl(270,20%,55%)] line-through">Rs. {book.price}</span>
+                    <span className="text-xs line-through" style={{ color: "#9d8c6a" }}>Rs. {book.price}</span>
                   )}
                 </div>
               )}
@@ -89,14 +94,14 @@ export function BookCard({ book }: { book: Book }) {
                   if (book.downloadUrl) window.open(book.downloadUrl, "_blank");
                 }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95"
-                style={{ background: "hsl(270,62%,34%)" }}>
+                style={{ background: "#416D53" }}>
                 <Download className="h-3.5 w-3.5" /> Get
               </button>
             ) : (
               <button
                 onClick={handleAddToCart}
                 className="flex items-center justify-center w-8 h-8 rounded-full text-white transition-all hover:opacity-90 active:scale-95 shadow-sm"
-                style={{ background: "hsl(330,77%,58%)" }}>
+                style={{ background: "#D97B8F" }}>
                 <ShoppingCart className="h-4 w-4" />
               </button>
             )}

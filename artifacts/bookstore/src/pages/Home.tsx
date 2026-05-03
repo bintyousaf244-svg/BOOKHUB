@@ -15,11 +15,13 @@ function BookSkeleton() {
   );
 }
 
-const PURPLE = "hsl(270,62%,34%)";
-const PINK = "hsl(330,77%,58%)";
-const CREAM = "hsl(33,33%,94%)";
-const CREAM_DARK = "hsl(33,25%,88%)";
-const PURPLE_LIGHT = "hsl(270,40%,96%)";
+const PURPLE = "#582C6F";
+const PINK = "#D97B8F";
+const GREEN = "#416D53";
+const GOLD = "#B08B1E";
+const CREAM = "#f5f0e8";
+const CREAM_DARK = "#ebe4d4";
+const PURPLE_LIGHT = "#f3eef8";
 
 export default function Home() {
   const { data: featuredBooks, isLoading: loadingFeatured } = useGetFeaturedBooks();
@@ -109,7 +111,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-bold font-serif text-base" style={{ color: PURPLE }}>{item.title}</h3>
-                  <p className="text-sm mt-0.5" style={{ color: "hsl(270,20%,48%)" }}>{item.desc}</p>
+                  <p className="text-sm mt-0.5" style={{ color: "#6b5a7a" }}>{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -131,7 +133,7 @@ export default function Home() {
             {/* Kids card */}
             <Link href="/books?ageGroup=Kids">
               <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-                style={{ background: `linear-gradient(135deg, ${PURPLE} 0%, hsl(270,62%,48%) 100%)` }}>
+                style={{ background: `linear-gradient(135deg, ${PURPLE} 0%, #7a3e96 100%)` }}>
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20"
                   style={{ background: PINK }} />
@@ -151,7 +153,7 @@ export default function Home() {
             {/* Adults card */}
             <Link href="/books?ageGroup=Adults">
               <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-                style={{ background: `linear-gradient(135deg, ${PINK} 0%, hsl(330,77%,45%) 100%)` }}>
+                style={{ background: `linear-gradient(135deg, ${GREEN} 0%, #2d4d3a 100%)` }}>
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20"
                   style={{ background: "white" }} />
@@ -181,7 +183,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-serif font-bold" style={{ color: PURPLE }}>
                 Featured Collection
               </h2>
-              <p className="mt-2" style={{ color: "hsl(270,20%,48%)" }}>Our most loved books this season.</p>
+              <p className="mt-2" style={{ color: "#6b5a7a" }}>Our most loved books this season.</p>
             </div>
             <Link href="/books">
               <button className="flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90"
@@ -203,7 +205,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           {/* Banner */}
           <div className="relative overflow-hidden rounded-3xl p-10 md:p-14 mb-12 text-center"
-            style={{ background: `linear-gradient(135deg, ${PURPLE} 0%, hsl(270,62%,46%) 100%)` }}>
+            style={{ background: `linear-gradient(135deg, ${PURPLE} 0%, #7a3e96 100%)` }}>
             <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-10"
               style={{ background: PINK }} />
             <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full opacity-10"
@@ -244,7 +246,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
               <div>
                 <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold text-white mb-3"
-                  style={{ background: "hsl(25,90%,55%)" }}>
+                  style={{ background: GOLD }}>
                   <Star className="h-3.5 w-3.5 fill-current" /> Limited Offers
                 </span>
                 <h2 className="text-3xl md:text-4xl font-serif font-bold" style={{ color: PURPLE }}>
