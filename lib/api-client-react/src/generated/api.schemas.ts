@@ -16,6 +16,76 @@ export interface RequestUploadUrlResponse {
   objectPath: string;
 }
 
+export type DiscountCodeType =
+  (typeof DiscountCodeType)[keyof typeof DiscountCodeType];
+
+export const DiscountCodeType = {
+  percentage: "percentage",
+  fixed: "fixed",
+} as const;
+
+export interface DiscountCode {
+  id: number;
+  code: string;
+  type: DiscountCodeType;
+  value: number;
+  minOrderAmount?: number | null;
+  maxUses?: number | null;
+  usedCount: number;
+  isActive: boolean;
+  expiresAt?: string | null;
+  createdAt: string;
+}
+
+export type CreateDiscountCodeBodyType =
+  (typeof CreateDiscountCodeBodyType)[keyof typeof CreateDiscountCodeBodyType];
+
+export const CreateDiscountCodeBodyType = {
+  percentage: "percentage",
+  fixed: "fixed",
+} as const;
+
+export interface CreateDiscountCodeBody {
+  code: string;
+  type: CreateDiscountCodeBodyType;
+  value: number;
+  minOrderAmount?: number | null;
+  maxUses?: number | null;
+  isActive?: boolean;
+  expiresAt?: string | null;
+}
+
+export type UpdateDiscountCodeBodyType =
+  (typeof UpdateDiscountCodeBodyType)[keyof typeof UpdateDiscountCodeBodyType];
+
+export const UpdateDiscountCodeBodyType = {
+  percentage: "percentage",
+  fixed: "fixed",
+} as const;
+
+export interface UpdateDiscountCodeBody {
+  code?: string;
+  type?: UpdateDiscountCodeBodyType;
+  value?: number;
+  minOrderAmount?: number | null;
+  maxUses?: number | null;
+  isActive?: boolean;
+  expiresAt?: string | null;
+}
+
+export interface ValidateDiscountCodeBody {
+  code: string;
+  orderAmount: number;
+}
+
+export interface ValidateDiscountCodeResponse {
+  valid: boolean;
+  discountAmount: number;
+  discountType?: string | null;
+  discountValue?: number | null;
+  message: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -185,4 +255,8 @@ export type ListBooksParams = {
 export type ListOrdersParams = {
   status?: string;
   page?: number;
+};
+
+export type DeleteDiscountCode200 = {
+  success: boolean;
 };

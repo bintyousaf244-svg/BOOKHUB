@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
-import { LayoutDashboard, Book, ShoppingCart, LogOut, Store } from "lucide-react";
+import { LayoutDashboard, Book, ShoppingCart, LogOut, Store, Tag } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { logout, isAuthenticated } = useAuth();
@@ -33,6 +33,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <Link href="/admin/orders" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/admin/orders') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
             <ShoppingCart className="h-5 w-5" /> Orders
+          </Link>
+          <Link href="/admin/discounts" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/admin/discounts') ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent/50'}`}>
+            <Tag className="h-5 w-5" /> Discount Codes
           </Link>
         </nav>
         <div className="p-4 border-t border-sidebar-border">

@@ -328,6 +328,104 @@ paths:
               schema:
                 $ref: "#/components/schemas/AdminStats"
 
+  /discount-codes/validate:
+    post:
+      operationId: validateDiscountCode
+      tags: [admin]
+      summary: Validate a discount code and return discount amount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateDiscountCodeBody"
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidateDiscountCodeResponse"
+
+  /admin/discount-codes:
+    get:
+      operationId: listDiscountCodes
+      tags: [admin]
+      summary: List all discount codes
+      responses:
+        "200":
+          description: List of discount codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DiscountCode"
+    post:
+      operationId: createDiscountCode
+      tags: [admin]
+      summary: Create a new discount code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDiscountCodeBody"
+      responses:
+        "201":
+          description: Created discount code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscountCode"
+
+  /admin/discount-codes/{id}:
+    put:
+      operationId: updateDiscountCode
+      tags: [admin]
+      summary: Update a discount code
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDiscountCodeBody"
+      responses:
+        "200":
+          description: Updated discount code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscountCode"
+    delete:
+      operationId: deleteDiscountCode
+      tags: [admin]
+      summary: Delete a discount code
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+
   /admin/login:
     post:
       operationId: adminLogin
@@ -373,6 +471,121 @@ components:
       required:
         - uploadURL
         - objectPath
+
+    DiscountCode:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        type:
+          type: string
+          enum: [percentage, fixed]
+        value:
+          type: number
+        minOrderAmount:
+          type: number
+          nullable: true
+        maxUses:
+          type: integer
+          nullable: true
+        usedCount:
+          type: integer
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - code
+        - type
+        - value
+        - usedCount
+        - isActive
+        - createdAt
+
+    CreateDiscountCodeBody:
+      type: object
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+          enum: [percentage, fixed]
+        value:
+          type: number
+        minOrderAmount:
+          type: number
+          nullable: true
+        maxUses:
+          type: integer
+          nullable: true
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          nullable: true
+      required:
+        - code
+        - type
+        - value
+
+    UpdateDiscountCodeBody:
+      type: object
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+          enum: [percentage, fixed]
+        value:
+          type: number
+        minOrderAmount:
+          type: number
+          nullable: true
+        maxUses:
+          type: integer
+          nullable: true
+        isActive:
+          type: boolean
+        expiresAt:
+          type: string
+          nullable: true
+
+    ValidateDiscountCodeBody:
+      type: object
+      properties:
+        code:
+          type: string
+        orderAmount:
+          type: number
+      required:
+        - code
+        - orderAmount
+
+    ValidateDiscountCodeResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        discountAmount:
+          type: number
+        discountType:
+          type: string
+          nullable: true
+        discountValue:
+          type: number
+          nullable: true
+        message:
+          type: string
+      required:
+        - valid
+        - discountAmount
+        - message
 
     HealthStatus:
       type: object

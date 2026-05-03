@@ -465,6 +465,95 @@ export const GetAdminStatsResponse = zod.object({
 });
 
 /**
+ * @summary Validate a discount code and return discount amount
+ */
+export const ValidateDiscountCodeBody = zod.object({
+  code: zod.string(),
+  orderAmount: zod.number(),
+});
+
+export const ValidateDiscountCodeResponse = zod.object({
+  valid: zod.boolean(),
+  discountAmount: zod.number(),
+  discountType: zod.string().nullish(),
+  discountValue: zod.number().nullish(),
+  message: zod.string(),
+});
+
+/**
+ * @summary List all discount codes
+ */
+export const ListDiscountCodesResponseItem = zod.object({
+  id: zod.number(),
+  code: zod.string(),
+  type: zod.enum(["percentage", "fixed"]),
+  value: zod.number(),
+  minOrderAmount: zod.number().nullish(),
+  maxUses: zod.number().nullish(),
+  usedCount: zod.number(),
+  isActive: zod.boolean(),
+  expiresAt: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const ListDiscountCodesResponse = zod.array(
+  ListDiscountCodesResponseItem,
+);
+
+/**
+ * @summary Create a new discount code
+ */
+export const CreateDiscountCodeBody = zod.object({
+  code: zod.string(),
+  type: zod.enum(["percentage", "fixed"]),
+  value: zod.number(),
+  minOrderAmount: zod.number().nullish(),
+  maxUses: zod.number().nullish(),
+  isActive: zod.boolean().optional(),
+  expiresAt: zod.string().nullish(),
+});
+
+/**
+ * @summary Update a discount code
+ */
+export const UpdateDiscountCodeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateDiscountCodeBody = zod.object({
+  code: zod.string().optional(),
+  type: zod.enum(["percentage", "fixed"]).optional(),
+  value: zod.number().optional(),
+  minOrderAmount: zod.number().nullish(),
+  maxUses: zod.number().nullish(),
+  isActive: zod.boolean().optional(),
+  expiresAt: zod.string().nullish(),
+});
+
+export const UpdateDiscountCodeResponse = zod.object({
+  id: zod.number(),
+  code: zod.string(),
+  type: zod.enum(["percentage", "fixed"]),
+  value: zod.number(),
+  minOrderAmount: zod.number().nullish(),
+  maxUses: zod.number().nullish(),
+  usedCount: zod.number(),
+  isActive: zod.boolean(),
+  expiresAt: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+/**
+ * @summary Delete a discount code
+ */
+export const DeleteDiscountCodeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteDiscountCodeResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
  * @summary Admin login
  */
 export const AdminLoginBody = zod.object({

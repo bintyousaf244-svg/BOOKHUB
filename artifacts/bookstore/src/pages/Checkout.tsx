@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tag, CheckCircle, X, Loader2 } from "lucide-react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -35,6 +36,13 @@ export default function Checkout() {
 
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer");
 
+  // Discount code state
+  const [discountInput, setDiscountInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountMsg, setDiscountMsg] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -54,13 +62,54 @@ export default function Checkout() {
     return null;
   }
 
-  const shipping = 200; // Flat shipping rate
-  const total = subtotal + shipping;
+  const shipping = 200;
+  const total = Math.max(0, subtotal + shipping - discountAmount);
+
+  const handleApplyCode = async () => {
+    const code = discountInput.trim().toUpperCase();
+    if (!code) return;
+    setIsValidating(true);
+    setDiscountMsg("");
+    try {
+      const res = await fetch("/api/discount-codes/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, orderAmount: subtotal + shipping }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setAppliedCode(code);
+        setDiscountAmount(data.discountAmount);
+        setDiscountMsg(data.message);
+        toast({ title: data.message });
+      } else {
+        setDiscountMsg(data.message);
+        toast({ title: data.message, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Could not validate code", variant: "destructive" });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleRemoveCode = () => {
+    setAppliedCode(null);
+    setDiscountAmount(0);
+    setDiscountInput("");
+    setDiscountMsg("");
+  };
 
   const onSubmit = (data: CheckoutFormValues) => {
+    const notes = [
+      data.notes,
+      appliedCode ? `Discount code: ${appliedCode} (Rs. ${discountAmount} off)` : null,
+    ].filter(Boolean).join(" | ");
+
     createOrder.mutate({
       data: {
         ...data,
+        notes: notes || undefined,
         items: items.map(i => ({ bookId: i.bookId, quantity: i.quantity }))
       }
     }, {
@@ -83,7 +132,7 @@ export default function Checkout() {
         <div className="flex-1">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              
+
               {/* Contact Info */}
               <section className="bg-card p-6 md:p-8 rounded-xl border border-border shadow-sm">
                 <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Contact & Shipping Details</h2>
@@ -132,15 +181,12 @@ export default function Checkout() {
               <section className="bg-card p-6 md:p-8 rounded-xl border border-border shadow-sm">
                 <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Payment Method</h2>
                 <p className="text-sm text-muted-foreground mb-6">Please select how you would like to pay. Payment instructions will be provided on the next screen.</p>
-                
+
                 <FormField control={form.control} name="paymentMethod" render={({ field }) => (
                   <FormItem className="space-y-4">
                     <FormControl>
-                      <RadioGroup 
-                        onValueChange={(val) => {
-                          field.onChange(val);
-                          setPaymentMethod(val);
-                        }} 
+                      <RadioGroup
+                        onValueChange={(val) => { field.onChange(val); setPaymentMethod(val); }}
                         defaultValue={field.value}
                         className="flex flex-col space-y-3"
                       >
@@ -171,7 +217,7 @@ export default function Checkout() {
                     </FormItem>
                   )} />
                 </div>
-                
+
                 <div className="mt-4">
                   <FormField control={form.control} name="notes" render={({ field }) => (
                     <FormItem>
@@ -184,13 +230,13 @@ export default function Checkout() {
               </section>
 
               <div className="flex justify-end pt-4">
-                <Button 
-                  type="submit" 
-                  size="lg" 
+                <Button
+                  type="submit"
+                  size="lg"
                   className="w-full md:w-auto px-12 h-14 rounded-full bg-accent text-accent-foreground font-bold shadow-md hover:bg-accent/90"
                   disabled={createOrder.isPending}
                 >
-                  {createOrder.isPending ? "Placing Order..." : `Place Order — Rs. ${total}`}
+                  {createOrder.isPending ? "Placing Order..." : `Place Order — Rs. ${total.toLocaleString()}`}
                 </Button>
               </div>
             </form>
@@ -202,8 +248,8 @@ export default function Checkout() {
           <Card className="border-border shadow-md sticky top-24 bg-card">
             <CardContent className="p-6">
               <h2 className="text-xl font-serif font-bold mb-6 text-foreground">Order Summary</h2>
-              
-              <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
+
+              <div className="space-y-4 mb-6 max-h-[35vh] overflow-y-auto pr-2">
                 {items.map((item) => (
                   <div key={item.bookId} className="flex gap-4 text-sm">
                     <img src={item.coverImage} alt={item.title} className="w-12 h-16 object-cover rounded shadow-sm" />
@@ -219,20 +265,63 @@ export default function Checkout() {
               </div>
 
               <Separator className="my-4 border-border/50" />
-              
+
+              {/* Discount Code Input */}
+              <div className="mb-4">
+                {appliedCode ? (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-green-800 font-mono">{appliedCode}</p>
+                      <p className="text-xs text-green-600">{discountMsg}</p>
+                    </div>
+                    <button onClick={handleRemoveCode} className="text-green-600 hover:text-red-500 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                      <Tag className="h-3 w-3" /> Have a discount code?
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter code"
+                        value={discountInput}
+                        onChange={(e) => setDiscountInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleApplyCode())}
+                        className="font-mono uppercase text-sm"
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={handleApplyCode} disabled={isValidating || !discountInput.trim()} className="px-4 flex-shrink-0">
+                        {isValidating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Apply"}
+                      </Button>
+                    </div>
+                    {discountMsg && !appliedCode && (
+                      <p className="text-xs text-destructive">{discountMsg}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>Rs. {subtotal}</span>
+                  <span>Rs. {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
                   <span>Rs. {shipping}</span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>Discount ({appliedCode})</span>
+                    <span>− Rs. {discountAmount.toLocaleString()}</span>
+                  </div>
+                )}
                 <Separator className="my-3 border-border/50" />
                 <div className="flex justify-between text-xl font-bold text-foreground">
                   <span>Total</span>
-                  <span>Rs. {total}</span>
+                  <span>Rs. {total.toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>

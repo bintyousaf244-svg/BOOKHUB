@@ -12,9 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Upload, X, ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Upload, X, ImageIcon, FileText, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUpload } from "@workspace/object-storage-web";
+import { Badge } from "@/components/ui/badge";
 
 const bookSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -30,7 +31,7 @@ const bookSchema = z.object({
   language: z.string().min(1, "Language is required"),
   ageGroup: z.string().min(1, "Age group is required"),
   pages: z.coerce.number().optional().nullable(),
-  downloadUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).nullable(),
+  downloadUrl: z.string().optional().or(z.literal("")).nullable(),
   stock: z.coerce.number().min(0).default(10),
 });
 
@@ -44,8 +45,14 @@ export default function AdminBookEdit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Cover image upload
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedCoverPreview, setUploadedCoverPreview] = useState<string | null>(null);
+
+  // Digital book file upload
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   const { data: book, isLoading } = useGetBook(bookId, {
     query: { enabled: isEditing, queryKey: getGetBookQueryKey(bookId) }
@@ -54,16 +61,23 @@ export default function AdminBookEdit() {
   const createBook = useCreateBook();
   const updateBook = useUpdateBook();
 
-  const { uploadFile, isUploading, progress } = useUpload({
+  const coverUpload = useUpload({
     onSuccess: (response) => {
       const servingUrl = `/api/storage${response.objectPath}`;
       form.setValue("coverImage", servingUrl, { shouldValidate: true });
-      setUploadedPreview(servingUrl);
-      toast({ title: "Image uploaded successfully" });
+      setUploadedCoverPreview(servingUrl);
+      toast({ title: "Cover image uploaded" });
     },
-    onError: (err) => {
-      toast({ title: `Upload failed: ${err.message}`, variant: "destructive" });
+    onError: (err) => toast({ title: `Upload failed: ${err.message}`, variant: "destructive" }),
+  });
+
+  const fileUpload = useUpload({
+    onSuccess: (response) => {
+      const servingUrl = `/api/storage${response.objectPath}`;
+      form.setValue("downloadUrl", servingUrl, { shouldValidate: true });
+      toast({ title: "Book file uploaded successfully" });
     },
+    onError: (err) => toast({ title: `Upload failed: ${err.message}`, variant: "destructive" }),
   });
 
   const form = useForm<BookFormValues>({
@@ -106,29 +120,40 @@ export default function AdminBookEdit() {
         downloadUrl: book.downloadUrl || "",
         stock: book.stock,
       });
+      if (book.downloadUrl?.startsWith("/api/storage")) {
+        setUploadedFileName("Previously uploaded file");
+      }
     }
   }, [isEditing, book, form]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast({ title: "Please select an image file", variant: "destructive" });
       return;
     }
-    await uploadFile(file);
+    await coverUpload.uploadFile(file);
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedFileName(file.name);
+    await fileUpload.uploadFile(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleClearUpload = () => {
-    setUploadedPreview(null);
-    form.setValue("coverImage", "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop");
+  const handleClearFile = () => {
+    setUploadedFileName(null);
+    form.setValue("downloadUrl", "");
   };
 
   const onSubmit = (data: BookFormValues) => {
     const payload = {
       ...data,
-      downloadUrl: data.isFree ? (data.downloadUrl || null) : null,
+      downloadUrl: data.downloadUrl || null,
     };
 
     if (isEditing) {
@@ -158,6 +183,8 @@ export default function AdminBookEdit() {
   const isFree = form.watch("isFree");
   const isOnSale = form.watch("isOnSale");
   const currentCoverImage = form.watch("coverImage");
+  const currentDownloadUrl = form.watch("downloadUrl");
+  const isAnyUploading = coverUpload.isUploading || fileUpload.isUploading;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
@@ -172,8 +199,11 @@ export default function AdminBookEdit() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
+          {/* Basic Info */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-6 space-y-6">
+              <h2 className="text-xl font-serif font-bold text-foreground">Book Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="title" render={({ field }) => (
                   <FormItem className="md:col-span-2">
@@ -191,79 +221,41 @@ export default function AdminBookEdit() {
                   </FormItem>
                 )} />
 
-                {/* Cover Image Field with Upload */}
+                {/* Cover Image */}
                 <FormField control={form.control} name="coverImage" render={({ field }) => (
                   <FormItem className="md:col-span-2">
                     <FormLabel>Cover Image</FormLabel>
                     <div className="flex gap-4 items-start">
-                      {/* Preview */}
-                      <div className="flex-shrink-0 w-28 h-36 rounded-lg border border-border overflow-hidden bg-muted flex items-center justify-center">
+                      <div className="flex-shrink-0 w-24 h-32 rounded-lg border border-border overflow-hidden bg-muted flex items-center justify-center">
                         {currentCoverImage ? (
-                          <img
-                            src={currentCoverImage}
-                            alt="Cover preview"
-                            className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                          />
+                          <img src={currentCoverImage} alt="Cover" className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                         ) : (
-                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                          <ImageIcon className="h-7 w-7 text-muted-foreground" />
                         )}
                       </div>
-
                       <div className="flex-1 space-y-3">
-                        {/* Upload button */}
-                        <div className="flex gap-2 items-center">
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileChange}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="flex items-center gap-2"
-                          >
-                            <Upload className="h-4 w-4" />
-                            {isUploading ? `Uploading… ${progress}%` : "Upload Image"}
+                        <div className="flex gap-2 items-center flex-wrap">
+                          <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
+                          <Button type="button" variant="outline" size="sm" onClick={() => coverInputRef.current?.click()} disabled={coverUpload.isUploading}>
+                            <Upload className="h-4 w-4 mr-1" />
+                            {coverUpload.isUploading ? `Uploading ${coverUpload.progress}%` : "Upload Image"}
                           </Button>
-                          {uploadedPreview && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleClearUpload}
-                              className="text-muted-foreground hover:text-destructive"
-                            >
+                          {uploadedCoverPreview && (
+                            <Button type="button" variant="ghost" size="sm" onClick={() => { setUploadedCoverPreview(null); form.setValue("coverImage", ""); }}
+                              className="text-muted-foreground hover:text-destructive">
                               <X className="h-4 w-4 mr-1" /> Clear
                             </Button>
                           )}
                         </div>
-
-                        {/* Progress bar */}
-                        {isUploading && (
+                        {coverUpload.isUploading && (
                           <div className="w-full bg-muted rounded-full h-1.5">
-                            <div
-                              className="bg-primary h-1.5 rounded-full transition-all duration-300"
-                              style={{ width: `${progress}%` }}
-                            />
+                            <div className="bg-primary h-1.5 rounded-full transition-all" style={{ width: `${coverUpload.progress}%` }} />
                           </div>
                         )}
-
-                        {/* URL fallback */}
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground">Or paste an image URL directly:</p>
-                          <FormControl>
-                            <Input
-                              placeholder="https://example.com/cover.jpg"
-                              {...field}
-                              disabled={isUploading}
-                            />
-                          </FormControl>
+                          <p className="text-xs text-muted-foreground">Or paste an image URL:</p>
+                          <FormControl><Input placeholder="https://example.com/cover.jpg" {...field} disabled={coverUpload.isUploading} /></FormControl>
                         </div>
                         <FormMessage />
                       </div>
@@ -281,7 +273,7 @@ export default function AdminBookEdit() {
                 <FormField control={form.control} name="language" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Language</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger></FormControl>
                       <SelectContent>
                         <SelectItem value="English">English</SelectItem>
@@ -294,7 +286,7 @@ export default function AdminBookEdit() {
                 <FormField control={form.control} name="ageGroup" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Age Group</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Select age group" /></SelectTrigger></FormControl>
                       <SelectContent>
                         <SelectItem value="Kids">Kids</SelectItem>
@@ -323,6 +315,58 @@ export default function AdminBookEdit() {
             </CardContent>
           </Card>
 
+          {/* Digital File */}
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-6 space-y-4">
+              <div>
+                <h2 className="text-xl font-serif font-bold text-foreground">Digital Book File</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Upload the book file (PDF, EPUB, etc.) for digital download. For free books this link is shown immediately; for paid books you can share it after payment.
+                </p>
+              </div>
+
+              {/* Uploaded file badge */}
+              {(uploadedFileName || (currentDownloadUrl && currentDownloadUrl.length > 0)) && (
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span className="text-sm text-foreground flex-1 truncate">
+                    {uploadedFileName || "File linked"}
+                  </span>
+                  <Button type="button" variant="ghost" size="sm" onClick={handleClearFile}
+                    className="text-muted-foreground hover:text-destructive h-6 px-2">
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex gap-3 items-center flex-wrap">
+                <input ref={fileInputRef} type="file" accept=".pdf,.epub,.doc,.docx,.txt,.mobi" className="hidden" onChange={handleFileChange} />
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={fileUpload.isUploading}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  {fileUpload.isUploading ? `Uploading ${fileUpload.progress}%` : "Upload Book File"}
+                </Button>
+                <Badge variant="outline" className="text-xs text-muted-foreground">PDF, EPUB, DOCX, MOBI</Badge>
+              </div>
+
+              {fileUpload.isUploading && (
+                <div className="w-full bg-muted rounded-full h-1.5">
+                  <div className="bg-primary h-1.5 rounded-full transition-all" style={{ width: `${fileUpload.progress}%` }} />
+                </div>
+              )}
+
+              <FormField control={form.control} name="downloadUrl" render={({ field }) => (
+                <FormItem>
+                  <p className="text-xs text-muted-foreground">Or paste an external link (Google Drive, Dropbox, etc.):</p>
+                  <FormControl>
+                    <Input placeholder="https://drive.google.com/..." {...field} value={field.value || ""} disabled={fileUpload.isUploading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </CardContent>
+          </Card>
+
+          {/* Pricing & Status */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-6 space-y-6">
               <h2 className="text-xl font-serif font-bold text-foreground">Pricing & Status</h2>
@@ -332,7 +376,7 @@ export default function AdminBookEdit() {
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">Free Resource</FormLabel>
-                      <FormDescription>Available for direct download</FormDescription>
+                      <FormDescription>Show download link publicly</FormDescription>
                     </div>
                     <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                   </FormItem>
@@ -384,18 +428,6 @@ export default function AdminBookEdit() {
                   )} />
                 </div>
               )}
-
-              {isFree && (
-                <div className="border-t border-border pt-6">
-                  <FormField control={form.control} name="downloadUrl" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Download URL (Google Drive, Dropbox, etc.)</FormLabel>
-                      <FormControl><Input placeholder="https://..." {...field} value={field.value || ""} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -403,7 +435,7 @@ export default function AdminBookEdit() {
             <Link href="/admin/books">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={createBook.isPending || updateBook.isPending || isUploading} className="bg-primary text-primary-foreground px-8">
+            <Button type="submit" disabled={createBook.isPending || updateBook.isPending || isAnyUploading} className="bg-primary text-primary-foreground px-8">
               <Save className="mr-2 h-4 w-4" /> Save Book
             </Button>
           </div>
