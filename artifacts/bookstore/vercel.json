@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://bookhub-j5f2.onrender.com/api/$1"
+    }
+  ]
+}
