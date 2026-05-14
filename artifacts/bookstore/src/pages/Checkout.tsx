@@ -147,7 +147,7 @@ function PaymentInstructions({ method, settings, total }: { method: string; sett
 }
 
 export default function Checkout() {
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, pruneUnavailableItems } = useCart();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const createOrder = useCreateOrder();
@@ -246,8 +246,15 @@ export default function Checkout() {
         setLocation(`/order-success?id=${order.id}&method=${data.paymentMethod}`);
       },
       onError: (error) => {
+        const apiError = error as ApiError<{ error?: string; missingBookIds?: number[] }>;
+        const missingBookIds = apiError?.data?.missingBookIds ?? [];
+
+        if (missingBookIds.length > 0) {
+          pruneUnavailableItems(missingBookIds);
+        }
+
         const message =
-          (error as ApiError<{ error?: string }>)?.data?.error ||
+          apiError?.data?.error ||
           error.message ||
           "Failed to place order. Please try again.";
         toast({ title: message, variant: "destructive" });

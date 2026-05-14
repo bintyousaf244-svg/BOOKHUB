@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 export type CartItem = {
   bookId: number;
@@ -16,6 +17,7 @@ type CartContextType = {
   removeFromCart: (bookId: number) => void;
   updateQuantity: (bookId: number, quantity: number) => void;
   clearCart: () => void;
+  pruneUnavailableItems: (bookIds: number[]) => void;
   itemCount: number;
   subtotal: number;
 };
@@ -65,6 +67,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("bookstore_cart", JSON.stringify(items));
   }, [items]);
 
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    let cancelled = false;
+
+    const syncWithLiveCatalog = async () => {
+      try {
+        const response = await apiFetch("/api/books?limit=1000");
+        if (!response.ok) return;
+
+        const data = await response.json() as { books?: Array<{ id: number }> };
+        const validBookIds = new Set(
+          (data.books ?? [])
+            .map((book) => Number(book.id))
+            .filter((id) => Number.isFinite(id))
+        );
+
+        if (cancelled) return;
+
+        setItems((prev) => {
+          const next = prev.filter((item) => validBookIds.has(Number(item.bookId)));
+          return next.length === prev.length ? prev : next;
+        });
+      } catch (error) {
+        console.error("Failed to validate cart items", error);
+      }
+    };
+
+    void syncWithLiveCatalog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items.length]);
+
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.bookId === item.bookId);
@@ -90,6 +127,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => setItems([]);
 
+  const pruneUnavailableItems = (bookIds: number[]) => {
+    if (bookIds.length === 0) return;
+
+    const unavailable = new Set(
+      bookIds
+        .map((bookId) => Number(bookId))
+        .filter((bookId) => Number.isFinite(bookId))
+    );
+
+    setItems((prev) => prev.filter((item) => !unavailable.has(Number(item.bookId))));
+  };
+
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = items.reduce(
     (acc, item) =>
@@ -105,6 +154,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeFromCart,
         updateQuantity,
         clearCart,
+        pruneUnavailableItems,
         itemCount,
         subtotal,
       }}
