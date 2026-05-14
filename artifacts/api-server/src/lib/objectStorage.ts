@@ -1,6 +1,8 @@
 import { Storage, File } from "@google-cloud/storage";
 import { Readable } from "stream";
 import { randomUUID } from "crypto";
+import { promises as fs } from "fs";
+import path from "path";
 import {
   ObjectAclPolicy,
   ObjectPermission,
@@ -39,6 +41,93 @@ export class ObjectNotFoundError extends Error {
 
 export class ObjectStorageService {
   constructor() {}
+
+  isReplitObjectStorageConfigured(): boolean {
+    return Boolean(
+      process.env.PUBLIC_OBJECT_SEARCH_PATHS &&
+        process.env.PRIVATE_OBJECT_DIR
+    );
+  }
+
+  isLocalUploadMode(): boolean {
+    return !this.isReplitObjectStorageConfigured();
+  }
+
+  getLocalUploadDir(): string {
+    return (
+      process.env.LOCAL_UPLOAD_DIR ||
+      path.resolve(process.cwd(), ".local-uploads")
+    );
+  }
+
+  async ensureLocalUploadDir(): Promise<string> {
+    const dir = this.getLocalUploadDir();
+    await fs.mkdir(dir, { recursive: true });
+    return dir;
+  }
+
+  getLocalUploadObjectPath(fileName: string): string {
+    return `/local-uploads/${fileName}`;
+  }
+
+  async createLocalUploadTarget({
+    baseUrl,
+    originalName,
+  }: {
+    baseUrl: string;
+    originalName: string;
+  }): Promise<{ uploadURL: string; objectPath: string }> {
+    await this.ensureLocalUploadDir();
+
+    const extension = path.extname(originalName).toLowerCase();
+    const fileName = `${randomUUID()}${extension}`;
+    const objectPath = this.getLocalUploadObjectPath(fileName);
+
+    return {
+      uploadURL: `${baseUrl}/api/storage${objectPath}`,
+      objectPath,
+    };
+  }
+
+  async writeLocalUpload(
+    objectPath: string,
+    content: Buffer
+  ): Promise<void> {
+    const filePath = this.getLocalUploadFilePath(objectPath);
+    await this.ensureLocalUploadDir();
+    await fs.writeFile(filePath, content);
+  }
+
+  getLocalUploadFilePath(objectPath: string): string {
+    if (!objectPath.startsWith("/local-uploads/")) {
+      throw new ObjectNotFoundError();
+    }
+
+    const fileName = objectPath.split("/").pop();
+    if (!fileName) {
+      throw new ObjectNotFoundError();
+    }
+
+    return path.join(this.getLocalUploadDir(), fileName);
+  }
+
+  async getLocalUploadResponse(objectPath: string): Promise<Response> {
+    const filePath = this.getLocalUploadFilePath(objectPath);
+    const fileBuffer = await fs.readFile(filePath).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") {
+        throw new ObjectNotFoundError();
+      }
+      throw error;
+    });
+
+    return new Response(fileBuffer, {
+      headers: {
+        "Content-Type": getContentTypeFromPath(filePath),
+        "Content-Length": String(fileBuffer.length),
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  }
 
   getPublicObjectSearchPaths(): Array<string> {
     const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
@@ -203,6 +292,38 @@ export class ObjectStorageService {
       objectFile,
       requestedPermission: requestedPermission ?? ObjectPermission.READ,
     });
+  }
+}
+
+function getContentTypeFromPath(filePath: string): string {
+  const extension = path.extname(filePath).toLowerCase();
+
+  switch (extension) {
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".webp":
+      return "image/webp";
+    case ".gif":
+      return "image/gif";
+    case ".svg":
+      return "image/svg+xml";
+    case ".pdf":
+      return "application/pdf";
+    case ".epub":
+      return "application/epub+zip";
+    case ".txt":
+      return "text/plain; charset=utf-8";
+    case ".doc":
+      return "application/msword";
+    case ".docx":
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    case ".mobi":
+      return "application/x-mobipocket-ebook";
+    default:
+      return "application/octet-stream";
   }
 }
 

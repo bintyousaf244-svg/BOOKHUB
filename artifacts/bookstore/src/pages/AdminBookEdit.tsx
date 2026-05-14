@@ -107,6 +107,13 @@ export default function AdminBookEdit() {
 
   useEffect(() => {
     if (isEditing && book) {
+      const matchingCategoryName =
+        categoriesData?.find(
+          (cat) =>
+            cat.name === book.category ||
+            cat.slug === book.category
+        )?.name ?? book.category;
+
       form.reset({
         title: book.title,
         author: book.author,
@@ -117,7 +124,7 @@ export default function AdminBookEdit() {
         isFree: book.isFree,
         isFeatured: book.isFeatured,
         coverImage: book.coverImage,
-        category: book.category,
+        category: matchingCategoryName,
         language: book.language,
         ageGroup: book.ageGroup,
         pages: book.pages,
@@ -128,7 +135,7 @@ export default function AdminBookEdit() {
         setUploadedFileName("Previously uploaded file");
       }
     }
-  }, [isEditing, book, form]);
+  }, [isEditing, book, form, categoriesData]);
 
   const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -279,7 +286,7 @@ export default function AdminBookEdit() {
                         </FormControl>
                         <SelectContent>
                           {categoriesData.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.slug}>
+                            <SelectItem key={cat.id} value={cat.name}>
                               {cat.name}
                             </SelectItem>
                           ))}

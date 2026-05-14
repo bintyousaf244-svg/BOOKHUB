@@ -107,7 +107,7 @@ router.get("/books", async (req, res) => {
 
     if (category) {
       conditions.push(
-        eq(booksTable.category, category)
+        sql`(${booksTable.category} = ${category} or lower(regexp_replace(${booksTable.category}, '[^a-zA-Z0-9]+', '-', 'g')) = ${category})`
       );
     }
 
@@ -328,17 +328,174 @@ router.post("/books", async (req, res) => {
 });
 
 router.put("/books/:id", async (req, res) => {
-  res.json({
-    message:
-      "PUT route temporarily skipped during debugging",
-  });
+  try {
+    const paramsParsed = UpdateBookParams.safeParse({
+      id: Number(req.params.id),
+    });
+
+    if (!paramsParsed.success) {
+      res.status(400).json({
+        error: "Invalid id",
+      });
+
+      return;
+    }
+
+    const parsed = UpdateBookBody.safeParse(req.body);
+
+    if (!parsed.success) {
+      res.status(400).json({
+        error: parsed.error.message,
+      });
+
+      return;
+    }
+
+    const existingBook = await db
+      .select()
+      .from(booksTable)
+      .where(
+        eq(
+          booksTable.id,
+          paramsParsed.data.id
+        )
+      )
+      .limit(1);
+
+    if (!existingBook[0]) {
+      res.status(404).json({
+        error: "Book not found",
+      });
+
+      return;
+    }
+
+    const data = parsed.data;
+    const updateData: Record<string, unknown> = {};
+
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.author !== undefined) updateData.author = data.author;
+    if (data.price !== undefined) updateData.price = String(data.price);
+    if (data.salePrice !== undefined) {
+      updateData.salePrice =
+        data.salePrice != null
+          ? String(data.salePrice)
+          : null;
+    }
+    if (data.isOnSale !== undefined) updateData.isOnSale = data.isOnSale;
+    if (data.isFree !== undefined) updateData.isFree = data.isFree;
+    if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
+    if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
+    if (data.category !== undefined) updateData.category = data.category;
+    if (data.language !== undefined) updateData.language = data.language;
+    if (data.ageGroup !== undefined) updateData.ageGroup = data.ageGroup;
+    if (data.pages !== undefined) updateData.pages = data.pages;
+    if (data.downloadUrl !== undefined) updateData.downloadUrl = data.downloadUrl;
+    if (data.stock !== undefined) updateData.stock = data.stock;
+
+    const [book] = await db
+      .update(booksTable)
+      .set(updateData)
+      .where(
+        eq(
+          booksTable.id,
+          paramsParsed.data.id
+        )
+      )
+      .returning();
+
+    if (!book) {
+      res.status(404).json({
+        error: "Book not found",
+      });
+
+      return;
+    }
+
+    if (
+      data.category &&
+      data.category !== existingBook[0].category
+    ) {
+      await updateCategoryCount(existingBook[0].category);
+      await updateCategoryCount(data.category);
+    } else {
+      await updateCategoryCount(book.category);
+    }
+
+    res.json(mapBook(book));
+
+  } catch (error) {
+    console.error(
+      "UPDATE BOOK ERROR:",
+      error
+    );
+
+    res.status(500).json({
+      error: String(error),
+    });
+  }
 });
 
 router.delete("/books/:id", async (req, res) => {
-  res.json({
-    message:
-      "DELETE route temporarily skipped during debugging",
-  });
+  try {
+    const parsed = DeleteBookParams.safeParse({
+      id: Number(req.params.id),
+    });
+
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "Invalid id",
+      });
+
+      return;
+    }
+
+    const existingBook = await db
+      .select()
+      .from(booksTable)
+      .where(
+        eq(
+          booksTable.id,
+          parsed.data.id
+        )
+      )
+      .limit(1);
+
+    if (!existingBook[0]) {
+      res.status(404).json({
+        error: "Book not found",
+      });
+
+      return;
+    }
+
+    await db
+      .delete(booksTable)
+      .where(
+        eq(
+          booksTable.id,
+          parsed.data.id
+        )
+      );
+
+    await updateCategoryCount(existingBook[0].category);
+
+    res.json({
+      success: true,
+      message: "Book deleted",
+    });
+
+  } catch (error) {
+    console.error(
+      "DELETE BOOK ERROR:",
+      error
+    );
+
+    res.status(500).json({
+      error: String(error),
+    });
+  }
 });
 
 async function updateCategoryCount(
@@ -366,7 +523,8 @@ async function updateCategoryCount(
         name: category,
         slug: category
           .toLowerCase()
-          .replace(/\s+/g, "-"),
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, ""),
         bookCount: Number(
           count[0]?.count ?? 0
         ),

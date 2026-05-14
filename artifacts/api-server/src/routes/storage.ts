@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, raw } from "express";
 import { Readable } from "stream";
 import {
   RequestUploadUrlBody,
@@ -27,8 +27,23 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
   try {
     const { name, size, contentType } = parsed.data;
 
-    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-    const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+    let uploadURL: string;
+    let objectPath: string;
+
+    if (objectStorageService.isLocalUploadMode()) {
+      const protocol = req.get("x-forwarded-proto") ?? req.protocol;
+      const host = req.get("x-forwarded-host") ?? req.get("host");
+      const baseUrl = `${protocol}://${host}`;
+      const target = await objectStorageService.createLocalUploadTarget({
+        baseUrl,
+        originalName: name,
+      });
+      uploadURL = target.uploadURL;
+      objectPath = target.objectPath;
+    } else {
+      uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+    }
 
     res.json(
       RequestUploadUrlResponse.parse({
@@ -40,6 +55,55 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
   } catch (error) {
     req.log.error({ err: error }, "Error generating upload URL");
     res.status(500).json({ error: "Failed to generate upload URL" });
+  }
+});
+
+router.put(
+  "/storage/local-uploads/*path",
+  raw({ type: "*/*", limit: "50mb" }),
+  async (req: Request, res: Response) => {
+    try {
+      const rawPath = req.params.path;
+      const uploadPath = Array.isArray(rawPath) ? rawPath.join("/") : rawPath;
+      const objectPath = `/local-uploads/${uploadPath}`;
+
+      if (!Buffer.isBuffer(req.body)) {
+        res.status(400).json({ error: "Missing upload body" });
+        return;
+      }
+
+      await objectStorageService.writeLocalUpload(objectPath, req.body);
+      res.status(200).end();
+    } catch (error) {
+      req.log.error({ err: error }, "Error saving local upload");
+      res.status(500).json({ error: "Failed to save uploaded file" });
+    }
+  },
+);
+
+router.get("/storage/local-uploads/*path", async (req: Request, res: Response) => {
+  try {
+    const rawPath = req.params.path;
+    const objectPath = `/local-uploads/${Array.isArray(rawPath) ? rawPath.join("/") : rawPath}`;
+    const response = await objectStorageService.getLocalUploadResponse(objectPath);
+
+    res.status(response.status);
+    response.headers.forEach((value, key) => res.setHeader(key, value));
+
+    if (response.body) {
+      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
+      nodeStream.pipe(res);
+    } else {
+      res.end();
+    }
+  } catch (error) {
+    if (error instanceof ObjectNotFoundError) {
+      res.status(404).json({ error: "Object not found" });
+      return;
+    }
+
+    req.log.error({ err: error }, "Error serving local upload");
+    res.status(500).json({ error: "Failed to serve uploaded file" });
   }
 });
 
