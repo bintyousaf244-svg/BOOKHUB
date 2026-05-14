@@ -234,7 +234,10 @@ export default function Checkout() {
       data: {
         ...data,
         notes: notes || undefined,
-        items: items.map(i => ({ bookId: i.bookId, quantity: i.quantity }))
+        items: items.map((i) => ({
+          bookId: Number(i.bookId),
+          quantity: Number(i.quantity),
+        }))
       }
     }, {
       onSuccess: (order) => {

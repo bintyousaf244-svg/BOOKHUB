@@ -29,7 +29,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const savedCart = localStorage.getItem("bookstore_cart");
     if (savedCart) {
       try {
-        setItems(JSON.parse(savedCart));
+        const parsedCart = JSON.parse(savedCart);
+        if (!Array.isArray(parsedCart)) {
+          setItems([]);
+          return;
+        }
+
+        setItems(
+          parsedCart
+            .map((item) => ({
+              ...item,
+              bookId: Number(item.bookId),
+              price: Number(item.price),
+              salePrice:
+                item.salePrice == null
+                  ? null
+                  : Number(item.salePrice),
+              quantity: Number(item.quantity),
+            }))
+            .filter(
+              (item) =>
+                Number.isFinite(item.bookId) &&
+                Number.isFinite(item.price) &&
+                Number.isFinite(item.quantity) &&
+                item.quantity > 0
+            )
+        );
       } catch (e) {
         console.error("Failed to parse cart");
       }
