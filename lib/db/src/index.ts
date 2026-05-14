@@ -25,20 +25,19 @@ function resolveDatabaseUrl(): string {
   return rawValue;
 }
 
-const databaseUrl = new URL(resolveDatabaseUrl());
+const resolvedDatabaseUrl = resolveDatabaseUrl();
+const databaseUrl = new URL(resolvedDatabaseUrl);
 
 export const pool = new Pool({
-  host: databaseUrl.hostname,
-  port: Number(databaseUrl.port || 5432),
-  user: databaseUrl.username,
-  password: databaseUrl.password,
-  database: databaseUrl.pathname.replace("/", ""),
+  connectionString: resolvedDatabaseUrl,
 
   ssl: {
     rejectUnauthorized: false,
   },
 
   family: 4,
+  connectionTimeoutMillis: 10_000,
+  idleTimeoutMillis: 30_000,
 });
 
 export const db = drizzle(pool, {
