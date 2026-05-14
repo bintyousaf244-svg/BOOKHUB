@@ -41,53 +41,66 @@ router.get("/orders", async (req, res) => {
 });
 
 router.post("/orders", async (req, res) => {
-  const parsed = CreateOrderBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
+  try {
+    const parsed = CreateOrderBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.message });
+      return;
+    }
+    const data = parsed.data;
+
+    const bookIds = data.items.map((i) => i.bookId);
+    const books = bookIds.length > 0
+      ? await db.select().from(booksTable).where(inArray(booksTable.id, bookIds))
+      : [];
+    const bookMap = new Map(books.map((b) => [b.id, b]));
+
+    const missingBookIds = bookIds.filter((bookId) => !bookMap.has(bookId));
+    if (missingBookIds.length > 0) {
+      res.status(400).json({
+        error:
+          "Some books in your cart are no longer available. Please clear your cart and add them again.",
+        missingBookIds,
+      });
+      return;
+    }
+
+    let total = 0;
+    const items = data.items.map((item) => {
+      const book = bookMap.get(item.bookId)!;
+      const price = book.isOnSale && book.salePrice ? Number(book.salePrice) : Number(book.price);
+      total += price * item.quantity;
+      return {
+        bookId: item.bookId,
+        title: book.title,
+        price,
+        quantity: item.quantity,
+        coverImage: book.coverImage,
+      };
+    });
+
+    const [order] = await db
+      .insert(ordersTable)
+      .values({
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        address: data.address,
+        city: data.city,
+        paymentMethod: data.paymentMethod,
+        paymentReference: data.paymentReference ?? null,
+        status: "pending",
+        total: String(total.toFixed(2)),
+        items,
+        notes: data.notes ?? null,
+      })
+      .returning();
+
+    res.status(201).json(mapOrder(order));
+  } catch (error) {
+    req.log.error({ err: error }, "Create order failed");
+    res.status(500).json({ error: "Failed to place order" });
   }
-  const data = parsed.data;
-
-  // Fetch all books for order items
-  const bookIds = data.items.map((i) => i.bookId);
-  const books = bookIds.length > 0
-    ? await db.select().from(booksTable).where(inArray(booksTable.id, bookIds))
-    : [];
-  const bookMap = new Map(books.map((b) => [b.id, b]));
-
-  let total = 0;
-  const items = data.items.map((item) => {
-    const book = bookMap.get(item.bookId);
-    if (!book) throw new Error(`Book ${item.bookId} not found`);
-    const price = book.isOnSale && book.salePrice ? Number(book.salePrice) : Number(book.price);
-    total += price * item.quantity;
-    return {
-      bookId: item.bookId,
-      title: book.title,
-      price,
-      quantity: item.quantity,
-      coverImage: book.coverImage,
-    };
-  });
-
-  const [order] = await db
-    .insert(ordersTable)
-    .values({
-      customerName: data.customerName,
-      customerEmail: data.customerEmail,
-      customerPhone: data.customerPhone,
-      address: data.address,
-      city: data.city,
-      paymentMethod: data.paymentMethod,
-      paymentReference: data.paymentReference ?? null,
-      status: "pending",
-      total: String(total.toFixed(2)),
-      items,
-      notes: data.notes ?? null,
-    })
-    .returning();
-
-  res.status(201).json(mapOrder(order));
 });
 
 router.get("/orders/:id", async (req, res) => {

@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tag, CheckCircle, X, Loader2, Copy, Check } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import type { ApiError } from "@workspace/api-client-react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -241,8 +242,12 @@ export default function Checkout() {
         toast({ title: "Order placed successfully!" });
         setLocation(`/order-success?id=${order.id}&method=${data.paymentMethod}`);
       },
-      onError: () => {
-        toast({ title: "Failed to place order. Please try again.", variant: "destructive" });
+      onError: (error) => {
+        const message =
+          (error as ApiError<{ error?: string }>)?.data?.error ||
+          error.message ||
+          "Failed to place order. Please try again.";
+        toast({ title: message, variant: "destructive" });
       }
     });
   };
