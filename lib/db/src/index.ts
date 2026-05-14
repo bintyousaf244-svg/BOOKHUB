@@ -29,7 +29,11 @@ const resolvedDatabaseUrl = resolveDatabaseUrl();
 const databaseUrl = new URL(resolvedDatabaseUrl);
 
 export const pool = new Pool({
-  connectionString: resolvedDatabaseUrl,
+  host: databaseUrl.hostname,
+  port: Number(databaseUrl.port || 5432),
+  user: decodeURIComponent(databaseUrl.username),
+  password: decodeURIComponent(databaseUrl.password),
+  database: decodeURIComponent(databaseUrl.pathname.replace(/^\//, "")),
 
   ssl: {
     rejectUnauthorized: false,
