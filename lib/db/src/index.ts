@@ -1,4 +1,4 @@
-console.log("USING IPV4 DATABASE FIX");
+console.log("FORCING IPV4 DATABASE CONNECTION");
 
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
@@ -15,12 +15,20 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+const databaseUrl = new URL(process.env.DATABASE_URL);
+
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: databaseUrl.hostname,
+  port: Number(databaseUrl.port || 5432),
+  user: databaseUrl.username,
+  password: databaseUrl.password,
+  database: databaseUrl.pathname.replace("/", ""),
 
   ssl: {
     rejectUnauthorized: false,
   },
+
+  family: 4,
 });
 
 export const db = drizzle(pool, {
