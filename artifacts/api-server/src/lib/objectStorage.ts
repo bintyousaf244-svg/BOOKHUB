@@ -56,7 +56,7 @@ export class ObjectStorageService {
   getLocalUploadDir(): string {
     return (
       process.env.LOCAL_UPLOAD_DIR ||
-      path.resolve(process.cwd(), ".local-uploads")
+      path.join(process.env.TMPDIR || process.env.TEMP || "/tmp", "bookhub-uploads")
     );
   }
 
