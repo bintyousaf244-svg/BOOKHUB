@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, FolderOpen, Book } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface Category {
   id: number;
@@ -36,7 +37,7 @@ function toSlug(name: string) {
 }
 
 async function fetchCategories(): Promise<Category[]> {
-  const r = await fetch("/api/categories");
+  const r = await apiFetch("/api/categories");
   if (!r.ok) throw new Error("Failed to fetch categories");
   return r.json();
 }
@@ -56,7 +57,7 @@ export default function AdminCategories() {
 
   const createMutation = useMutation({
     mutationFn: async (body: CatForm) => {
-      const r = await fetch("/api/admin/categories", {
+      const r = await apiFetch("/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -78,7 +79,7 @@ export default function AdminCategories() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, body }: { id: number; body: CatForm }) => {
-      const r = await fetch(`/api/admin/categories/${id}`, {
+      const r = await apiFetch(`/api/admin/categories/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -100,7 +101,7 @@ export default function AdminCategories() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+      await apiFetch(`/api/admin/categories/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-categories"] });

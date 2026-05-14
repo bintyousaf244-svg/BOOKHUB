@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, ChevronRight, Copy, Check, Wallet, Building2, Phone, Download, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/api";
 
 interface PaymentSettings {
   jazzcashNumber: string;
@@ -136,7 +137,7 @@ export default function OrderSuccess() {
   });
 
   useEffect(() => {
-    fetch("/api/payment-settings")
+    apiFetch("/api/payment-settings")
       .then((r) => r.json())
       .then(setPaymentSettings)
       .catch(() => {});

@@ -9,13 +9,23 @@ dns.setDefaultResultOrder("ipv4first");
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?"
-  );
+function resolveDatabaseUrl(): string {
+  const rawValue = process.env.DATABASE_URL?.trim();
+
+  if (!rawValue) {
+    throw new Error(
+      "DATABASE_URL must be set. Did you forget to provision a database?"
+    );
+  }
+
+  if (rawValue.startsWith("DATABASE_URL=")) {
+    return rawValue.slice("DATABASE_URL=".length);
+  }
+
+  return rawValue;
 }
 
-const databaseUrl = new URL(process.env.DATABASE_URL);
+const databaseUrl = new URL(resolveDatabaseUrl());
 
 export const pool = new Pool({
   host: databaseUrl.hostname,

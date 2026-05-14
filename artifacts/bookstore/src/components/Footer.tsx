@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { apiFetch } from "@/lib/api";
 
 interface SocialLinks {
   facebookUrl: string;
@@ -40,7 +41,7 @@ export function Footer() {
   const [social, setSocial] = useState<SocialLinks>({ facebookUrl: "", instagramUrl: "", websiteUrl: "" });
 
   useEffect(() => {
-    fetch("/api/payment-settings")
+    apiFetch("/api/payment-settings")
       .then((r) => r.json())
       .then((d) => setSocial({ facebookUrl: d.facebookUrl || "", instagramUrl: d.instagramUrl || "", websiteUrl: d.websiteUrl || "" }))
       .catch(() => {});

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 export function WhatsAppFloat() {
   const [waNumber, setWaNumber] = useState("");
 
   useEffect(() => {
-    fetch("/api/payment-settings")
+    apiFetch("/api/payment-settings")
       .then((r) => r.json())
       .then((data) => {
         const raw = (data.whatsappNumber || "").replace(/\D/g, "");

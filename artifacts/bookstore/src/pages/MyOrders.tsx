@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Clock, XCircle, Download, BookOpen, ArrowRight, AlertCircle } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface DownloadBook {
   bookId: number;
@@ -66,7 +67,7 @@ export default function MyOrders() {
     if (!orderId || !email) return;
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/orders/${orderId}/downloads?email=${encodeURIComponent(email.trim())}`);
+      const res = await apiFetch(`/api/orders/${orderId}/downloads?email=${encodeURIComponent(email.trim())}`);
       if (res.status === 404) {
         setError("No order found with that ID and email combination. Please double-check your details.");
         setIsLoading(false);

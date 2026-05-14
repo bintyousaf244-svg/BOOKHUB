@@ -6,6 +6,19 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+const allowedOrigins = new Set(
+  [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://bookhub-bookstore.vercel.app",
+    "https://learner-s-grove.vercel.app",
+    process.env.FRONTEND_URL,
+    ...(process.env.FRONTEND_ORIGINS
+      ?.split(",")
+      .map((origin) => origin.trim()) ?? []),
+  ].filter((origin): origin is string => Boolean(origin)),
+);
+
 app.use(
   pinoHttp({
     logger,
@@ -28,10 +41,14 @@ app.use(
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://bookhub-bookstore.vercel.app",
-    ],
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS origin not allowed: ${origin}`));
+    },
     credentials: true,
   }),
 );

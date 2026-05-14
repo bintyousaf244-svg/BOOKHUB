@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tag, CheckCircle, X, Loader2, Copy, Check } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -160,7 +161,7 @@ export default function Checkout() {
   const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
-    fetch("/api/payment-settings")
+    apiFetch("/api/payment-settings")
       .then((r) => r.json())
       .then(setPaymentSettings)
       .catch(() => {});
@@ -193,7 +194,7 @@ export default function Checkout() {
     setIsValidating(true);
     setDiscountMsg("");
     try {
-      const res = await fetch("/api/discount-codes/validate", {
+      const res = await apiFetch("/api/discount-codes/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, orderAmount: subtotal }),

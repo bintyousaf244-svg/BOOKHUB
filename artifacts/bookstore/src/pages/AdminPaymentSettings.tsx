@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, Smartphone, Building2, Wallet, MessageCircle, Globe, Share2 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface PaymentSettings {
   jazzcashNumber: string;
@@ -43,7 +44,7 @@ export default function AdminPaymentSettings() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/payment-settings")
+    apiFetch("/api/payment-settings")
       .then((r) => r.json())
       .then((data) => { setForm({ ...empty, ...data }); setIsLoading(false); })
       .catch(() => setIsLoading(false));
@@ -52,7 +53,7 @@ export default function AdminPaymentSettings() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const r = await fetch("/api/admin/payment-settings", {
+      const r = await apiFetch("/api/admin/payment-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

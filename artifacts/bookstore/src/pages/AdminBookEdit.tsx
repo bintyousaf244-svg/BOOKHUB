@@ -16,6 +16,7 @@ import { ArrowLeft, Save, Upload, X, ImageIcon, FileText, CheckCircle } from "lu
 import { Card, CardContent } from "@/components/ui/card";
 import { useUpload } from "@workspace/object-storage-web";
 import { Badge } from "@/components/ui/badge";
+import { apiUrl, storageUrl } from "@/lib/api";
 
 const bookSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -63,8 +64,9 @@ export default function AdminBookEdit() {
   const updateBook = useUpdateBook();
 
   const coverUpload = useUpload({
+    basePath: apiUrl("/api/storage"),
     onSuccess: (response) => {
-      const servingUrl = `/api/storage${response.objectPath}`;
+      const servingUrl = storageUrl(response.objectPath);
       form.setValue("coverImage", servingUrl, { shouldValidate: true });
       setUploadedCoverPreview(servingUrl);
       toast({ title: "Cover image uploaded" });
@@ -73,8 +75,9 @@ export default function AdminBookEdit() {
   });
 
   const fileUpload = useUpload({
+    basePath: apiUrl("/api/storage"),
     onSuccess: (response) => {
-      const servingUrl = `/api/storage${response.objectPath}`;
+      const servingUrl = storageUrl(response.objectPath);
       form.setValue("downloadUrl", servingUrl, { shouldValidate: true });
       toast({ title: "Book file uploaded successfully" });
     },
@@ -121,7 +124,7 @@ export default function AdminBookEdit() {
         downloadUrl: book.downloadUrl || "",
         stock: book.stock,
       });
-      if (book.downloadUrl?.startsWith("/api/storage")) {
+      if (book.downloadUrl?.includes("/api/storage/")) {
         setUploadedFileName("Previously uploaded file");
       }
     }

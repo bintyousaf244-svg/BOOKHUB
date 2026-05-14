@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Plus, Pencil, Trash2, Tag, Copy, Check } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 interface DiscountCode {
   id: number;
@@ -44,10 +45,8 @@ const emptyForm: CodeForm = {
   expiresAt: "",
 };
 
-const API = "/api";
-
 async function fetchCodes(): Promise<DiscountCode[]> {
-  const r = await fetch(`${API}/admin/discount-codes`);
+  const r = await apiFetch("/api/admin/discount-codes");
   return r.json();
 }
 
@@ -63,7 +62,7 @@ export default function AdminDiscountCodes() {
 
   const createMutation = useMutation({
     mutationFn: async (body: object) => {
-      const r = await fetch(`${API}/admin/discount-codes`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const r = await apiFetch("/api/admin/discount-codes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error("Failed to create");
       return r.json();
     },
@@ -73,7 +72,7 @@ export default function AdminDiscountCodes() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, body }: { id: number; body: object }) => {
-      const r = await fetch(`${API}/admin/discount-codes/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const r = await apiFetch(`/api/admin/discount-codes/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error("Failed to update");
       return r.json();
     },
@@ -83,14 +82,14 @@ export default function AdminDiscountCodes() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`${API}/admin/discount-codes/${id}`, { method: "DELETE" });
+      await apiFetch(`/api/admin/discount-codes/${id}`, { method: "DELETE" });
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["discount-codes"] }); toast({ title: "Code deleted" }); },
   });
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-      const r = await fetch(`${API}/admin/discount-codes/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive }) });
+      const r = await apiFetch(`/api/admin/discount-codes/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive }) });
       return r.json();
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["discount-codes"] }),
