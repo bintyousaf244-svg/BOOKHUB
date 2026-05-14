@@ -1,3 +1,5 @@
+console.log("USING IPV4 DATABASE FIX");
+
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import dns from "dns";
