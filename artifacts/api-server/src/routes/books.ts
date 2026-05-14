@@ -19,17 +19,23 @@ router.get("/books/featured", async (req, res) => {
     .where(eq(booksTable.isFeatured, true))
     .orderBy(desc(booksTable.createdAt))
     .limit(8);
-  const mapped = books.map(mapBook);
-  res.json(mapped);
+
+  res.json(books.map(mapBook));
 });
 
 router.get("/books/on-sale", async (req, res) => {
   const books = await db
     .select()
     .from(booksTable)
-    .where(and(eq(booksTable.isOnSale, true), eq(booksTable.isFree, false)))
+    .where(
+      and(
+        eq(booksTable.isOnSale, true),
+        eq(booksTable.isFree, false)
+      )
+    )
     .orderBy(desc(booksTable.createdAt))
     .limit(8);
+
   res.json(books.map(mapBook));
 });
 
@@ -39,22 +45,46 @@ router.get("/books/free", async (req, res) => {
     .from(booksTable)
     .where(eq(booksTable.isFree, true))
     .orderBy(desc(booksTable.createdAt));
+
   res.json(books.map(mapBook));
 });
 
 router.get("/books", async (req, res) => {
   const parsed = ListBooksQueryParams.safeParse(req.query);
+
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid query params" });
     return;
   }
-  const { category, language, isFree, isOnSale, search, page, limit } = parsed.data;
+
+  const {
+    category,
+    language,
+    isFree,
+    isOnSale,
+    search,
+    page,
+    limit,
+  } = parsed.data;
 
   const conditions = [];
-  if (category) conditions.push(eq(booksTable.category, category));
-  if (language) conditions.push(eq(booksTable.language, language));
-  if (isFree !== undefined) conditions.push(eq(booksTable.isFree, isFree));
-  if (isOnSale !== undefined) conditions.push(eq(booksTable.isOnSale, isOnSale));
+
+  if (category) {
+    conditions.push(eq(booksTable.category, category));
+  }
+
+  if (language) {
+    conditions.push(eq(booksTable.language, language));
+  }
+
+  if (isFree !== undefined) {
+    conditions.push(eq(booksTable.isFree, isFree));
+  }
+
+  if (isOnSale !== undefined) {
+    conditions.push(eq(booksTable.isOnSale, isOnSale));
+  }
+
   if (search) {
     conditions.push(
       or(
@@ -65,15 +95,31 @@ router.get("/books", async (req, res) => {
     );
   }
 
-  const where = conditions.length > 0 ? and(...conditions) : undefined;
+  const where = conditions.length > 0
+    ? and(...conditions)
+    : undefined;
+
   const offset = (page - 1) * limit;
 
   const [books, countResult] = await Promise.all([
-    db.select().from(booksTable).where(where).orderBy(desc(booksTable.createdAt)).limit(limit).offset(offset),
-    db.select({ count: sql<number>`count(*)` }).from(booksTable).where(where),
+    db
+      .select()
+      .from(booksTable)
+      .where(where)
+      .orderBy(desc(booksTable.createdAt))
+      .limit(limit)
+      .offset(offset),
+
+    db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(booksTable)
+      .where(where),
   ]);
 
   const total = Number(countResult[0]?.count ?? 0);
+
   res.json({
     books: books.map(mapBook),
     total,
@@ -83,26 +129,41 @@ router.get("/books", async (req, res) => {
 });
 
 router.get("/books/:id", async (req, res) => {
-  const parsed = GetBookParams.safeParse({ id: Number(req.params.id) });
+  const parsed = GetBookParams.safeParse({
+    id: Number(req.params.id),
+  });
+
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid id" });
     return;
   }
-  const book = await db.select().from(booksTable).where(eq(booksTable.id, parsed.data.id)).limit(1);
+
+  const book = await db
+    .select()
+    .from(booksTable)
+    .where(eq(booksTable.id, parsed.data.id))
+    .limit(1);
+
   if (!book[0]) {
     res.status(404).json({ error: "Book not found" });
     return;
   }
+
   res.json(mapBook(book[0]));
 });
 
 router.post("/books", async (req, res) => {
   const parsed = CreateBookBody.safeParse(req.body);
+
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
+    res.status(400).json({
+      error: parsed.error.message,
+    });
     return;
   }
+
   const data = parsed.data;
+
   const [book] = await db
     .insert(booksTable)
     .values({
@@ -110,7 +171,10 @@ router.post("/books", async (req, res) => {
       description: data.description,
       author: data.author,
       price: String(data.price),
-      salePrice: data.salePrice != null ? String(data.salePrice) : null,
+      salePrice:
+        data.salePrice != null
+          ? String(data.salePrice)
+          : null,
       isOnSale: data.isOnSale ?? false,
       isFree: data.isFree ?? false,
       isFeatured: data.isFeatured ?? false,
@@ -125,27 +189,44 @@ router.post("/books", async (req, res) => {
     .returning();
 
   await updateCategoryCount(data.category);
+
   res.status(201).json(mapBook(book));
 });
 
 router.put("/books/:id", async (req, res) => {
-  const paramsParsed = UpdateBookParams.safeParse({ id: Number(req.params.id) });
+  const paramsParsed = UpdateBookParams.safeParse({
+    id: Number(req.params.id),
+  });
+
   if (!paramsParsed.success) {
     res.status(400).json({ error: "Invalid id" });
     return;
   }
+
   const parsed = UpdateBookBody.safeParse(req.body);
+
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
+    res.status(400).json({
+      error: parsed.error.message,
+    });
     return;
   }
+
   const data = parsed.data;
   const updateData: Record<string, unknown> = {};
+
   if (data.title !== undefined) updateData.title = data.title;
   if (data.description !== undefined) updateData.description = data.description;
   if (data.author !== undefined) updateData.author = data.author;
   if (data.price !== undefined) updateData.price = String(data.price);
-  if (data.salePrice !== undefined) updateData.salePrice = data.salePrice != null ? String(data.salePrice) : null;
+
+  if (data.salePrice !== undefined) {
+    updateData.salePrice =
+      data.salePrice != null
+        ? String(data.salePrice)
+        : null;
+  }
+
   if (data.isOnSale !== undefined) updateData.isOnSale = data.isOnSale;
   if (data.isFree !== undefined) updateData.isFree = data.isFree;
   if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
@@ -162,35 +243,59 @@ router.put("/books/:id", async (req, res) => {
     .set(updateData)
     .where(eq(booksTable.id, paramsParsed.data.id))
     .returning();
+
   if (!book) {
-    res.status(404).json({ error: "Book not found" });
+    res.status(404).json({
+      error: "Book not found",
+    });
     return;
   }
+
   res.json(mapBook(book));
 });
 
 router.delete("/books/:id", async (req, res) => {
-  const parsed = DeleteBookParams.safeParse({ id: Number(req.params.id) });
+  const parsed = DeleteBookParams.safeParse({
+    id: Number(req.params.id),
+  });
+
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid id" });
     return;
   }
-  await db.delete(booksTable).where(eq(booksTable.id, parsed.data.id));
-  res.json({ success: true, message: "Book deleted" });
+
+  await db
+    .delete(booksTable)
+    .where(eq(booksTable.id, parsed.data.id));
+
+  res.json({
+    success: true,
+    message: "Book deleted",
+  });
 });
 
 async function updateCategoryCount(category: string) {
   const { categoriesTable } = await import("@workspace/db");
+
   const count = await db
-    .select({ count: sql<number>`count(*)` })
+    .select({
+      count: sql<number>`count(*)`,
+    })
     .from(booksTable)
     .where(eq(booksTable.category, category));
+
   await db
     .insert(categoriesTable)
-    .values({ name: category, slug: category.toLowerCase().replace(/\s+/g, "-"), bookCount: Number(count[0]?.count ?? 0) })
+    .values({
+      name: category,
+      slug: category.toLowerCase().replace(/\s+/g, "-"),
+      bookCount: Number(count[0]?.count ?? 0),
+    })
     .onConflictDoUpdate({
       target: categoriesTable.slug,
-      set: { bookCount: Number(count[0]?.count ?? 0) },
+      set: {
+        bookCount: Number(count[0]?.count ?? 0),
+      },
     });
 }
 
@@ -201,7 +306,10 @@ function mapBook(b: typeof booksTable.$inferSelect) {
     description: b.description,
     author: b.author,
     price: Number(b.price),
-    salePrice: b.salePrice != null ? Number(b.salePrice) : null,
+    salePrice:
+      b.salePrice != null
+        ? Number(b.salePrice)
+        : null,
     isOnSale: b.isOnSale,
     isFree: b.isFree,
     isFeatured: b.isFeatured,
@@ -214,7 +322,9 @@ function mapBook(b: typeof booksTable.$inferSelect) {
     stock: b.stock,
     rating: Number(b.rating),
     reviewCount: b.reviewCount,
-    createdAt: b.createdAt.toISOString(),
+    createdAt: b.createdAt
+      ? new Date(b.createdAt).toISOString()
+      : null,
   };
 }
 
