@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://bookhub-j5f2.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
