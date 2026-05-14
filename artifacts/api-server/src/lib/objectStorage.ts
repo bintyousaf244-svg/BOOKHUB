@@ -44,6 +44,7 @@ export class ObjectStorageService {
 
   isReplitObjectStorageConfigured(): boolean {
     return Boolean(
+      process.env.USE_REPLIT_OBJECT_STORAGE === "true" &&
       process.env.PUBLIC_OBJECT_SEARCH_PATHS &&
         process.env.PRIVATE_OBJECT_DIR
     );
