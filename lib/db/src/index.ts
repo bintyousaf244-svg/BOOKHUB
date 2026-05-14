@@ -1,6 +1,9 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
+import dns from "dns";
 import * as schema from "./schema";
+
+dns.setDefaultResultOrder("ipv4first");
 
 const { Pool } = pg;
 
@@ -18,35 +21,8 @@ export const pool = new Pool({
   },
 });
 
-pool.on("error", (err) => {
-  console.error("PG POOL ERROR:", err);
-});
-
 export const db = drizzle(pool, {
   schema,
 });
-
-(async () => {
-  try {
-    const client = await pool.connect();
-
-    const result = await client.query(
-      "SELECT NOW()"
-    );
-
-    console.log(
-      "DATABASE CONNECTED:",
-      result.rows
-    );
-
-    client.release();
-
-  } catch (error) {
-    console.error(
-      "DATABASE CONNECTION FAILED:",
-      error
-    );
-  }
-})();
 
 export * from "./schema";
