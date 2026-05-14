@@ -56,7 +56,7 @@ router.post("/orders", async (req, res) => {
     const bookMap = new Map(books.map((b) => [b.id, b]));
 
     const missingBookIds = bookIds.filter((bookId) => !bookMap.has(bookId));
-    if (missingBookIds.length > 0) {
+    if (missingBookIds.length === bookIds.length) {
       res.status(400).json({
         error:
           "Some books in your cart are no longer available. Please clear your cart and add them again.",
@@ -66,18 +66,34 @@ router.post("/orders", async (req, res) => {
     }
 
     let total = 0;
-    const items = data.items.map((item) => {
-      const book = bookMap.get(item.bookId)!;
+    const items = data.items.flatMap((item) => {
+      const book = bookMap.get(item.bookId);
+      if (!book) {
+        return [];
+      }
+
       const price = book.isOnSale && book.salePrice ? Number(book.salePrice) : Number(book.price);
       total += price * item.quantity;
-      return {
+      return [{
         bookId: item.bookId,
         title: book.title,
         price,
         quantity: item.quantity,
         coverImage: book.coverImage,
-      };
+      }];
     });
+
+    if (items.length === 0) {
+      res.status(400).json({
+        error: "No valid books were left in your cart. Please add the books again.",
+        missingBookIds,
+      });
+      return;
+    }
+
+    if (missingBookIds.length > 0) {
+      req.log.warn({ missingBookIds }, "Skipping unavailable books while creating order");
+    }
 
     const [order] = await db
       .insert(ordersTable)
