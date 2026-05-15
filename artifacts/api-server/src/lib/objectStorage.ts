@@ -3,6 +3,7 @@ import { Readable } from "stream";
 import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import {
   ObjectAclPolicy,
   ObjectPermission,
@@ -55,10 +56,7 @@ export class ObjectStorageService {
   }
 
   getLocalUploadDir(): string {
-    return (
-      process.env.LOCAL_UPLOAD_DIR ||
-      path.join(process.env.TMPDIR || process.env.TEMP || "/tmp", "bookhub-uploads")
-    );
+    return process.env.LOCAL_UPLOAD_DIR || getPersistentLocalUploadDir();
   }
 
   async ensureLocalUploadDir(): Promise<string> {
@@ -294,6 +292,12 @@ export class ObjectStorageService {
       requestedPermission: requestedPermission ?? ObjectPermission.READ,
     });
   }
+}
+
+function getPersistentLocalUploadDir(): string {
+  const currentFileDir = path.dirname(fileURLToPath(import.meta.url));
+  const workspaceRoot = path.resolve(currentFileDir, "../../../../");
+  return path.join(workspaceRoot, "attached_assets", "uploads");
 }
 
 function getContentTypeFromPath(filePath: string): string {

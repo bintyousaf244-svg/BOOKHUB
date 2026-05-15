@@ -26,6 +26,11 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const cartBookIdsKey = items
+    .map((item) => Number(item.bookId))
+    .filter((bookId) => Number.isFinite(bookId))
+    .sort((a, b) => a - b)
+    .join(",");
 
   useEffect(() => {
     const savedCart = localStorage.getItem("bookstore_cart");
@@ -68,7 +73,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   useEffect(() => {
-    if (items.length === 0) return;
+    if (!cartBookIdsKey) return;
 
     let cancelled = false;
 
@@ -100,7 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [items.length]);
+  }, [cartBookIdsKey]);
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
