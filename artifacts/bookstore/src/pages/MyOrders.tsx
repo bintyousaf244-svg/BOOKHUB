@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Clock, XCircle, Download, BookOpen, ArrowRight, AlertCircle } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { BookCoverImage } from "@/components/BookCoverImage";
 
 interface DownloadBook {
   bookId: number;
@@ -159,7 +160,7 @@ export default function MyOrders() {
                 <Card key={book.bookId} className="border-border shadow-sm">
                   <CardContent className="p-4 flex items-center gap-4">
                     {book.coverImage && (
-                      <img src={book.coverImage} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0" />
+                      <BookCoverImage src={book.coverImage} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm flex-shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-foreground line-clamp-2">{book.title}</p>

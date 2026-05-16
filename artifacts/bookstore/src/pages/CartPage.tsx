@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash2, ArrowRight, BookOpen } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { BookCoverImage } from "@/components/BookCoverImage";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, subtotal, itemCount } = useCart();
@@ -36,7 +37,7 @@ export default function CartPage() {
             <Card key={item.bookId} className="overflow-hidden border-border shadow-sm">
               <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <Link href={`/books/${item.bookId}`} className="flex-shrink-0">
-                  <img src={item.coverImage} alt={item.title} className="w-24 sm:w-32 aspect-[3/4] object-cover rounded-md shadow-sm border border-border" />
+                  <BookCoverImage src={item.coverImage} alt={item.title} className="w-24 sm:w-32 aspect-[3/4] object-cover rounded-md shadow-sm border border-border" />
                 </Link>
                 
                 <div className="flex-1 flex flex-col text-center sm:text-left w-full">

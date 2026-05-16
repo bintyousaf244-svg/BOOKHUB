@@ -4,6 +4,7 @@ import { Book } from "@workspace/api-client-react/src/generated/api.schemas";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Download } from "lucide-react";
+import { BookCoverImage } from "@/components/BookCoverImage";
 
 export function BookCard({ book }: { book: Book }) {
   const { addToCart } = useCart();
@@ -30,7 +31,7 @@ export function BookCard({ book }: { book: Book }) {
 
         {/* Cover image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[hsl(33,33%,94%)]">
-          <img
+          <BookCoverImage
             src={book.coverImage}
             alt={book.title}
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-107"

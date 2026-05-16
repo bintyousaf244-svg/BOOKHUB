@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tag, CheckCircle, X, Loader2, Copy, Check } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { ApiError } from "@workspace/api-client-react";
+import { BookCoverImage } from "@/components/BookCoverImage";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -275,7 +276,7 @@ export default function Checkout() {
             <div className="space-y-3 mb-4 max-h-48 overflow-y-auto pr-1">
               {items.map((item) => (
                 <div key={item.bookId} className="flex gap-3 text-sm">
-                  <img src={item.coverImage} alt={item.title} className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0" />
+                  <BookCoverImage src={item.coverImage} alt={item.title} className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0" />
                   <div className="flex-1 min-w-0 flex flex-col">
                     <span className="font-medium text-foreground line-clamp-2 text-xs leading-snug">{item.title}</span>
                     <span className="text-muted-foreground text-xs mt-1">Qty: {item.quantity}</span>

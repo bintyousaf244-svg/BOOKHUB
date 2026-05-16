@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart, Download, CheckCircle, ArrowLeft, Star, FileText } from "lucide-react";
 import { Link } from "wouter";
+import { BookCoverImage } from "@/components/BookCoverImage";
 
 export default function BookDetail() {
   const { id } = useParams();
@@ -80,7 +81,7 @@ export default function BookDetail() {
         {/* Cover */}
         <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0">
           <div className="relative rounded-xl overflow-hidden shadow-xl border border-border">
-            <img src={book.coverImage} alt={book.title} className="w-full h-auto object-cover aspect-[3/4]" />
+            <BookCoverImage src={book.coverImage} alt={book.title} className="w-full h-auto object-cover aspect-[3/4]" />
             <div className="absolute top-3 left-3 flex flex-col gap-2">
               {book.isFree && <Badge variant="secondary" className="bg-accent text-accent-foreground font-bold shadow-md">FREE</Badge>}
               {!book.isFree && book.isOnSale && <Badge variant="destructive" className="font-bold shadow-md">SALE</Badge>}

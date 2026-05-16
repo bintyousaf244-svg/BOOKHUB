@@ -79,14 +79,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const syncWithLiveCatalog = async () => {
       try {
-        const response = await apiFetch("/api/books?limit=1000");
-        if (!response.ok) return;
+        const uniqueBookIds = Array.from(
+          new Set(
+            items
+              .map((item) => Number(item.bookId))
+              .filter((bookId) => Number.isFinite(bookId))
+          )
+        );
 
-        const data = await response.json() as { books?: Array<{ id: number }> };
+        const checks = await Promise.all(
+          uniqueBookIds.map(async (bookId) => {
+            const response = await apiFetch(`/api/books/${bookId}`);
+            return response.ok ? bookId : null;
+          })
+        );
+
         const validBookIds = new Set(
-          (data.books ?? [])
-            .map((book) => Number(book.id))
-            .filter((id) => Number.isFinite(id))
+          checks.filter((bookId): bookId is number => bookId !== null)
         );
 
         if (cancelled) return;
@@ -105,7 +114,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [cartBookIdsKey]);
+  }, [cartBookIdsKey, items]);
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {

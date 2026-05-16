@@ -214,6 +214,62 @@ router.get("/books", async (req, res) => {
   }
 });
 
+router.get("/books/cover", async (req, res) => {
+  const rawUrl = typeof req.query.url === "string" ? req.query.url.trim() : "";
+  if (!rawUrl) {
+    res.status(400).json({ error: "Missing cover image URL" });
+    return;
+  }
+
+  let targetUrl: URL;
+  try {
+    targetUrl = new URL(rawUrl.startsWith("//") ? `https:${rawUrl}` : rawUrl);
+    if (targetUrl.protocol === "http:") {
+      targetUrl.protocol = "https:";
+    }
+  } catch {
+    res.status(400).json({ error: "Invalid cover image URL" });
+    return;
+  }
+
+  if (!/^https?:$/i.test(targetUrl.protocol)) {
+    res.status(400).json({ error: "Unsupported cover image protocol" });
+    return;
+  }
+
+  try {
+    const response = await fetch(targetUrl.toString(), {
+      redirect: "follow",
+      headers: {
+        accept: "image/*,*/*;q=0.8",
+        "user-agent": "BOOKHUB cover proxy",
+      },
+    });
+
+    if (!response.ok) {
+      res.status(502).json({ error: "Failed to fetch cover image" });
+      return;
+    }
+
+    const contentType = response.headers.get("content-type") ?? "application/octet-stream";
+    if (!contentType.toLowerCase().startsWith("image/")) {
+      res.status(415).json({ error: "Remote URL did not return an image" });
+      return;
+    }
+
+    const body = Buffer.from(await response.arrayBuffer());
+    res.setHeader("Content-Type", contentType);
+    res.setHeader(
+      "Cache-Control",
+      response.headers.get("cache-control") ?? "public, max-age=86400"
+    );
+    res.status(200).send(body);
+  } catch (error) {
+    req.log.error({ err: error, targetUrl: targetUrl.toString() }, "Cover proxy failed");
+    res.status(502).json({ error: "Failed to fetch cover image" });
+  }
+});
+
 router.get("/books/:id", async (req, res) => {
   try {
     const parsed = GetBookParams.safeParse({
