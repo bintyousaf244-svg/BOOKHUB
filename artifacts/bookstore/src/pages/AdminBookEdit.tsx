@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useGetBook, useCreateBook, useUpdateBook, useListCategories, getGetBookQueryKey, getListBooksQueryKey } from "@workspace/api-client-react";
+import type { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,21 @@ const bookSchema = z.object({
 });
 
 type BookFormValues = z.infer<typeof bookSchema>;
+
+function getBookSaveErrorMessage(error: unknown): string {
+  const apiError = error as ApiError<{ error?: string }>;
+  const apiMessage = apiError?.data?.error;
+
+  if (typeof apiMessage === "string" && apiMessage.trim().length > 0) {
+    return apiMessage;
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return "Failed to save book";
+}
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -191,7 +207,7 @@ export default function AdminBookEdit() {
           queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
           setLocation("/books");
         },
-        onError: () => toast({ title: "Failed to update book", variant: "destructive" })
+        onError: (error) => toast({ title: getBookSaveErrorMessage(error), variant: "destructive" })
       });
     } else {
       createBook.mutate({ data: payload }, {
@@ -200,7 +216,7 @@ export default function AdminBookEdit() {
           queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
           setLocation("/books");
         },
-        onError: () => toast({ title: "Failed to create book", variant: "destructive" })
+        onError: (error) => toast({ title: getBookSaveErrorMessage(error), variant: "destructive" })
       });
     }
   };
