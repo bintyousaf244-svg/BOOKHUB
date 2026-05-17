@@ -21,11 +21,11 @@ export function Navbar() {
   useEffect(() => { setOpen(false); }, [location]);
 
   const links = [
-    { href: "/books", label: "All Books" },
-    { href: "/books?ageGroup=Kids", label: "Kids" },
-    { href: "/books?ageGroup=Adults", label: "Adults" },
-    { href: "/free", label: "Free Resources" },
-    { href: "/my-orders", label: "My Orders" },
+    { href: "/books", label: "All Books", forceReload: false },
+    { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
+    { href: "/books?ageGroup=Adults", label: "Adults", forceReload: true },
+    { href: "/free", label: "Free Resources", forceReload: false },
+    { href: "/my-orders", label: "My Orders", forceReload: false },
   ];
 
   return (
@@ -44,10 +44,20 @@ export function Navbar() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {links.map((l) => (
-              <Link key={l.href} href={l.href}
-                className="px-3 py-1.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                {l.label}
-              </Link>
+              l.forceReload ? (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="px-3 py-1.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                >
+                  {l.label}
+                </a>
+              ) : (
+                <Link key={l.href} href={l.href}
+                  className="px-3 py-1.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                  {l.label}
+                </Link>
+              )
             ))}
           </nav>
 
@@ -98,10 +108,20 @@ export function Navbar() {
             onClick={(e) => e.stopPropagation()}>
             <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
               {links.map((l) => (
-                <Link key={l.href} href={l.href}
-                  className="px-4 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                  {l.label}
-                </Link>
+                l.forceReload ? (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    className="px-4 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                  >
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link key={l.href} href={l.href}
+                    className="px-4 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+                    {l.label}
+                  </Link>
+                )
               ))}
               {isAuthenticated && (
                 <Link href="/admin/dashboard"
