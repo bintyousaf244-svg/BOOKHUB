@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { apiFetch } from "@/lib/api";
 
 export type CartItem = {
@@ -18,14 +18,50 @@ type CartContextType = {
   updateQuantity: (bookId: number, quantity: number) => void;
   clearCart: () => void;
   pruneUnavailableItems: (bookIds: number[]) => void;
+  syncCartWithCatalog: () => Promise<{
+    availableItems: CartItem[];
+    removedBookIds: number[];
+    unresolvedBookIds: number[];
+  }>;
   itemCount: number;
   subtotal: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+const CART_STORAGE_KEY = "bookstore_cart";
+const CART_STORAGE_VERSION = 2;
+
+function sanitizeCartItems(rawItems: unknown[]): CartItem[] {
+  return rawItems
+    .map((item) => {
+      const candidate = item as Partial<CartItem>;
+
+      return {
+        ...candidate,
+        bookId: Number(candidate.bookId),
+        title: typeof candidate.title === "string" ? candidate.title : "",
+        price: Number(candidate.price),
+        salePrice: candidate.salePrice == null ? null : Number(candidate.salePrice),
+        isOnSale: Boolean(candidate.isOnSale),
+        coverImage: typeof candidate.coverImage === "string" ? candidate.coverImage : "",
+        quantity: Number(candidate.quantity),
+      };
+    })
+    .filter(
+      (item) =>
+        Number.isInteger(item.bookId) &&
+        item.bookId > 0 &&
+        item.title.trim().length > 0 &&
+        Number.isFinite(item.price) &&
+        item.price >= 0 &&
+        Number.isFinite(item.quantity) &&
+        item.quantity > 0
+    );
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const itemsRef = useRef<CartItem[]>([]);
   const cartBookIdsKey = items
     .map((item) => Number(item.bookId))
     .filter((bookId) => Number.isFinite(bookId))
@@ -33,35 +69,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     .join(",");
 
   useEffect(() => {
-    const savedCart = localStorage.getItem("bookstore_cart");
+    itemsRef.current = items;
+  }, [items]);
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
     if (savedCart) {
       try {
-        const parsedCart = JSON.parse(savedCart);
-        if (!Array.isArray(parsedCart)) {
+        const parsedCart = JSON.parse(savedCart) as
+          | { version?: number; items?: unknown[] }
+          | unknown[];
+
+        if (Array.isArray(parsedCart)) {
           setItems([]);
           return;
         }
 
-        setItems(
-          parsedCart
-            .map((item) => ({
-              ...item,
-              bookId: Number(item.bookId),
-              price: Number(item.price),
-              salePrice:
-                item.salePrice == null
-                  ? null
-                  : Number(item.salePrice),
-              quantity: Number(item.quantity),
-            }))
-            .filter(
-              (item) =>
-                Number.isFinite(item.bookId) &&
-                Number.isFinite(item.price) &&
-                Number.isFinite(item.quantity) &&
-                item.quantity > 0
-            )
-        );
+        if (
+          !parsedCart ||
+          parsedCart.version !== CART_STORAGE_VERSION ||
+          !Array.isArray(parsedCart.items)
+        ) {
+          setItems([]);
+          return;
+        }
+
+        setItems(sanitizeCartItems(parsedCart.items));
       } catch (e) {
         console.error("Failed to parse cart");
       }
@@ -69,52 +102,77 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("bookstore_cart", JSON.stringify(items));
+    localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify({
+        version: CART_STORAGE_VERSION,
+        items,
+      })
+    );
   }, [items]);
+
+  const syncCartWithCatalog = useCallback(async () => {
+    const sourceItems = itemsRef.current;
+    const uniqueBookIds = Array.from(
+      new Set(
+        sourceItems
+          .map((item) => Number(item.bookId))
+          .filter((bookId) => Number.isInteger(bookId) && bookId > 0)
+      )
+    );
+
+    if (uniqueBookIds.length === 0) {
+      return {
+        availableItems: sourceItems,
+        removedBookIds: [],
+        unresolvedBookIds: [],
+      };
+    }
+
+    const checks = await Promise.all(
+      uniqueBookIds.map(async (bookId) => {
+        try {
+          const response = await apiFetch(`/api/books/${bookId}`);
+          return {
+            bookId,
+            status: response.status,
+            isAvailable: response.ok,
+          };
+        } catch (error) {
+          console.error(`Failed to validate book ${bookId}`, error);
+          return {
+            bookId,
+            status: 0,
+            isAvailable: false,
+          };
+        }
+      })
+    );
+
+    const removedBookIds = checks
+      .filter((result) => result.status === 404)
+      .map((result) => result.bookId);
+    const unresolvedBookIds = checks
+      .filter((result) => !result.isAvailable && result.status !== 404)
+      .map((result) => result.bookId);
+    const removedSet = new Set(removedBookIds);
+    const availableItems = sourceItems.filter((item) => !removedSet.has(Number(item.bookId)));
+
+    if (removedBookIds.length > 0) {
+      setItems((prev) => prev.filter((item) => !removedSet.has(Number(item.bookId))));
+    }
+
+    return {
+      availableItems,
+      removedBookIds,
+      unresolvedBookIds,
+    };
+  }, []);
 
   useEffect(() => {
     if (!cartBookIdsKey) return;
-
-    let cancelled = false;
-
-    const syncWithLiveCatalog = async () => {
-      try {
-        const uniqueBookIds = Array.from(
-          new Set(
-            items
-              .map((item) => Number(item.bookId))
-              .filter((bookId) => Number.isFinite(bookId))
-          )
-        );
-
-        const checks = await Promise.all(
-          uniqueBookIds.map(async (bookId) => {
-            const response = await apiFetch(`/api/books/${bookId}`);
-            return response.ok ? bookId : null;
-          })
-        );
-
-        const validBookIds = new Set(
-          checks.filter((bookId): bookId is number => bookId !== null)
-        );
-
-        if (cancelled) return;
-
-        setItems((prev) => {
-          const next = prev.filter((item) => validBookIds.has(Number(item.bookId)));
-          return next.length === prev.length ? prev : next;
-        });
-      } catch (error) {
-        console.error("Failed to validate cart items", error);
-      }
-    };
-
-    void syncWithLiveCatalog();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [cartBookIdsKey, items]);
+    void syncCartWithCatalog();
+  }, [cartBookIdsKey, syncCartWithCatalog]);
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
@@ -169,6 +227,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         clearCart,
         pruneUnavailableItems,
+        syncCartWithCatalog,
         itemCount,
         subtotal,
       }}

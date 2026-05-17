@@ -16,6 +16,7 @@ import { ArrowLeft, Save, Upload, X, ImageIcon, FileText, CheckCircle } from "lu
 import { Card, CardContent } from "@/components/ui/card";
 import { useUpload } from "@workspace/object-storage-web";
 import { Badge } from "@/components/ui/badge";
+import { BookCoverImage } from "@/components/BookCoverImage";
 import { apiUrl, storageUrl } from "@/lib/api";
 
 const bookSchema = z.object({
@@ -38,6 +39,21 @@ const bookSchema = z.object({
 
 type BookFormValues = z.infer<typeof bookSchema>;
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error("Failed to read image file"));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Failed to read image file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function AdminBookEdit() {
   const { id } = useParams();
   const isEditing = !!id && id !== "new";
@@ -47,9 +63,7 @@ export default function AdminBookEdit() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Cover image upload
   const coverInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedCoverPreview, setUploadedCoverPreview] = useState<string | null>(null);
 
   // Digital book file upload
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,17 +76,6 @@ export default function AdminBookEdit() {
 
   const createBook = useCreateBook();
   const updateBook = useUpdateBook();
-
-  const coverUpload = useUpload({
-    basePath: apiUrl("/api/storage"),
-    onSuccess: (response) => {
-      const servingUrl = storageUrl(response.objectPath);
-      form.setValue("coverImage", servingUrl, { shouldValidate: true });
-      setUploadedCoverPreview(servingUrl);
-      toast({ title: "Cover image uploaded" });
-    },
-    onError: (err) => toast({ title: `Upload failed: ${err.message}`, variant: "destructive" }),
-  });
 
   const fileUpload = useUpload({
     basePath: apiUrl("/api/storage"),
@@ -95,7 +98,7 @@ export default function AdminBookEdit() {
       isOnSale: false,
       isFree: false,
       isFeatured: false,
-      coverImage: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop",
+      coverImage: "",
       category: "kids-learning",
       language: "English",
       ageGroup: "Kids",
@@ -144,7 +147,20 @@ export default function AdminBookEdit() {
       toast({ title: "Please select an image file", variant: "destructive" });
       return;
     }
-    await coverUpload.uploadFile(file);
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Cover image must be 5 MB or smaller", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      form.setValue("coverImage", dataUrl, { shouldValidate: true, shouldDirty: true });
+      toast({ title: "Cover image saved with this book" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to read image file";
+      toast({ title: message, variant: "destructive" });
+    }
+
     if (coverInputRef.current) coverInputRef.current.value = "";
   };
 
@@ -195,7 +211,7 @@ export default function AdminBookEdit() {
   const isOnSale = form.watch("isOnSale");
   const currentCoverImage = form.watch("coverImage");
   const currentDownloadUrl = form.watch("downloadUrl");
-  const isAnyUploading = coverUpload.isUploading || fileUpload.isUploading;
+  const isAnyUploading = fileUpload.isUploading;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
@@ -239,8 +255,7 @@ export default function AdminBookEdit() {
                     <div className="flex gap-4 items-start">
                       <div className="flex-shrink-0 w-24 h-32 rounded-lg border border-border overflow-hidden bg-muted flex items-center justify-center">
                         {currentCoverImage ? (
-                          <img src={currentCoverImage} alt="Cover" className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          <BookCoverImage src={currentCoverImage} alt="Cover preview" className="w-full h-full object-cover" />
                         ) : (
                           <ImageIcon className="h-7 w-7 text-muted-foreground" />
                         )}
@@ -248,26 +263,24 @@ export default function AdminBookEdit() {
                       <div className="flex-1 space-y-3">
                         <div className="flex gap-2 items-center flex-wrap">
                           <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
-                          <Button type="button" variant="outline" size="sm" onClick={() => coverInputRef.current?.click()} disabled={coverUpload.isUploading}>
+                          <Button type="button" variant="outline" size="sm" onClick={() => coverInputRef.current?.click()}>
                             <Upload className="h-4 w-4 mr-1" />
-                            {coverUpload.isUploading ? `Uploading ${coverUpload.progress}%` : "Upload Image"}
+                            Upload Image
                           </Button>
-                          {uploadedCoverPreview && (
-                            <Button type="button" variant="ghost" size="sm" onClick={() => { setUploadedCoverPreview(null); form.setValue("coverImage", ""); }}
+                          {currentCoverImage && (
+                            <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue("coverImage", "", { shouldValidate: true, shouldDirty: true })}
                               className="text-muted-foreground hover:text-destructive">
                               <X className="h-4 w-4 mr-1" /> Clear
                             </Button>
                           )}
                         </div>
-                        {coverUpload.isUploading && (
-                          <div className="w-full bg-muted rounded-full h-1.5">
-                            <div className="bg-primary h-1.5 rounded-full transition-all" style={{ width: `${coverUpload.progress}%` }} />
-                          </div>
-                        )}
                         <div className="space-y-1">
                           <p className="text-xs text-muted-foreground">Or paste an image URL:</p>
-                          <FormControl><Input placeholder="https://example.com/cover.jpg" {...field} disabled={coverUpload.isUploading} /></FormControl>
+                          <FormControl><Input placeholder="https://example.com/cover.jpg" {...field} /></FormControl>
                         </div>
+                        <p className="text-xs text-muted-foreground">
+                          Uploaded cover images are stored directly with the book so they do not disappear after deploys or restarts.
+                        </p>
                         <FormMessage />
                       </div>
                     </div>

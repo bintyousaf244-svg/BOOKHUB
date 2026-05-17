@@ -148,7 +148,7 @@ function PaymentInstructions({ method, settings, total }: { method: string; sett
 }
 
 export default function Checkout() {
-  const { items, subtotal, clearCart, pruneUnavailableItems } = useCart();
+  const { items, subtotal, clearCart, pruneUnavailableItems, syncCartWithCatalog } = useCart();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const createOrder = useCreateOrder();
@@ -161,6 +161,7 @@ export default function Checkout() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountMsg, setDiscountMsg] = useState("");
   const [isValidating, setIsValidating] = useState(false);
+  const [isValidatingCart, setIsValidatingCart] = useState(false);
 
   useEffect(() => {
     apiFetch("/api/payment-settings")
@@ -225,7 +226,39 @@ export default function Checkout() {
     setDiscountMsg("");
   };
 
-  const onSubmit = (data: CheckoutFormValues) => {
+  const onSubmit = async (data: CheckoutFormValues) => {
+    setIsValidatingCart(true);
+
+    const { availableItems, removedBookIds, unresolvedBookIds } = await syncCartWithCatalog();
+
+    if (unresolvedBookIds.length > 0) {
+      setIsValidatingCart(false);
+      toast({
+        title: "We could not verify your cart right now. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (removedBookIds.length > 0) {
+      setIsValidatingCart(false);
+
+      if (availableItems.length === 0) {
+        toast({
+          title: "Your cart was refreshed because those books are no longer available.",
+          variant: "destructive",
+        });
+        setLocation("/cart");
+        return;
+      }
+
+      toast({
+        title: "Your cart was updated. Please review it and place the order again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const notes = [
       data.notes,
       appliedCode ? `Discount code: ${appliedCode} (Rs. ${discountAmount} off)` : null,
@@ -235,18 +268,20 @@ export default function Checkout() {
       data: {
         ...data,
         notes: notes || undefined,
-        items: items.map((i) => ({
+        items: availableItems.map((i) => ({
           bookId: Number(i.bookId),
           quantity: Number(i.quantity),
         }))
       }
     }, {
       onSuccess: (order) => {
+        setIsValidatingCart(false);
         clearCart();
         toast({ title: "Order placed successfully!" });
         setLocation(`/order-success?id=${order.id}&method=${data.paymentMethod}`);
       },
       onError: (error) => {
+        setIsValidatingCart(false);
         const apiError = error as ApiError<{ error?: string; missingBookIds?: number[] }>;
         const missingBookIds = apiError?.data?.missingBookIds ?? [];
 
@@ -431,9 +466,9 @@ export default function Checkout() {
                   type="submit"
                   size="lg"
                   className="w-full md:w-auto px-12 h-14 rounded-full bg-accent text-accent-foreground font-bold shadow-md hover:bg-accent/90"
-                  disabled={createOrder.isPending}
+                  disabled={createOrder.isPending || isValidatingCart}
                 >
-                  {createOrder.isPending ? "Placing Order..." : `Confirm Order — Rs. ${total.toLocaleString()}`}
+                  {createOrder.isPending || isValidatingCart ? "Placing Order..." : `Confirm Order — Rs. ${total.toLocaleString()}`}
                 </Button>
               </div>
             </form>
