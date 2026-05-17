@@ -153,6 +153,9 @@ importers:
 
   .:
     devDependencies:
+      '@rollup/rollup-win32-arm64-msvc':
+        specifier: 4.59.0
+        version: 4.59.0
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -1582,6 +1585,11 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [glibc]
+
+  '@rollup/rollup-win32-arm64-msvc@4.59.0':
+    resolution: {integrity: sha512-V5B6mG7OrGTwnxaNUzZTDTjDS7F75PO1ae6MJYdiMu60sq0CqN5CVeVsbhPxalupvTX8gXVSU9gq+Rx1/hvu6A==}
+    cpu: [arm64]
+    os: [win32]
 
   '@scalar/helpers@0.2.18':
     resolution: {integrity: sha512-w1d4tpNEVZ293oB2BAgLrS0kVPUtG3eByNmOCJA5eK9vcT4D3cmsGtWjUaaqit0BQCsBFHK51rasGvSWnApYTw==}
@@ -4678,6 +4686,8 @@ snapshots:
 
   '@rollup/rollup-linux-x64-gnu@4.59.0':
     optional: true
+
+  '@rollup/rollup-win32-arm64-msvc@4.59.0': {}
 
   '@scalar/helpers@0.2.18': {}
 
