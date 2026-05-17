@@ -97,6 +97,7 @@ export interface SuccessResponse {
 
 export interface Book {
   id: number;
+  sortOrder: number;
   title: string;
   description: string;
   author: string;
@@ -125,6 +126,7 @@ export interface BookListResponse {
 }
 
 export interface CreateBookBody {
+  sortOrder?: number;
   title: string;
   description: string;
   author: string;
@@ -143,6 +145,7 @@ export interface CreateBookBody {
 }
 
 export interface UpdateBookBody {
+  sortOrder?: number;
   title?: string;
   description?: string;
   author?: string;

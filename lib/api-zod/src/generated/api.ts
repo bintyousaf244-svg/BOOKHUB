@@ -48,6 +48,7 @@ export const ListBooksResponse = zod.object({
   books: zod.array(
     zod.object({
       id: zod.number(),
+      sortOrder: zod.number(),
       title: zod.string(),
       description: zod.string(),
       author: zod.string(),
@@ -82,6 +83,7 @@ export const createBookBodyIsFeaturedDefault = false;
 export const createBookBodyStockDefault = 100;
 
 export const CreateBookBody = zod.object({
+  sortOrder: zod.number().default(0),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -108,6 +110,7 @@ export const GetBookParams = zod.object({
 
 export const GetBookResponse = zod.object({
   id: zod.number(),
+  sortOrder: zod.number(),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -136,6 +139,7 @@ export const UpdateBookParams = zod.object({
 });
 
 export const UpdateBookBody = zod.object({
+  sortOrder: zod.number().optional(),
   title: zod.string().optional(),
   description: zod.string().optional(),
   author: zod.string().optional(),
@@ -155,6 +159,7 @@ export const UpdateBookBody = zod.object({
 
 export const UpdateBookResponse = zod.object({
   id: zod.number(),
+  sortOrder: zod.number(),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -192,6 +197,7 @@ export const DeleteBookResponse = zod.object({
  */
 export const GetFeaturedBooksResponseItem = zod.object({
   id: zod.number(),
+  sortOrder: zod.number(),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -218,6 +224,7 @@ export const GetFeaturedBooksResponse = zod.array(GetFeaturedBooksResponseItem);
  */
 export const GetOnSaleBooksResponseItem = zod.object({
   id: zod.number(),
+  sortOrder: zod.number(),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -244,6 +251,7 @@ export const GetOnSaleBooksResponse = zod.array(GetOnSaleBooksResponseItem);
  */
 export const GetFreeBooksResponseItem = zod.object({
   id: zod.number(),
+  sortOrder: zod.number(),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -442,6 +450,7 @@ export const GetAdminStatsResponse = zod.object({
   topSellingBooks: zod.array(
     zod.object({
       id: zod.number(),
+      sortOrder: zod.number(),
       title: zod.string(),
       description: zod.string(),
       author: zod.string(),

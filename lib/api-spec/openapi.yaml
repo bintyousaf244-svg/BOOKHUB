@@ -611,6 +611,8 @@ components:
       properties:
         id:
           type: integer
+        sortOrder:
+          type: integer
         title:
           type: string
         description:
@@ -652,6 +654,7 @@ components:
           type: string
       required:
         - id
+        - sortOrder
         - title
         - description
         - author
@@ -690,6 +693,9 @@ components:
     CreateBookBody:
       type: object
       properties:
+        sortOrder:
+          type: integer
+          default: 0
         title:
           type: string
         description:
@@ -740,6 +746,8 @@ components:
     UpdateBookBody:
       type: object
       properties:
+        sortOrder:
+          type: integer
         title:
           type: string
         description:

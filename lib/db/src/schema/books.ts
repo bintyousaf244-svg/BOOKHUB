@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const booksTable = pgTable("books", {
   id: serial("id").primaryKey(),
+  sortOrder: integer("sort_order").notNull().default(0),
   title: text("title").notNull(),
   description: text("description").notNull(),
   author: text("author").notNull(),

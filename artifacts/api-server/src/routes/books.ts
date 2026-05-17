@@ -16,17 +16,34 @@ import {
   sql,
   desc,
   or,
+  asc,
 } from "drizzle-orm";
 
 const router = Router();
+let ensureBooksSortOrderColumnPromise: Promise<void> | null = null;
+
+function ensureBooksSortOrderColumn() {
+  if (!ensureBooksSortOrderColumnPromise) {
+    ensureBooksSortOrderColumnPromise = db
+      .execute(sql`alter table books add column if not exists sort_order integer not null default 0`)
+      .then(() => undefined)
+      .catch((error) => {
+        ensureBooksSortOrderColumnPromise = null;
+        throw error;
+      });
+  }
+
+  return ensureBooksSortOrderColumnPromise;
+}
 
 router.get("/books/featured", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const books = await db
       .select()
       .from(booksTable)
       .where(eq(booksTable.isFeatured, true))
-      .orderBy(desc(booksTable.createdAt))
+      .orderBy(asc(booksTable.sortOrder), desc(booksTable.createdAt))
       .limit(8);
 
     res.json(books.map(mapBook));
@@ -41,6 +58,7 @@ router.get("/books/featured", async (req, res) => {
 
 router.get("/books/on-sale", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const books = await db
       .select()
       .from(booksTable)
@@ -50,7 +68,7 @@ router.get("/books/on-sale", async (req, res) => {
           eq(booksTable.isFree, false)
         )
       )
-      .orderBy(desc(booksTable.createdAt))
+      .orderBy(asc(booksTable.sortOrder), desc(booksTable.createdAt))
       .limit(8);
 
     res.json(books.map(mapBook));
@@ -65,11 +83,12 @@ router.get("/books/on-sale", async (req, res) => {
 
 router.get("/books/free", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const books = await db
       .select()
       .from(booksTable)
       .where(eq(booksTable.isFree, true))
-      .orderBy(desc(booksTable.createdAt));
+      .orderBy(asc(booksTable.sortOrder), desc(booksTable.createdAt));
 
     res.json(books.map(mapBook));
   } catch (error) {
@@ -83,6 +102,7 @@ router.get("/books/free", async (req, res) => {
 
 router.get("/books", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const parsed = ListBooksQueryParams.safeParse(req.query);
 
     if (!parsed.success) {
@@ -163,7 +183,7 @@ router.get("/books", async (req, res) => {
         .select()
         .from(booksTable)
         .where(where)
-        .orderBy(desc(booksTable.createdAt))
+        .orderBy(asc(booksTable.sortOrder), desc(booksTable.createdAt))
         .limit(limit)
         .offset(offset);
 
@@ -272,6 +292,7 @@ router.get("/books/cover", async (req, res) => {
 
 router.get("/books/:id", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const parsed = GetBookParams.safeParse({
       id: Number(req.params.id),
     });
@@ -319,6 +340,7 @@ router.get("/books/:id", async (req, res) => {
 
 router.post("/books", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const parsed =
       CreateBookBody.safeParse(req.body);
 
@@ -335,6 +357,7 @@ router.post("/books", async (req, res) => {
     const [book] = await db
       .insert(booksTable)
       .values({
+        sortOrder: data.sortOrder ?? 0,
         title: data.title,
         description: data.description,
         author: data.author,
@@ -385,6 +408,7 @@ router.post("/books", async (req, res) => {
 
 router.put("/books/:id", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const paramsParsed = UpdateBookParams.safeParse({
       id: Number(req.params.id),
     });
@@ -429,6 +453,7 @@ router.put("/books/:id", async (req, res) => {
     const data = parsed.data;
     const updateData: Record<string, unknown> = {};
 
+    if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.author !== undefined) updateData.author = data.author;
@@ -495,6 +520,7 @@ router.put("/books/:id", async (req, res) => {
 
 router.delete("/books/:id", async (req, res) => {
   try {
+    await ensureBooksSortOrderColumn();
     const parsed = DeleteBookParams.safeParse({
       id: Number(req.params.id),
     });
@@ -608,6 +634,7 @@ function mapBook(
   ) {
   return {
     id: Number(b.id),
+    sortOrder: b.sortOrder,
     title: b.title,
     description: b.description,
     author: b.author,

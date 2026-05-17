@@ -1,32 +1,77 @@
 import React, { useState } from "react";
 import { Link } from "wouter";
-import { useListBooks, useDeleteBook, getListBooksQueryKey } from "@workspace/api-client-react";
+import { useListBooks, useDeleteBook, useUpdateBook } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { BookCoverImage } from "@/components/BookCoverImage";
 
 export default function AdminBooks() {
   const [search, setSearch] = useState("");
+  const [sortOrderDrafts, setSortOrderDrafts] = useState<Record<number, string>>({});
   const { data, isLoading } = useListBooks({ search, limit: 100 });
   const deleteBook = useDeleteBook();
+  const updateBook = useUpdateBook();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const refreshBookLists = () => {
+    void queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+  };
 
   const handleDelete = (id: number) => {
     deleteBook.mutate({ id }, {
       onSuccess: () => {
         toast({ title: "Book deleted successfully" });
-        queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
+        refreshBookLists();
       },
       onError: () => {
         toast({ title: "Failed to delete book", variant: "destructive" });
       }
     });
+  };
+
+  const getDraftValue = (bookId: number, currentSortOrder: number) =>
+    sortOrderDrafts[bookId] ?? String(currentSortOrder);
+
+  const handleSortOrderChange = (bookId: number, value: string) => {
+    setSortOrderDrafts((prev) => ({
+      ...prev,
+      [bookId]: value,
+    }));
+  };
+
+  const handleSortOrderSave = (bookId: number, currentSortOrder: number) => {
+    const rawValue = getDraftValue(bookId, currentSortOrder).trim();
+    const nextSortOrder = Number(rawValue);
+
+    if (!Number.isInteger(nextSortOrder) || nextSortOrder < 0) {
+      toast({ title: "Sort order must be a whole number 0 or greater", variant: "destructive" });
+      return;
+    }
+
+    updateBook.mutate(
+      { id: bookId, data: { sortOrder: nextSortOrder } },
+      {
+        onSuccess: () => {
+          toast({ title: "Book order updated" });
+          setSortOrderDrafts((prev) => {
+            const next = { ...prev };
+            delete next[bookId];
+            return next;
+          });
+          refreshBookLists();
+        },
+        onError: () => {
+          toast({ title: "Failed to update book order", variant: "destructive" });
+        },
+      }
+    );
   };
 
   return (
@@ -55,6 +100,7 @@ export default function AdminBooks() {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
+                <TableHead className="w-[120px]">Order</TableHead>
                 <TableHead>Book</TableHead>
                 <TableHead>Category/Age</TableHead>
                 <TableHead>Price</TableHead>
@@ -66,18 +112,39 @@ export default function AdminBooks() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading books...</TableCell>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading books...</TableCell>
                 </TableRow>
               ) : data?.books.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No books found.</TableCell>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No books found.</TableCell>
                 </TableRow>
               ) : (
                 data?.books.map(book => (
                   <TableRow key={book.id}>
                     <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          className="h-9 w-20"
+                          value={getDraftValue(book.id, book.sortOrder)}
+                          onChange={(e) => handleSortOrderChange(book.id, e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-9 w-9"
+                          onClick={() => handleSortOrderSave(book.id, book.sortOrder)}
+                          disabled={updateBook.isPending}
+                        >
+                          <Save className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-3">
-                        <img src={book.coverImage} alt={book.title} className="w-10 h-14 object-cover rounded shadow-sm" />
+                        <BookCoverImage src={book.coverImage} alt={book.title} className="w-10 h-14 object-cover rounded shadow-sm" />
                         <div>
                           <div className="font-medium max-w-[200px] truncate">{book.title}</div>
                           <div className="text-xs text-muted-foreground">{book.author}</div>

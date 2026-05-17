@@ -30,6 +30,7 @@ const bookSchema = z.object({
   isFree: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
   coverImage: z.string().min(1, "Cover image is required"),
+  sortOrder: z.coerce.number().min(0).default(0),
   category: z.string().min(1, "Category is required"),
   language: z.string().min(1, "Language is required"),
   ageGroup: z.string().min(1, "Age group is required"),
@@ -149,6 +150,7 @@ export default function AdminBookEdit() {
       isFree: false,
       isFeatured: false,
       coverImage: "",
+      sortOrder: 0,
       category: "kids-learning",
       language: "English",
       ageGroup: "Kids",
@@ -177,6 +179,7 @@ export default function AdminBookEdit() {
         isFree: book.isFree,
         isFeatured: book.isFeatured,
         coverImage: book.coverImage,
+        sortOrder: book.sortOrder ?? 0,
         category: matchingCategoryName,
         language: book.language,
         ageGroup: book.ageGroup,
@@ -397,6 +400,16 @@ export default function AdminBookEdit() {
                   <FormItem>
                     <FormLabel>Pages (Optional)</FormLabel>
                     <FormControl><Input type="number" placeholder="100" {...field} value={field.value || ""} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="sortOrder" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Display Order</FormLabel>
+                    <FormControl><Input type="number" min="0" placeholder="0" {...field} /></FormControl>
+                    <FormDescription className="text-xs">
+                      Lower numbers appear first in the store.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )} />
