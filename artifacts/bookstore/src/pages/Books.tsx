@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { useListBooks, useListCategories } from "@workspace/api-client-react";
 import { BookCard } from "@/components/BookCard";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ function BookSkeleton() {
 }
 
 export default function Books() {
+  const [location] = useLocation();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [language, setLanguage] = useState<string>("all");
@@ -30,6 +32,19 @@ export default function Books() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: categories } = useListCategories();
+
+  useEffect(() => {
+    const queryString = location.includes("?") ? location.slice(location.indexOf("?")) : "";
+    const params = new URLSearchParams(queryString);
+    const requestedAgeGroup = params.get("ageGroup");
+
+    if (requestedAgeGroup === "Kids" || requestedAgeGroup === "Adults" || requestedAgeGroup === "All Ages") {
+      setAgeGroup(requestedAgeGroup);
+      return;
+    }
+
+    setAgeGroup("all");
+  }, [location]);
 
   const queryParams = {
     ...(search && { search }),
