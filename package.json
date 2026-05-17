@@ -11,7 +11,9 @@
   "private": true,
   "devDependencies": {
     "@rollup/rollup-win32-arm64-msvc": "4.59.0",
+    "@tailwindcss/oxide-win32-arm64-msvc": "4.2.1",
     "dotenv": "^17.4.2",
+    "lightningcss-win32-arm64-msvc": "1.31.1",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
   }

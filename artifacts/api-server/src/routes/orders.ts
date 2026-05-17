@@ -7,7 +7,7 @@ import {
   UpdateOrderStatusParams,
   UpdateOrderStatusBody,
 } from "@workspace/api-zod";
-import { eq, and, sql, desc, inArray } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { sendDownloadEmail } from "../email";
 
 const router = Router();
@@ -48,12 +48,15 @@ router.post("/orders", async (req, res) => {
       return;
     }
     const data = parsed.data;
+    const normalizedItems = data.items.map((item) => ({
+      ...item,
+      bookId: Number(item.bookId),
+      quantity: Number(item.quantity),
+    }));
 
-    const bookIds = data.items.map((i) => i.bookId);
-    const books = bookIds.length > 0
-      ? await db.select().from(booksTable).where(inArray(booksTable.id, bookIds))
-      : [];
-    const bookMap = new Map(books.map((b) => [b.id, b]));
+    const bookIds = normalizedItems.map((item) => item.bookId);
+    const books = await findBooksByIds(bookIds);
+    const bookMap = new Map(books.map((b) => [Number(b.id), b]));
 
     const missingBookIds = bookIds.filter((bookId) => !bookMap.has(bookId));
     if (missingBookIds.length === bookIds.length) {
@@ -66,7 +69,7 @@ router.post("/orders", async (req, res) => {
     }
 
     let total = 0;
-    const items = data.items.flatMap((item) => {
+    const items = normalizedItems.flatMap((item) => {
       const book = bookMap.get(item.bookId);
       if (!book) {
         return [];
@@ -204,11 +207,13 @@ router.get("/orders/:id/downloads", async (req, res) => {
   }
 
   const items = order.items as Array<{ bookId: number; title: string; price: number; quantity: number; coverImage: string }>;
-  const bookIds = items.map((i) => i.bookId);
-  const books = bookIds.length > 0
-    ? await db.select({ id: booksTable.id, title: booksTable.title, downloadUrl: booksTable.downloadUrl }).from(booksTable).where(inArray(booksTable.id, bookIds))
-    : [];
-  const bookMap = new Map(books.map((b) => [b.id, b]));
+  const bookIds = items.map((item) => Number(item.bookId));
+  const books = (await findBooksByIds(bookIds)).map((book) => ({
+    id: Number(book.id),
+    title: book.title,
+    downloadUrl: book.downloadUrl,
+  }));
+  const bookMap = new Map(books.map((b) => [Number(b.id), b]));
 
   const downloadable = items.map((item) => ({
     bookId: item.bookId,
@@ -236,6 +241,32 @@ function mapOrder(o: typeof ordersTable.$inferSelect) {
     notes: o.notes ?? null,
     createdAt: o.createdAt.toISOString(),
   };
+}
+
+async function findBooksByIds(bookIds: number[]) {
+  const uniqueBookIds = Array.from(
+    new Set(
+      bookIds.filter((bookId) => Number.isInteger(bookId) && bookId > 0)
+    )
+  );
+
+  if (uniqueBookIds.length === 0) {
+    return [];
+  }
+
+  const rows = await Promise.all(
+    uniqueBookIds.map(async (bookId) => {
+      const [book] = await db
+        .select()
+        .from(booksTable)
+        .where(eq(booksTable.id, bookId))
+        .limit(1);
+
+      return book ?? null;
+    })
+  );
+
+  return rows.filter((book): book is NonNullable<typeof book> => book !== null);
 }
 
 export default router;

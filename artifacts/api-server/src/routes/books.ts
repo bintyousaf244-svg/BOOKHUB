@@ -605,9 +605,9 @@ async function updateCategoryCount(
 
 function mapBook(
   b: typeof booksTable.$inferSelect
-) {
+  ) {
   return {
-    id: b.id,
+    id: Number(b.id),
     title: b.title,
     description: b.description,
     author: b.author,
