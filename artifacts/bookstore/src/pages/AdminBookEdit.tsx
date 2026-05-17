@@ -44,6 +44,10 @@ function getBookSaveErrorMessage(error: unknown): string {
   const apiError = error as ApiError<{ error?: string }>;
   const apiMessage = apiError?.data?.error;
 
+  if (apiError?.status === 413) {
+    return "Cover image payload is too large for the live server. Redeploy the API with the latest fix, or use a smaller image.";
+  }
+
   if (typeof apiMessage === "string" && apiMessage.trim().length > 0) {
     return apiMessage;
   }
@@ -55,19 +59,49 @@ function getBookSaveErrorMessage(error: unknown): string {
   return "Failed to save book";
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
+async function readFileAsDataUrl(file: File): Promise<string> {
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Failed to load image file"));
+      img.src = objectUrl;
+    });
+
+    const maxDimension = 1600;
+    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+    const targetWidth = Math.max(1, Math.round(image.width * scale));
+    const targetHeight = Math.max(1, Math.round(image.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Failed to process image");
+    }
+
+    context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    const qualitySteps = [0.92, 0.85, 0.78, 0.7, 0.6];
+    let bestResult = "";
+
+    for (const quality of qualitySteps) {
+      const candidate = canvas.toDataURL("image/webp", quality);
+      bestResult = candidate;
+
+      if (candidate.length <= 1_500_000) {
+        return candidate;
       }
-      reject(new Error("Failed to read image file"));
-    };
-    reader.onerror = () => reject(reader.error ?? new Error("Failed to read image file"));
-    reader.readAsDataURL(file);
-  });
+    }
+
+    return bestResult;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 
 export default function AdminBookEdit() {
