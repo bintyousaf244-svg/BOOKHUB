@@ -21,7 +21,7 @@ export function Navbar() {
   useEffect(() => { setOpen(false); }, [location]);
 
   const links = [
-    { href: "/books", label: "All Books", forceReload: false },
+    { href: "/books", label: "All Books", forceReload: true },
     { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
     { href: "/books?ageGroup=Adults", label: "Adults", forceReload: true },
     { href: "/free", label: "Free Resources", forceReload: false },
