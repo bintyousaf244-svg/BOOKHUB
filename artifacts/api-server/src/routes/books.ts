@@ -125,18 +125,6 @@ router.get("/books", async (req, res) => {
 
     const conditions = [];
 
-    if (category) {
-      conditions.push(
-        sql`(${booksTable.category} = ${category} or lower(regexp_replace(${booksTable.category}, '[^a-zA-Z0-9]+', '-', 'g')) = ${category})`
-      );
-    }
-
-    if (language) {
-      conditions.push(
-        eq(booksTable.language, language)
-      );
-    }
-
     if (isFree !== undefined) {
       conditions.push(
         eq(booksTable.isFree, isFree)
@@ -183,22 +171,18 @@ router.get("/books", async (req, res) => {
         .select()
         .from(booksTable)
         .where(where)
-        .orderBy(asc(booksTable.sortOrder), desc(booksTable.createdAt))
-        .limit(limit)
-        .offset(offset);
+        .orderBy(asc(booksTable.sortOrder), desc(booksTable.createdAt));
 
-      books = booksResult.map(mapBook);
+      const filteredBooks = booksResult.filter((book) => {
+        const categoryMatchesFilter = !category || matchesMultiValue(book.category, category, { treatFilterAsSlug: true });
+        const languageMatchesFilter = !language || matchesMultiValue(book.language, language);
+        return categoryMatchesFilter && languageMatchesFilter;
+      });
 
-      const countResult = await db
-        .select({
-          count: sql<number>`count(*)`,
-        })
-        .from(booksTable)
-        .where(where);
-
-      total = Number(
-        countResult[0]?.count ?? 0
-      );
+      total = filteredBooks.length;
+      books = filteredBooks
+        .slice(offset, offset + limit)
+        .map(mapBook);
 
     } catch (error) {
       console.error(
@@ -353,6 +337,8 @@ router.post("/books", async (req, res) => {
     }
 
     const data = parsed.data;
+    const normalizedCategories = normalizeStoredMultiValue(data.category);
+    const normalizedLanguages = normalizeStoredMultiValue(data.language);
 
     const [book] = await db
       .insert(booksTable)
@@ -374,8 +360,8 @@ router.post("/books", async (req, res) => {
           data.isFeatured ?? false,
         coverImage:
           data.coverImage,
-        category: data.category,
-        language: data.language,
+        category: normalizedCategories,
+        language: normalizedLanguages,
         ageGroup: data.ageGroup,
         pages:
           data.pages ?? null,
@@ -386,8 +372,10 @@ router.post("/books", async (req, res) => {
       })
       .returning();
 
-    await updateCategoryCount(
-      data.category
+    await Promise.all(
+      parseStoredMultiValue(normalizedCategories).map((categoryName) =>
+        updateCategoryCount(categoryName)
+      )
     );
 
     res.status(201).json(
@@ -452,6 +440,7 @@ router.put("/books/:id", async (req, res) => {
 
     const data = parsed.data;
     const updateData: Record<string, unknown> = {};
+    const previousCategories = parseStoredMultiValue(existingBook[0].category);
 
     if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
     if (data.title !== undefined) updateData.title = data.title;
@@ -468,8 +457,8 @@ router.put("/books/:id", async (req, res) => {
     if (data.isFree !== undefined) updateData.isFree = data.isFree;
     if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
     if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
-    if (data.category !== undefined) updateData.category = data.category;
-    if (data.language !== undefined) updateData.language = data.language;
+    if (data.category !== undefined) updateData.category = normalizeStoredMultiValue(data.category);
+    if (data.language !== undefined) updateData.language = normalizeStoredMultiValue(data.language);
     if (data.ageGroup !== undefined) updateData.ageGroup = data.ageGroup;
     if (data.pages !== undefined) updateData.pages = data.pages;
     if (data.downloadUrl !== undefined) updateData.downloadUrl = data.downloadUrl;
@@ -494,15 +483,10 @@ router.put("/books/:id", async (req, res) => {
       return;
     }
 
-    if (
-      data.category &&
-      data.category !== existingBook[0].category
-    ) {
-      await updateCategoryCount(existingBook[0].category);
-      await updateCategoryCount(data.category);
-    } else {
-      await updateCategoryCount(book.category);
-    }
+    const nextCategories = parseStoredMultiValue(book.category);
+    const categoriesToRefresh = Array.from(new Set([...previousCategories, ...nextCategories]));
+
+    await Promise.all(categoriesToRefresh.map((categoryName) => updateCategoryCount(categoryName)));
 
     res.json(mapBook(book));
 
@@ -561,7 +545,11 @@ router.delete("/books/:id", async (req, res) => {
         )
       );
 
-    await updateCategoryCount(existingBook[0].category);
+    await Promise.all(
+      parseStoredMultiValue(existingBook[0].category).map((categoryName) =>
+        updateCategoryCount(categoryName)
+      )
+    );
 
     res.json({
       success: true,
@@ -587,17 +575,13 @@ async function updateCategoryCount(
     const { categoriesTable } =
       await import("@workspace/db");
 
-    const count = await db
-      .select({
-        count: sql<number>`count(*)`,
-      })
-      .from(booksTable)
-      .where(
-        eq(
-          booksTable.category,
-          category
-        )
-      );
+    const allBooks = await db
+      .select({ category: booksTable.category })
+      .from(booksTable);
+
+    const nextCount = allBooks.filter((book) =>
+      matchesMultiValue(book.category, category)
+    ).length;
 
     await db
       .insert(categoriesTable)
@@ -607,17 +591,13 @@ async function updateCategoryCount(
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-+|-+$/g, ""),
-        bookCount: Number(
-          count[0]?.count ?? 0
-        ),
+        bookCount: nextCount,
       })
       .onConflictDoUpdate({
         target:
           categoriesTable.slug,
         set: {
-          bookCount: Number(
-            count[0]?.count ?? 0
-          ),
+          bookCount: nextCount,
         },
       });
 
@@ -649,8 +629,8 @@ function mapBook(
     isFree: b.isFree,
     isFeatured: b.isFeatured,
     coverImage: b.coverImage,
-    category: b.category,
-    language: b.language,
+    category: formatStoredMultiValue(b.category),
+    language: formatStoredMultiValue(b.language),
     ageGroup: b.ageGroup,
     pages: b.pages ?? null,
     downloadUrl:
@@ -665,6 +645,68 @@ function mapBook(
         ).toISOString()
       : null,
   };
+}
+
+function parseStoredMultiValue(value?: string | null): string[] {
+  const rawValue = value?.trim();
+  if (!rawValue) return [];
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (Array.isArray(parsed)) {
+      return Array.from(
+        new Set(
+          parsed
+            .map((item) => (typeof item === "string" ? item.trim() : ""))
+            .filter(Boolean)
+        )
+      );
+    }
+  } catch {
+    // Support legacy plain-string rows.
+  }
+
+  return Array.from(
+    new Set(
+      rawValue
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function formatStoredMultiValue(value?: string | null): string {
+  return parseStoredMultiValue(value).join(", ");
+}
+
+function normalizeStoredMultiValue(value?: string | null): string {
+  return JSON.stringify(parseStoredMultiValue(value));
+}
+
+function slugifyValue(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function matchesMultiValue(
+  rawValue: string | null | undefined,
+  filterValue: string,
+  options?: { treatFilterAsSlug?: boolean }
+): boolean {
+  const normalizedFilter = filterValue.trim().toLowerCase();
+  if (!normalizedFilter) return true;
+
+  return parseStoredMultiValue(rawValue).some((value) => {
+    const normalizedValue = value.toLowerCase();
+    if (normalizedValue === normalizedFilter) {
+      return true;
+    }
+
+    return Boolean(options?.treatFilterAsSlug) && slugifyValue(value) === normalizedFilter;
+  });
 }
 
 export default router;
