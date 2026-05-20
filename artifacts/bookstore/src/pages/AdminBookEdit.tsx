@@ -3,22 +3,53 @@ import { useParams, useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useGetBook, useCreateBook, useUpdateBook, useListCategories, getGetBookQueryKey, getListBooksQueryKey } from "@workspace/api-client-react";
+import {
+  useGetBook,
+  useCreateBook,
+  useUpdateBook,
+  useListCategories,
+  getGetBookQueryKey,
+  getListBooksQueryKey,
+} from "@workspace/api-client-react";
 import type { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Upload, X, ImageIcon, FileText, CheckCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  ArrowLeft,
+  Save,
+  Upload,
+  X,
+  ImageIcon,
+  FileText,
+  CheckCircle,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUpload } from "@workspace/object-storage-web";
 import { Badge } from "@/components/ui/badge";
 import { BookCoverImage } from "@/components/BookCoverImage";
 import { apiUrl, storageUrl } from "@/lib/api";
+import { joinBookMetadataList, parseBookMetadataList } from "@/lib/bookMetadata";
 
 const bookSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -40,6 +71,46 @@ const bookSchema = z.object({
 });
 
 type BookFormValues = z.infer<typeof bookSchema>;
+
+const DEFAULT_LANGUAGE_OPTIONS = ["English", "Arabic", "Urdu"];
+
+function addMetadataValue(currentValue: string, nextValue: string): string {
+  return joinBookMetadataList([
+    ...parseBookMetadataList(currentValue),
+    nextValue,
+  ]);
+}
+
+function removeMetadataValue(currentValue: string, valueToRemove: string): string {
+  return joinBookMetadataList(
+    parseBookMetadataList(currentValue).filter((value) => value !== valueToRemove)
+  );
+}
+
+function toggleMetadataValue(currentValue: string, nextValue: string): string {
+  const selectedValues = parseBookMetadataList(currentValue);
+
+  if (selectedValues.includes(nextValue)) {
+    return removeMetadataValue(currentValue, nextValue);
+  }
+
+  return addMetadataValue(currentValue, nextValue);
+}
+
+function resolveCategoryNames(
+  rawCategoryValue: string,
+  categoriesData?: Array<{ name: string; slug: string }>
+): string {
+  return joinBookMetadataList(
+    parseBookMetadataList(rawCategoryValue).map((categoryValue) => {
+      const matchingCategory = categoriesData?.find(
+        (cat) => cat.name === categoryValue || cat.slug === categoryValue
+      );
+
+      return matchingCategory?.name ?? categoryValue;
+    })
+  );
+}
 
 function getBookSaveErrorMessage(error: unknown): string {
   const apiError = error as ApiError<{ error?: string }>;
@@ -115,13 +186,14 @@ export default function AdminBookEdit() {
   const queryClient = useQueryClient();
 
   const coverInputRef = useRef<HTMLInputElement>(null);
-
-  // Digital book file upload
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [customCategory, setCustomCategory] = useState("");
+  const [customLanguage, setCustomLanguage] = useState("");
 
   const { data: book, isLoading } = useGetBook(bookId, {
-    query: { enabled: isEditing, queryKey: getGetBookQueryKey(bookId) }
+    query: { enabled: isEditing, queryKey: getGetBookQueryKey(bookId) },
   });
   const { data: categoriesData } = useListCategories();
 
@@ -135,7 +207,8 @@ export default function AdminBookEdit() {
       form.setValue("downloadUrl", servingUrl, { shouldValidate: true });
       toast({ title: "Book file uploaded successfully" });
     },
-    onError: (err) => toast({ title: `Upload failed: ${err.message}`, variant: "destructive" }),
+    onError: (err) =>
+      toast({ title: `Upload failed: ${err.message}`, variant: "destructive" }),
   });
 
   const form = useForm<BookFormValues>({
@@ -157,18 +230,11 @@ export default function AdminBookEdit() {
       pages: null,
       downloadUrl: "",
       stock: 10,
-    }
+    },
   });
 
   useEffect(() => {
     if (isEditing && book) {
-      const matchingCategoryName =
-        categoriesData?.find(
-          (cat) =>
-            cat.name === book.category ||
-            cat.slug === book.category
-        )?.name ?? book.category;
-
       form.reset({
         title: book.title,
         author: book.author,
@@ -180,13 +246,14 @@ export default function AdminBookEdit() {
         isFeatured: book.isFeatured,
         coverImage: book.coverImage,
         sortOrder: book.sortOrder ?? 0,
-        category: matchingCategoryName,
+        category: resolveCategoryNames(book.category, categoriesData),
         language: book.language,
         ageGroup: book.ageGroup,
         pages: book.pages,
         downloadUrl: book.downloadUrl || "",
         stock: book.stock,
       });
+
       if (book.downloadUrl?.includes("/api/storage/")) {
         setUploadedFileName("Previously uploaded file");
       }
@@ -230,6 +297,22 @@ export default function AdminBookEdit() {
     form.setValue("downloadUrl", "");
   };
 
+  const handleAddCustomCategory = (currentValue: string, onChange: (value: string) => void) => {
+    const trimmedCategory = customCategory.trim();
+    if (!trimmedCategory) return;
+
+    onChange(addMetadataValue(currentValue, trimmedCategory));
+    setCustomCategory("");
+  };
+
+  const handleAddCustomLanguage = (currentValue: string, onChange: (value: string) => void) => {
+    const trimmedLanguage = customLanguage.trim();
+    if (!trimmedLanguage) return;
+
+    onChange(addMetadataValue(currentValue, trimmedLanguage));
+    setCustomLanguage("");
+  };
+
   const onSubmit = (data: BookFormValues) => {
     const payload = {
       ...data,
@@ -237,24 +320,32 @@ export default function AdminBookEdit() {
     };
 
     if (isEditing) {
-      updateBook.mutate({ id: bookId, data: payload }, {
-        onSuccess: () => {
-          toast({ title: "Book updated successfully" });
-          queryClient.invalidateQueries({ queryKey: getGetBookQueryKey(bookId) });
-          queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
-          setLocation("/books");
-        },
-        onError: (error) => toast({ title: getBookSaveErrorMessage(error), variant: "destructive" })
-      });
+      updateBook.mutate(
+        { id: bookId, data: payload },
+        {
+          onSuccess: () => {
+            toast({ title: "Book updated successfully" });
+            queryClient.invalidateQueries({ queryKey: getGetBookQueryKey(bookId) });
+            queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
+            setLocation("/books");
+          },
+          onError: (error) =>
+            toast({ title: getBookSaveErrorMessage(error), variant: "destructive" }),
+        }
+      );
     } else {
-      createBook.mutate({ data: payload }, {
-        onSuccess: () => {
-          toast({ title: "Book created successfully" });
-          queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
-          setLocation("/books");
-        },
-        onError: (error) => toast({ title: getBookSaveErrorMessage(error), variant: "destructive" })
-      });
+      createBook.mutate(
+        { data: payload },
+        {
+          onSuccess: () => {
+            toast({ title: "Book created successfully" });
+            queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
+            setLocation("/books");
+          },
+          onError: (error) =>
+            toast({ title: getBookSaveErrorMessage(error), variant: "destructive" }),
+        }
+      );
     }
   };
 
@@ -270,7 +361,9 @@ export default function AdminBookEdit() {
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
       <div className="flex items-center gap-4">
         <Link href="/books">
-          <Button variant="outline" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
         </Link>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           {isEditing ? "Edit Book" : "Add New Book"}
@@ -279,262 +372,561 @@ export default function AdminBookEdit() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-
-          {/* Basic Info */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-6 space-y-6">
               <h2 className="text-xl font-serif font-bold text-foreground">Book Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField control={form.control} name="title" render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Title</FormLabel>
-                    <FormControl><Input placeholder="Book Title" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Book Title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                <FormField control={form.control} name="author" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Author</FormLabel>
-                    <FormControl><Input placeholder="Author Name" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <FormField
+                  control={form.control}
+                  name="author"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Author</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Author Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                {/* Cover Image */}
-                <FormField control={form.control} name="coverImage" render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Cover Image</FormLabel>
-                    <div className="flex gap-4 items-start">
-                      <div className="flex-shrink-0 w-24 h-32 rounded-lg border border-border overflow-hidden bg-muted flex items-center justify-center">
-                        {currentCoverImage ? (
-                          <BookCoverImage src={currentCoverImage} alt="Cover preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <ImageIcon className="h-7 w-7 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-3">
-                        <div className="flex gap-2 items-center flex-wrap">
-                          <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
-                          <Button type="button" variant="outline" size="sm" onClick={() => coverInputRef.current?.click()}>
-                            <Upload className="h-4 w-4 mr-1" />
-                            Upload Image
-                          </Button>
-                          {currentCoverImage && (
-                            <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue("coverImage", "", { shouldValidate: true, shouldDirty: true })}
-                              className="text-muted-foreground hover:text-destructive">
-                              <X className="h-4 w-4 mr-1" /> Clear
-                            </Button>
+                <FormField
+                  control={form.control}
+                  name="coverImage"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Cover Image</FormLabel>
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-32 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
+                          {currentCoverImage ? (
+                            <BookCoverImage
+                              src={currentCoverImage}
+                              alt="Cover preview"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="h-7 w-7 text-muted-foreground" />
                           )}
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground">Or paste an image URL:</p>
-                          <FormControl><Input placeholder="https://example.com/cover.jpg" {...field} /></FormControl>
+                        <div className="flex-1 space-y-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <input
+                              ref={coverInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleCoverChange}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => coverInputRef.current?.click()}
+                            >
+                              <Upload className="mr-1 h-4 w-4" />
+                              Upload Image
+                            </Button>
+                            {currentCoverImage && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  form.setValue("coverImage", "", {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
+                                className="text-muted-foreground hover:text-destructive"
+                              >
+                                <X className="mr-1 h-4 w-4" />
+                                Clear
+                              </Button>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Or paste an image URL:</p>
+                            <FormControl>
+                              <Input placeholder="https://example.com/cover.jpg" {...field} />
+                            </FormControl>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Uploaded cover images are stored directly with the book so they do not
+                            disappear after deploys or restarts.
+                          </p>
+                          <FormMessage />
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Uploaded cover images are stored directly with the book so they do not disappear after deploys or restarts.
-                        </p>
-                        <FormMessage />
                       </div>
-                    </div>
-                  </FormItem>
-                )} />
+                    </FormItem>
+                  )}
+                />
 
-                <FormField control={form.control} name="category" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    {categoriesData && categoriesData.length > 0 ? (
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => {
+                    const selectedCategories = parseBookMetadataList(field.value);
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <div className="space-y-4 rounded-xl border border-border p-4">
+                          {categoriesData && categoriesData.length > 0 ? (
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              {categoriesData.map((cat) => {
+                                const isChecked = selectedCategories.includes(cat.name);
+
+                                return (
+                                  <label
+                                    key={cat.id}
+                                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/40"
+                                  >
+                                    <Checkbox
+                                      checked={isChecked}
+                                      onCheckedChange={() =>
+                                        field.onChange(toggleMetadataValue(field.value, cat.name))
+                                      }
+                                    />
+                                    <span>{cat.name}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              No saved categories yet. Add one below.
+                            </p>
+                          )}
+
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Add custom category"
+                              value={customCategory}
+                              onChange={(event) => setCustomCategory(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  event.preventDefault();
+                                  handleAddCustomCategory(field.value, field.onChange);
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleAddCustomCategory(field.value, field.onChange)}
+                            >
+                              Add
+                            </Button>
+                          </div>
+
+                          {selectedCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {selectedCategories.map((categoryValue) => (
+                                <Badge
+                                  key={categoryValue}
+                                  variant="secondary"
+                                  className="gap-1.5 pr-1"
+                                >
+                                  {categoryValue}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      field.onChange(
+                                        removeMetadataValue(field.value, categoryValue)
+                                      )
+                                    }
+                                    className="rounded-full p-0.5 hover:bg-black/10"
+                                    aria-label={`Remove ${categoryValue}`}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <FormDescription className="text-xs">
+                          Select one or more categories. You can also add a custom one here if
+                          needed.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => {
+                    const selectedLanguages = parseBookMetadataList(field.value);
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Language</FormLabel>
+                        <div className="space-y-4 rounded-xl border border-border p-4">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {DEFAULT_LANGUAGE_OPTIONS.map((languageOption) => {
+                              const isChecked = selectedLanguages.includes(languageOption);
+
+                              return (
+                                <label
+                                  key={languageOption}
+                                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/40"
+                                >
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={() =>
+                                      field.onChange(
+                                        toggleMetadataValue(field.value, languageOption)
+                                      )
+                                    }
+                                  />
+                                  <span>{languageOption}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Add custom language"
+                              value={customLanguage}
+                              onChange={(event) => setCustomLanguage(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  event.preventDefault();
+                                  handleAddCustomLanguage(field.value, field.onChange);
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleAddCustomLanguage(field.value, field.onChange)}
+                            >
+                              Add
+                            </Button>
+                          </div>
+
+                          {selectedLanguages.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {selectedLanguages.map((languageValue) => (
+                                <Badge
+                                  key={languageValue}
+                                  variant="secondary"
+                                  className="gap-1.5 pr-1"
+                                >
+                                  {languageValue}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      field.onChange(
+                                        removeMetadataValue(field.value, languageValue)
+                                      )
+                                    }
+                                    className="rounded-full p-0.5 hover:bg-black/10"
+                                    aria-label={`Remove ${languageValue}`}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <FormDescription className="text-xs">
+                          Choose one or more languages, or add your own custom language label.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="ageGroup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Age Group</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder="Select age group" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categoriesData.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="Kids">Kids</SelectItem>
+                          <SelectItem value="Adults">Adults</SelectItem>
+                          <SelectItem value="All Ages">All Ages</SelectItem>
                         </SelectContent>
                       </Select>
-                    ) : (
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="pages"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pages (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. kids-learning" {...field} />
+                        <Input
+                          type="number"
+                          placeholder="100"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
-                    )}
-                    <FormDescription className="text-xs">
-                      Manage categories under <a href="/admin/categories" className="underline text-primary">Admin → Categories</a>.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="language" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Language</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="English">English</SelectItem>
-                        <SelectItem value="Arabic">Arabic</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="ageGroup" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Age Group</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select age group" /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="Kids">Kids</SelectItem>
-                        <SelectItem value="Adults">Adults</SelectItem>
-                        <SelectItem value="All Ages">All Ages</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="pages" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pages (Optional)</FormLabel>
-                    <FormControl><Input type="number" placeholder="100" {...field} value={field.value || ""} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="sortOrder" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Display Order</FormLabel>
-                    <FormControl><Input type="number" min="0" placeholder="0" {...field} /></FormControl>
-                    <FormDescription className="text-xs">
-                      Lower numbers appear first in the store.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="description" render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea className="min-h-[120px]" placeholder="Book description..." {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sortOrder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Order</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Lower numbers appear first in the store.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          className="min-h-[120px]"
+                          placeholder="Book description..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </CardContent>
           </Card>
 
-          {/* Digital File */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-6 space-y-4">
               <div>
-                <h2 className="text-xl font-serif font-bold text-foreground">Digital Book File</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Upload the book file (PDF, EPUB, etc.) for digital download. For free books this link is shown immediately; for paid books you can share it after payment.
+                <h2 className="text-xl font-serif font-bold text-foreground">
+                  Digital Book File
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Upload the book file (PDF, EPUB, etc.) for digital download. For free books this
+                  link is shown immediately; for paid books you can share it after payment.
                 </p>
               </div>
 
-              {/* Uploaded file badge */}
               {(uploadedFileName || (currentDownloadUrl && currentDownloadUrl.length > 0)) && (
-                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span className="text-sm text-foreground flex-1 truncate">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 p-3">
+                  <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+                  <span className="flex-1 truncate text-sm text-foreground">
                     {uploadedFileName || "File linked"}
                   </span>
-                  <Button type="button" variant="ghost" size="sm" onClick={handleClearFile}
-                    className="text-muted-foreground hover:text-destructive h-6 px-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearFile}
+                    className="h-6 px-2 text-muted-foreground hover:text-destructive"
+                  >
                     <X className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               )}
 
-              <div className="flex gap-3 items-center flex-wrap">
-                <input ref={fileInputRef} type="file" accept=".pdf,.epub,.doc,.docx,.txt,.mobi" className="hidden" onChange={handleFileChange} />
-                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={fileUpload.isUploading}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  {fileUpload.isUploading ? `Uploading ${fileUpload.progress}%` : "Upload Book File"}
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.epub,.doc,.docx,.txt,.mobi"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={fileUpload.isUploading}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  {fileUpload.isUploading
+                    ? `Uploading ${fileUpload.progress}%`
+                    : "Upload Book File"}
                 </Button>
-                <Badge variant="outline" className="text-xs text-muted-foreground">PDF, EPUB, DOCX, MOBI</Badge>
+                <Badge variant="outline" className="text-xs text-muted-foreground">
+                  PDF, EPUB, DOCX, MOBI
+                </Badge>
               </div>
 
               {fileUpload.isUploading && (
-                <div className="w-full bg-muted rounded-full h-1.5">
-                  <div className="bg-primary h-1.5 rounded-full transition-all" style={{ width: `${fileUpload.progress}%` }} />
+                <div className="h-1.5 w-full rounded-full bg-muted">
+                  <div
+                    className="h-1.5 rounded-full bg-primary transition-all"
+                    style={{ width: `${fileUpload.progress}%` }}
+                  />
                 </div>
               )}
 
-              <FormField control={form.control} name="downloadUrl" render={({ field }) => (
-                <FormItem>
-                  <p className="text-xs text-muted-foreground">Or paste an external link (Google Drive, Dropbox, etc.):</p>
-                  <FormControl>
-                    <Input placeholder="https://drive.google.com/..." {...field} value={field.value || ""} disabled={fileUpload.isUploading} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="downloadUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <p className="text-xs text-muted-foreground">
+                      Or paste an external link (Google Drive, Dropbox, etc.):
+                    </p>
+                    <FormControl>
+                      <Input
+                        placeholder="https://drive.google.com/..."
+                        {...field}
+                        value={field.value || ""}
+                        disabled={fileUpload.isUploading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
 
-          {/* Pricing & Status */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-6 space-y-6">
               <h2 className="text-xl font-serif font-bold text-foreground">Pricing & Status</h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField control={form.control} name="isFree" render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Free Resource</FormLabel>
-                      <FormDescription>Show download link publicly</FormDescription>
-                    </div>
-                    <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="isFeatured" render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Featured</FormLabel>
-                      <FormDescription>Show on homepage</FormDescription>
-                    </div>
-                    <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="isOnSale" render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">On Sale</FormLabel>
-                      <FormDescription>Apply discount</FormDescription>
-                    </div>
-                    <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} disabled={isFree} /></FormControl>
-                  </FormItem>
-                )} />
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="isFree"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Free Resource</FormLabel>
+                        <FormDescription>Show download link publicly</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isFeatured"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Featured</FormLabel>
+                        <FormDescription>Show on homepage</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isOnSale"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">On Sale</FormLabel>
+                        <FormDescription>Apply discount</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isFree}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {!isFree && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-border pt-6">
-                  <FormField control={form.control} name="price" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Regular Price (Rs.)</FormLabel>
-                      <FormControl><Input type="number" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  {isOnSale && (
-                    <FormField control={form.control} name="salePrice" render={({ field }) => (
+                <div className="grid grid-cols-1 gap-6 border-t border-border pt-6 md:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sale Price (Rs.)</FormLabel>
-                        <FormControl><Input type="number" {...field} value={field.value || ""} /></FormControl>
+                        <FormLabel>Regular Price (Rs.)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )} />
+                    )}
+                  />
+
+                  {isOnSale && (
+                    <FormField
+                      control={form.control}
+                      name="salePrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sale Price (Rs.)</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                  <FormField control={form.control} name="stock" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Inventory Stock</FormLabel>
-                      <FormControl><Input type="number" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+
+                  <FormField
+                    control={form.control}
+                    name="stock"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inventory Stock</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
             </CardContent>
@@ -542,10 +934,17 @@ export default function AdminBookEdit() {
 
           <div className="flex justify-end gap-4">
             <Link href="/books">
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
             </Link>
-            <Button type="submit" disabled={createBook.isPending || updateBook.isPending || isAnyUploading} className="bg-primary text-primary-foreground px-8">
-              <Save className="mr-2 h-4 w-4" /> Save Book
+            <Button
+              type="submit"
+              disabled={createBook.isPending || updateBook.isPending || isAnyUploading}
+              className="bg-primary px-8 text-primary-foreground"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save Book
             </Button>
           </div>
         </form>
