@@ -64,6 +64,7 @@ export default function BookDetail() {
   const inCart = items.some((i) => i.bookId === book.id);
   const categoryValues = parseBookMetadataList(book.category);
   const languageValues = parseBookMetadataList(book.language);
+  const ageGroupValues = parseBookMetadataList(book.ageGroup);
   const previewImages = [book.previewImage1, book.previewImage2].filter(
     (image): image is string => Boolean(image),
   );
@@ -142,9 +143,15 @@ export default function BookDetail() {
                 {languageValue}
               </Badge>
             ))}
-            <Badge variant="outline" className="text-xs uppercase tracking-wider">
-              {book.ageGroup}
-            </Badge>
+            {ageGroupValues.map((ageGroupValue) => (
+              <Badge
+                key={`age-group-${ageGroupValue}`}
+                variant="outline"
+                className="text-xs uppercase tracking-wider"
+              >
+                {ageGroupValue}
+              </Badge>
+            ))}
           </div>
 
           <h1 className="mb-2 text-3xl font-serif font-bold leading-tight text-foreground md:text-5xl">

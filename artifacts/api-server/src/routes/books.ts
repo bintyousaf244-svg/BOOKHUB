@@ -391,7 +391,7 @@ router.post("/books", async (req, res) => {
           data.previewImage2 ?? null,
         category: normalizedCategories,
         language: normalizedLanguages,
-        ageGroup: data.ageGroup,
+        ageGroup: normalizeStoredMultiValue(data.ageGroup),
         pages:
           data.pages ?? null,
         downloadUrl:
@@ -491,7 +491,7 @@ router.put("/books/:id", async (req, res) => {
     if (data.previewImage2 !== undefined) updateData.previewImage2 = data.previewImage2;
     if (data.category !== undefined) updateData.category = normalizeStoredMultiValue(data.category);
     if (data.language !== undefined) updateData.language = normalizeStoredMultiValue(data.language);
-    if (data.ageGroup !== undefined) updateData.ageGroup = data.ageGroup;
+    if (data.ageGroup !== undefined) updateData.ageGroup = normalizeStoredMultiValue(data.ageGroup);
     if (data.pages !== undefined) updateData.pages = data.pages;
     if (data.downloadUrl !== undefined) updateData.downloadUrl = data.downloadUrl;
     if (data.stock !== undefined) updateData.stock = data.stock;
@@ -666,7 +666,7 @@ function mapBook(
     previewImage2: b.previewImage2 ?? null,
     category: formatStoredMultiValue(b.category),
     language: formatStoredMultiValue(b.language),
-    ageGroup: b.ageGroup,
+    ageGroup: formatStoredMultiValue(b.ageGroup),
     pages: b.pages ?? null,
     downloadUrl:
       b.downloadUrl ?? null,

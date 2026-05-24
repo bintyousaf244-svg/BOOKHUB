@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, FilterX, BookOpen, SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "wouter";
+import { parseBookMetadataList } from "@/lib/bookMetadata";
 
 const PURPLE = "#582C6F";
 const PINK = "#D97B8F";
@@ -28,6 +30,7 @@ export default function Books() {
   const [ageGroup, setAgeGroup] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [location] = useLocation();
 
   const { data: categories } = useListCategories();
 
@@ -38,7 +41,7 @@ export default function Books() {
         ? requestedAgeGroup
         : "all"
     );
-  }, []);
+  }, [location]);
 
   const queryParams = {
     ...(search && { search }),
@@ -49,13 +52,18 @@ export default function Books() {
     ...(filterType === "sale" && { isOnSale: true }),
   };
 
-  const { data, isLoading } = useListBooks(queryParams);
+  const { data, isLoading } = useListBooks({ ...queryParams, limit: 1000 });
 
   const resetFilters = () => {
     setSearch(""); setCategory("all"); setLanguage("all"); setAgeGroup("all"); setFilterType("all");
   };
 
-  const filteredBooks = data?.books.filter((b) => ageGroup === "all" || b.ageGroup === ageGroup) || [];
+  const filteredBooks =
+    data?.books.filter(
+      (book) =>
+        ageGroup === "all" ||
+        parseBookMetadataList(book.ageGroup).includes(ageGroup),
+    ) || [];
 
   const activeFilterCount = [
     search, 

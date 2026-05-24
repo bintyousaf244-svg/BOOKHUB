@@ -5,7 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Download } from "lucide-react";
 import { BookCoverImage } from "@/components/BookCoverImage";
-import { getBookLanguageBadgeLabel } from "@/lib/bookMetadata";
+import { getBookLanguageBadgeLabel, parseBookMetadataList } from "@/lib/bookMetadata";
 
 export function BookCard({ book }: { book: Book }) {
   const { addToCart } = useCart();
@@ -25,6 +25,7 @@ export function BookCard({ book }: { book: Book }) {
   };
 
   const displayPrice = book.isOnSale && book.salePrice ? book.salePrice : book.price;
+  const ageGroupLabel = parseBookMetadataList(book.ageGroup).join(", ");
 
   return (
     <Link href={`/books/${book.id}`}>
@@ -68,7 +69,7 @@ export function BookCard({ book }: { book: Book }) {
             className="text-[10px] font-bold uppercase tracking-widest opacity-60"
             style={{ color: "#416D53" }}
           >
-            {book.category} · {book.ageGroup}
+            {book.category} · {ageGroupLabel || book.ageGroup}
           </div>
           <h3
             className="flex-1 line-clamp-2 font-serif text-base font-bold leading-snug transition-colors"

@@ -26,13 +26,6 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -75,6 +68,7 @@ const bookSchema = z.object({
 type BookFormValues = z.infer<typeof bookSchema>;
 
 const DEFAULT_LANGUAGE_OPTIONS = ["English", "Arabic", "Urdu"];
+const DEFAULT_AGE_GROUP_OPTIONS = ["Kids", "Adults", "All Ages"];
 
 function addMetadataValue(currentValue: string, nextValue: string): string {
   return joinBookMetadataList([
@@ -195,6 +189,7 @@ export default function AdminBookEdit() {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [customCategory, setCustomCategory] = useState("");
   const [customLanguage, setCustomLanguage] = useState("");
+  const [customAgeGroup, setCustomAgeGroup] = useState("");
 
   const { data: book, isLoading } = useGetBook(bookId, {
     query: { enabled: isEditing, queryKey: getGetBookQueryKey(bookId) },
@@ -324,6 +319,14 @@ export default function AdminBookEdit() {
 
     onChange(addMetadataValue(currentValue, trimmedLanguage));
     setCustomLanguage("");
+  };
+
+  const handleAddCustomAgeGroup = (currentValue: string, onChange: (value: string) => void) => {
+    const trimmedAgeGroup = customAgeGroup.trim();
+    if (!trimmedAgeGroup) return;
+
+    onChange(addMetadataValue(currentValue, trimmedAgeGroup));
+    setCustomAgeGroup("");
   };
 
   const onSubmit = (data: BookFormValues) => {
@@ -829,24 +832,90 @@ export default function AdminBookEdit() {
                 <FormField
                   control={form.control}
                   name="ageGroup"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Age Group</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select age group" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Kids">Kids</SelectItem>
-                          <SelectItem value="Adults">Adults</SelectItem>
-                          <SelectItem value="All Ages">All Ages</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const selectedAgeGroups = parseBookMetadataList(field.value);
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Age Group</FormLabel>
+                        <div className="space-y-4 rounded-xl border border-border p-4">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {DEFAULT_AGE_GROUP_OPTIONS.map((ageGroupOption) => {
+                              const isChecked = selectedAgeGroups.includes(ageGroupOption);
+
+                              return (
+                                <label
+                                  key={ageGroupOption}
+                                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/40"
+                                >
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={() =>
+                                      field.onChange(
+                                        toggleMetadataValue(field.value, ageGroupOption)
+                                      )
+                                    }
+                                  />
+                                  <span>{ageGroupOption}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Add custom age group"
+                              value={customAgeGroup}
+                              onChange={(event) => setCustomAgeGroup(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  event.preventDefault();
+                                  handleAddCustomAgeGroup(field.value, field.onChange);
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleAddCustomAgeGroup(field.value, field.onChange)}
+                            >
+                              Add
+                            </Button>
+                          </div>
+
+                          {selectedAgeGroups.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {selectedAgeGroups.map((ageGroupValue) => (
+                                <Badge
+                                  key={ageGroupValue}
+                                  variant="secondary"
+                                  className="gap-1.5 pr-1"
+                                >
+                                  {ageGroupValue}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      field.onChange(
+                                        removeMetadataValue(field.value, ageGroupValue)
+                                      )
+                                    }
+                                    className="rounded-full p-0.5 hover:bg-black/10"
+                                    aria-label={`Remove ${ageGroupValue}`}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <FormDescription className="text-xs">
+                          Choose one or more age groups for this book.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField

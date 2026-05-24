@@ -82,7 +82,7 @@ router.get("/admin/stats", async (req, res) => {
       coverImage: b.coverImage,
       category: b.category,
       language: b.language,
-      ageGroup: b.ageGroup,
+      ageGroup: formatStoredMultiValue(b.ageGroup),
       pages: b.pages ?? null,
       downloadUrl: b.downloadUrl ?? null,
       stock: b.stock,
@@ -94,3 +94,36 @@ router.get("/admin/stats", async (req, res) => {
 });
 
 export default router;
+
+function parseStoredMultiValue(value?: string | null): string[] {
+  const rawValue = value?.trim();
+  if (!rawValue) return [];
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (Array.isArray(parsed)) {
+      return Array.from(
+        new Set(
+          parsed
+            .map((item) => (typeof item === "string" ? item.trim() : ""))
+            .filter(Boolean)
+        )
+      );
+    }
+  } catch {
+    // Support legacy plain-string rows.
+  }
+
+  return Array.from(
+    new Set(
+      rawValue
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function formatStoredMultiValue(value?: string | null): string {
+  return parseStoredMultiValue(value).join(", ");
+}

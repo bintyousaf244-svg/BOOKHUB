@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BookCoverImage } from "@/components/BookCoverImage";
+import { parseBookMetadataList } from "@/lib/bookMetadata";
 
 export default function AdminBooks() {
   const [search, setSearch] = useState("");
@@ -153,7 +154,7 @@ export default function AdminBooks() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{book.category}</div>
-                      <div className="text-xs text-muted-foreground">{book.ageGroup} &bull; {book.language}</div>
+                      <div className="text-xs text-muted-foreground">{parseBookMetadataList(book.ageGroup).join(", ")} &bull; {book.language}</div>
                     </TableCell>
                     <TableCell>
                       {book.isFree ? (

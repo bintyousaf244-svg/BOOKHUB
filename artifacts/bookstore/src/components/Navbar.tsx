@@ -28,6 +28,7 @@ export function Navbar() {
     { href: "/books", label: "All Books", forceReload: true },
     { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
     { href: "/books?ageGroup=Adults", label: "Adults", forceReload: true },
+    { href: "/books?ageGroup=All%20Ages", label: "All Ages", forceReload: true },
     { href: "/free", label: "Free Resources", forceReload: false },
     { href: "/my-orders", label: "My Orders", forceReload: false },
   ];
