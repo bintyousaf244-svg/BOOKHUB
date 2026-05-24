@@ -1,4 +1,5 @@
 export type LayoutMode = "left" | "center" | "split" | "grid" | "stack" | "cards" | "inline" | "compact" | "spacious";
+export type TextEffect = "none" | "glow" | "outline" | "highlight" | "3d" | "shadow";
 
 export interface WebsiteContent {
   navbar: {
@@ -53,6 +54,7 @@ export interface WebsiteContent {
       primaryButtonTextColor?: string;
       secondaryButtonBgColor?: string;
       secondaryButtonTextColor?: string;
+      titleEffect?: TextEffect;
     };
     trust: {
       title: string;
@@ -125,6 +127,7 @@ export interface WebsiteContent {
       buttonTextColor: string;
       buttonLink: string;
       bannerLayout: "left" | "right";
+      titleEffect?: TextEffect;
     };
     deals: {
       badge: string;
@@ -156,6 +159,7 @@ export interface WebsiteContent {
       secondaryButtonLink: string;
       primaryButtonTextColor?: string;
       secondaryButtonTextColor?: string;
+      titleEffect?: TextEffect;
     };
   };
 }
@@ -229,6 +233,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       overlayOpacity: 0,
       primaryButtonLink: "/books",
       secondaryButtonLink: "/free",
+      titleEffect: "none",
     },
     trust: {
       title: "Why Families Choose Us",
@@ -307,6 +312,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       buttonTextColor: "#ffffff",
       buttonLink: "/free",
       bannerLayout: "left",
+      titleEffect: "shadow",
     },
     deals: {
       badge: "Limited Offers",
@@ -336,6 +342,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       bodySize: 18,
       primaryButtonLink: "/books",
       secondaryButtonLink: "/free",
+      titleEffect: "none",
     },
   },
 };

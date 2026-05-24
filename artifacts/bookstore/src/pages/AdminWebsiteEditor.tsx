@@ -502,6 +502,19 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
+              <Field label="Title Visual Effect" description="Add premium glow, outline, 3D shadow or background highlight to the hero heading.">
+                <Select value={form.home.hero.titleEffect || "none"} onValueChange={(value) => updateHome("hero", { titleEffect: value as any })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None (Plain Text)</SelectItem>
+                    <SelectItem value="glow">Vibrant Glow</SelectItem>
+                    <SelectItem value="outline">High Contrast Outline</SelectItem>
+                    <SelectItem value="highlight">Gradient Background Highlight</SelectItem>
+                    <SelectItem value="3d">Retro 3D Perspective</SelectItem>
+                    <SelectItem value="shadow">Deep Drop Shadow</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
               <Field label="Title Size">
                 <Input type="number" min={32} max={84} value={form.home.hero.titleSize} onChange={(event) => updateHome("hero", { titleSize: Number(event.target.value) || 56 })} />
               </Field>
@@ -802,6 +815,19 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
+              <Field label="Title Visual Effect" description="Apply premium text styling effects to the heading.">
+                <Select value={form.home.freeResources.titleEffect || "none"} onValueChange={(value) => updateHome("freeResources", { titleEffect: value as any })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None (Plain Text)</SelectItem>
+                    <SelectItem value="glow">Vibrant Glow</SelectItem>
+                    <SelectItem value="outline">High Contrast Outline</SelectItem>
+                    <SelectItem value="highlight">Gradient Background Highlight</SelectItem>
+                    <SelectItem value="3d">Retro 3D Perspective</SelectItem>
+                    <SelectItem value="shadow">Deep Drop Shadow</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
               <Field label="Checkmark Color">
                 <Input type="color" value={form.home.freeResources.checkmarkColor || "#bfa345"} onChange={(event) => updateHome("freeResources", { checkmarkColor: event.target.value })} />
               </Field>
@@ -892,6 +918,19 @@ export default function AdminWebsiteEditor() {
                   <SelectContent>
                     <SelectItem value="center">Centered</SelectItem>
                     <SelectItem value="split">Split</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Title Visual Effect" description="Apply premium text styling effects to the call-to-action title.">
+                <Select value={form.home.cta.titleEffect || "none"} onValueChange={(value) => updateHome("cta", { titleEffect: value as any })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None (Plain Text)</SelectItem>
+                    <SelectItem value="glow">Vibrant Glow</SelectItem>
+                    <SelectItem value="outline">High Contrast Outline</SelectItem>
+                    <SelectItem value="highlight">Gradient Background Highlight</SelectItem>
+                    <SelectItem value="3d">Retro 3D Perspective</SelectItem>
+                    <SelectItem value="shadow">Deep Drop Shadow</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>

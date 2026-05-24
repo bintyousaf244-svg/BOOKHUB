@@ -15,6 +15,42 @@ const getTrustIcon = (name?: string, index: number = 0) => {
   return IconComponent || trustIcons[index % trustIcons.length];
 };
 
+const getTextEffectStyle = (effect?: string, accentColor?: string, textColor?: string): React.CSSProperties => {
+  if (!effect || effect === "none") return {};
+  
+  const accent = accentColor || "#D97B8F";
+  const text = textColor || "#ffffff";
+  
+  switch (effect) {
+    case "glow":
+      return {
+        textShadow: `0 0 8px ${accent}, 0 0 20px ${accent}, 0 0 35px ${accent}80, 0 0 50px ${accent}40`,
+      };
+    case "outline":
+      return {
+        textShadow: `-1px -1px 0 ${accent}, 1px -1px 0 ${accent}, -1px 1px 0 ${accent}, 1px 1px 0 ${accent}, 0 0 8px rgba(0,0,0,0.5)`,
+      };
+    case "highlight":
+      return {
+        background: `linear-gradient(120deg, ${accent}33 0%, ${accent}66 100%)`,
+        padding: "0.1em 0.3em",
+        borderRadius: "0.2em",
+        boxShadow: `0 4px 12px ${accent}20`,
+        display: "inline-block",
+      };
+    case "3d":
+      return {
+        textShadow: `1px 1px 0px ${accent}, 2px 2px 0px ${accent}cc, 3px 3px 0px ${accent}99, 4px 4px 0px rgba(0,0,0,0.25)`,
+      };
+    case "shadow":
+      return {
+        textShadow: "0 4px 16px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4)",
+      };
+    default:
+      return {};
+  }
+};
+
 function BookSkeleton() {
   return (
     <div className="space-y-3">
@@ -97,7 +133,12 @@ export default function Home() {
 
             <h1
               className="font-bold leading-tight mb-6"
-              style={{ color: hero.textColor, fontFamily: hero.fontFamily, fontSize: `clamp(2.5rem, 4vw, ${hero.titleSize}px)` }}
+              style={{
+                color: hero.textColor,
+                fontFamily: hero.fontFamily,
+                fontSize: `clamp(2.5rem, 4vw, ${hero.titleSize}px)`,
+                ...getTextEffectStyle(hero.titleEffect, hero.accentColor, hero.textColor),
+              }}
             >
               {hero.titleLine1}
               <br />
@@ -282,7 +323,12 @@ export default function Home() {
                   <Download className="h-4 w-4" /> {freeResources.badge}
                 </div>
                 <h2
-                  style={{ color: freeResources.textColor, fontFamily: freeResources.fontFamily, fontSize: `clamp(2.4rem, 6vw, ${freeResources.titleSize}px)`, textShadow: "0 2px 15px rgba(0,0,0,0.8)" }}
+                  style={{
+                    color: freeResources.textColor,
+                    fontFamily: freeResources.fontFamily,
+                    fontSize: `clamp(2.4rem, 6vw, ${freeResources.titleSize}px)`,
+                    ...getTextEffectStyle(freeResources.titleEffect, freeResources.accentColor, freeResources.textColor),
+                  }}
                   className="font-bold leading-[1.06] mb-6 max-w-3xl"
                 >
                   {freeResources.title}
@@ -412,7 +458,15 @@ export default function Home() {
             <div className="inline-flex items-center px-4 py-1 rounded-full text-sm font-bold mb-6" style={{ background: `${cta.secondaryAccentColor}26`, color: cta.secondaryAccentColor }}>
               {cta.badge}
             </div>
-            <h2 style={{ color: cta.textColor, fontFamily: cta.fontFamily, fontSize: `clamp(2rem, 4vw, ${cta.titleSize}px)` }} className="font-bold mb-4">
+            <h2
+              style={{
+                color: cta.textColor,
+                fontFamily: cta.fontFamily,
+                fontSize: `clamp(2rem, 4vw, ${cta.titleSize}px)`,
+                ...getTextEffectStyle(cta.titleEffect, cta.accentColor, cta.textColor),
+              }}
+              className="font-bold mb-4"
+            >
               {cta.title}
             </h2>
             <p className="mb-8" style={{ color: `${cta.textColor}bf`, fontSize: cta.bodySize }}>{cta.description}</p>
