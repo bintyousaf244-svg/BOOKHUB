@@ -17,6 +17,16 @@ function BookSkeleton() {
   );
 }
 
+const freeCircleDesktopPositions = [
+  { size: 120, top: "-5%", left: "calc(50% - 60px)", delay: "0s", z: 2 },
+  { size: 110, top: "10%", right: "5%", delay: "1s", z: 2 },
+  { size: 160, top: "50%", left: "50%", marginTop: -80, marginLeft: -80, delay: "2s", z: 5 },
+  { size: 115, bottom: "5%", right: "10%", delay: "0.5s", z: 2 },
+  { size: 120, bottom: "-15%", left: "calc(50% - 60px)", delay: "1.5s", z: 2 },
+  { size: 110, bottom: "10%", left: "5%", delay: "2.2s", z: 2 },
+  { size: 120, top: "10%", left: "0%", delay: "0.8s", z: 2 },
+];
+
 export default function Home() {
   const { content } = useWebsiteContent();
   const { data: featuredBooks, isLoading: loadingFeatured } = useGetFeaturedBooks();
@@ -45,6 +55,13 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full">
+      <style>{`
+        @keyframes bookhub-free-float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0px); }
+        }
+      `}</style>
       <section className="relative overflow-hidden" style={{ background: hero.backgroundColor, minHeight: 580 }}>
         {hero.backgroundImage && (
           <div
@@ -233,7 +250,7 @@ export default function Home() {
             }}
           >
             <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08), transparent 18%), radial-gradient(circle at 80% 18%, rgba(255,255,255,0.07), transparent 16%)" }} />
-            <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center">
+            <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-12">
               <div className="flex-1 min-w-[300px]">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-5" style={{ background: freeResources.accentColor, color: freeResources.textColor }}>
                   <Download className="h-4 w-4" /> {freeResources.badge}
@@ -259,8 +276,8 @@ export default function Home() {
                       className="flex items-center gap-4"
                       style={{ color: freeResources.textColor }}
                     >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm flex-shrink-0" style={{ background: "rgba(191,163,69,0.95)", color: "#24122d", textShadow: "0 2px 8px rgba(0,0,0,0.25)" }}>
-                        ✓
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm flex-shrink-0" style={{ color: "#bfa345", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
+                        <span style={{ fontSize: 20, lineHeight: 1 }}>✓</span>
                       </span>
                       <span className="text-lg leading-snug" style={{ color: "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>{point}</span>
                     </div>
@@ -268,45 +285,68 @@ export default function Home() {
                 </div>
 
                 <Link href="/free">
-                  <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-xl transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: "#4a2955", color: "#ffffff" }}>
+                  <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-xl transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: "#4a2955", color: "#ffffff", boxShadow: "0 12px 25px rgba(74, 41, 85, 0.3)" }}>
                     {freeResources.buttonLabel} <ArrowRight className="h-4 w-4" />
                   </button>
                 </Link>
               </div>
 
               <div className="flex-1 min-w-[300px]">
-                <div className="relative h-[380px] md:h-[420px]">
+                <div className="relative h-[380px] md:h-[420px] lg:h-[400px]">
                   <div
                     className="absolute top-1/2 left-1/2 w-[90%] h-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[25px]"
                     style={{ background: "radial-gradient(circle, rgba(255,215,0,0.25) 0%, rgba(200,150,255,0.10) 40%, rgba(0,0,0,0) 70%)" }}
                   />
-                  {freeResourceSpotlights.slice(0, 7).map((book, index) => (
-                    <Link key={book.id} href={`/books/${book.id}`}>
-                      <div
-                        className={`absolute ${freeCirclePositions[index] ?? freeCirclePositions[0]} rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 hover:-translate-y-2 border-[3px] border-white/60`}
-                        style={{
-                          boxShadow: "0 0 30px rgba(255,215,0,0.30), 0 15px 35px rgba(0,0,0,0.50)",
-                        }}
-                      >
-                        <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full object-cover" />
-                      </div>
-                    </Link>
-                  ))}
+                  <div className="hidden lg:block relative w-full h-full">
+                    {freeResourceSpotlights.slice(0, 7).map((book, index) => {
+                      const position = freeCircleDesktopPositions[index];
+                      if (!position) return null;
+
+                      return (
+                        <Link key={book.id} href={`/books/${book.id}`}>
+                          <div
+                            className="absolute rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 hover:-translate-y-2"
+                            style={{
+                              width: position.size,
+                              height: position.size,
+                              top: position.top,
+                              right: position.right,
+                              bottom: position.bottom,
+                              left: position.left,
+                              marginTop: position.marginTop,
+                              marginLeft: position.marginLeft,
+                              zIndex: position.z,
+                              border: "3px solid rgba(255,255,255,0.6)",
+                              boxShadow: "0 0 30px rgba(255,215,0,0.30), 0 15px 35px rgba(0,0,0,0.50)",
+                              animation: `bookhub-free-float 6s ease-in-out ${position.delay} infinite alternate`,
+                            }}
+                          >
+                            <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full object-cover" />
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 lg:hidden">
+                    {freeResourceSpotlights.slice(0, 4).map((book, index) => (
+                      <Link key={book.id} href={`/books/${book.id}`}>
+                        <div
+                          className="rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+                          style={{
+                            aspectRatio: "1 / 1",
+                            border: "3px solid rgba(255,255,255,0.6)",
+                            boxShadow: "0 0 20px rgba(255,215,0,0.20), 0 10px 25px rgba(0,0,0,0.35)",
+                            animation: `bookhub-free-float 6s ease-in-out ${index * 0.4}s infinite alternate`,
+                          }}
+                        >
+                          <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full object-cover" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {freeResourceSpotlights.length > 0 && (
-              <div className="relative z-10 mt-8 grid grid-cols-2 gap-4 lg:hidden">
-                {freeResourceSpotlights.slice(0, 4).map((book) => (
-                  <Link key={book.id} href={`/books/${book.id}`}>
-                    <div className="overflow-hidden rounded-full border-[3px] border-white/60 cursor-pointer transition-transform duration-300 hover:scale-[1.02]" style={{ boxShadow: "0 0 20px rgba(255,215,0,0.20), 0 10px 25px rgba(0,0,0,0.35)" }}>
-                      <BookCoverImage src={book.coverImage} alt={book.title} className="aspect-square w-full object-cover" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
 
           <div className={`grid grid-cols-2 md:grid-cols-3 ${freeResources.layout === "spacious" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-4 md:gap-5`}>
