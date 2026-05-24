@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useGetFeaturedBooks, useGetOnSaleBooks, useGetFreeBooks } from "@workspace/api-client-react";
 import { ArrowRight, BookHeart, BookOpen, Download, GraduationCap, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { BookCard } from "@/components/BookCard";
+import { BookCoverImage } from "@/components/BookCoverImage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWebsiteContent } from "@/context/WebsiteContentContext";
 
@@ -29,6 +30,7 @@ export default function Home() {
   const freeResources = content.home.freeResources;
   const deals = content.home.deals;
   const cta = content.home.cta;
+  const freeResourceSpotlights = freeBooks?.slice(0, 5) ?? [];
 
   const trustIcons = [GraduationCap, BookHeart, ShieldCheck];
 
@@ -214,25 +216,95 @@ export default function Home() {
 
       <section className="py-20" style={{ background: freeResources.backgroundColor }}>
         <div className="container mx-auto px-4">
-          <div className={`relative overflow-hidden rounded-3xl ${freeResources.layout === "spacious" ? "p-12 md:p-16" : "p-10 md:p-14"} mb-12 text-center`} style={{ background: freeResources.bannerBackground }}>
-            <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-10" style={{ background: freeResources.accentColor }} />
-            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full opacity-10" style={{ background: freeResources.accentColor }} />
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-4" style={{ background: freeResources.accentColor, color: freeResources.textColor }}>
-                <Download className="h-4 w-4" /> {freeResources.badge}
+          <div
+            className={`relative overflow-hidden rounded-[2rem] ${freeResources.layout === "spacious" ? "p-8 md:p-12" : "p-6 md:p-10"} mb-12`}
+            style={{ background: freeResources.bannerBackground }}
+          >
+            <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 30%), radial-gradient(circle at bottom right, rgba(255,255,255,0.12), transparent 24%)" }} />
+            <div className="absolute inset-x-0 bottom-0 h-24 opacity-30" style={{ background: "linear-gradient(180deg, transparent, rgba(16, 6, 26, 0.55))" }} />
+            <div className="absolute -left-12 bottom-0 h-48 w-48 rounded-full opacity-10" style={{ background: freeResources.accentColor }} />
+            <div className="absolute -right-10 top-0 h-56 w-56 rounded-full opacity-10" style={{ background: freeResources.accentColor }} />
+
+            <div className="relative z-10 grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-5" style={{ background: freeResources.accentColor, color: freeResources.textColor }}>
+                  <Download className="h-4 w-4" /> {freeResources.badge}
+                </div>
+                <h2
+                  style={{ color: freeResources.textColor, fontFamily: freeResources.fontFamily, fontSize: `clamp(2.3rem, 5vw, ${freeResources.titleSize}px)` }}
+                  className="font-bold leading-tight mb-4"
+                >
+                  {freeResources.title}
+                </h2>
+                <p className="max-w-xl mb-8 leading-relaxed" style={{ color: `${freeResources.textColor}d9`, fontSize: freeResources.bodySize }}>
+                  {freeResources.description}
+                </p>
+
+                <div className="space-y-4 mb-8">
+                  {[
+                    "Free books your visitors can preview before downloading",
+                    "Clickable covers that open each book page directly",
+                    "A more editorial, story-first layout like your reference",
+                  ].map((point) => (
+                    <div key={point} className="flex items-center gap-3" style={{ color: freeResources.textColor }}>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold" style={{ background: "rgba(255,255,255,0.18)" }}>
+                        ✓
+                      </span>
+                      <span className="text-base md:text-lg" style={{ color: `${freeResources.textColor}e6` }}>{point}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Link href="/free">
+                  <button className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: "#ffffff", color: "#582C6F" }}>
+                    {freeResources.buttonLabel} <ArrowRight className="h-4 w-4" />
+                  </button>
+                </Link>
               </div>
-              <h2 style={{ color: freeResources.textColor, fontFamily: freeResources.fontFamily, fontSize: `clamp(2rem, 4vw, ${freeResources.titleSize}px)` }} className="font-bold mb-3">
-                {freeResources.title}
-              </h2>
-              <p className="max-w-xl mx-auto mb-6" style={{ color: `${freeResources.textColor}bf`, fontSize: freeResources.bodySize }}>
-                {freeResources.description}
-              </p>
-              <Link href="/free">
-                <button className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: "#ffffff", color: "#582C6F" }}>
-                  {freeResources.buttonLabel} <ArrowRight className="h-4 w-4" />
-                </button>
-              </Link>
+
+              <div className="relative min-h-[420px] hidden lg:block">
+                {freeResourceSpotlights[0] && (
+                  <Link href={`/books/${freeResourceSpotlights[0].id}`}>
+                    <div className="absolute left-[28%] top-[24%] h-56 w-56 cursor-pointer rounded-full border-4 border-white/70 shadow-2xl transition-transform duration-300 hover:scale-105">
+                      <BookCoverImage src={freeResourceSpotlights[0].coverImage} alt={freeResourceSpotlights[0].title} className="h-full w-full rounded-full object-cover" />
+                    </div>
+                  </Link>
+                )}
+                {freeResourceSpotlights.slice(1, 5).map((book, index) => {
+                  const positions = [
+                    "left-[2%] top-[4%] h-36 w-36",
+                    "right-[8%] top-[0%] h-40 w-40",
+                    "left-[12%] bottom-[6%] h-32 w-32",
+                    "right-[2%] bottom-[2%] h-36 w-36",
+                  ];
+
+                  return (
+                    <Link key={book.id} href={`/books/${book.id}`}>
+                      <div className={`absolute ${positions[index]} cursor-pointer rounded-full border-4 border-white/70 shadow-xl transition-transform duration-300 hover:scale-105`}>
+                        <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full rounded-full object-cover" />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
+
+            {freeResourceSpotlights.length > 0 && (
+              <div className="relative z-10 mt-8 grid grid-cols-2 gap-4 lg:hidden">
+                {freeResourceSpotlights.slice(0, 4).map((book) => (
+                  <Link key={book.id} href={`/books/${book.id}`}>
+                    <div className="overflow-hidden rounded-3xl border border-white/20 bg-white/10 backdrop-blur cursor-pointer">
+                      <BookCoverImage src={book.coverImage} alt={book.title} className="aspect-[4/3] w-full object-cover" />
+                      <div className="p-3">
+                        <p className="line-clamp-1 text-sm font-semibold" style={{ color: freeResources.textColor }}>
+                          {book.title}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className={`grid grid-cols-2 md:grid-cols-3 ${freeResources.layout === "spacious" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-4 md:gap-5`}>
