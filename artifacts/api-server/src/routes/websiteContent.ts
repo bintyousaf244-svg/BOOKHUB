@@ -1,13 +1,42 @@
 import { Router } from "express";
 import { db, websiteContentTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { z } from "zod";
 
 const router = Router();
+const fallbackPath = path.resolve(process.cwd(), "data", "website-content.json");
 
 const updateBody = z.object({
   content: z.record(z.unknown()),
 });
+
+async function readFallbackContent() {
+  try {
+    const raw = await readFile(fallbackPath, "utf8");
+    const parsed = JSON.parse(raw) as { content?: Record<string, unknown>; updatedAt?: string };
+    return {
+      content: parsed.content ?? {},
+      updatedAt: parsed.updatedAt ?? new Date().toISOString(),
+    };
+  } catch {
+    return {
+      content: {},
+      updatedAt: new Date().toISOString(),
+    };
+  }
+}
+
+async function writeFallbackContent(content: Record<string, unknown>) {
+  await mkdir(path.dirname(fallbackPath), { recursive: true });
+  const payload = {
+    content,
+    updatedAt: new Date().toISOString(),
+  };
+  await writeFile(fallbackPath, JSON.stringify(payload, null, 2), "utf8");
+  return payload;
+}
 
 async function getOrCreateWebsiteContent() {
   const rows = await db.select().from(websiteContentTable).limit(1);
@@ -23,11 +52,16 @@ async function getOrCreateWebsiteContent() {
 }
 
 router.get("/website-content", async (_req, res) => {
-  const settings = await getOrCreateWebsiteContent();
-  res.json({
-    content: settings.content ?? {},
-    updatedAt: settings.updatedAt.toISOString(),
-  });
+  try {
+    const settings = await getOrCreateWebsiteContent();
+    res.json({
+      content: settings.content ?? {},
+      updatedAt: settings.updatedAt.toISOString(),
+    });
+  } catch {
+    const fallback = await readFallbackContent();
+    res.json(fallback);
+  }
 });
 
 router.put("/admin/website-content", async (req, res) => {
@@ -37,20 +71,25 @@ router.put("/admin/website-content", async (req, res) => {
     return;
   }
 
-  const settings = await getOrCreateWebsiteContent();
-  const [updated] = await db
-    .update(websiteContentTable)
-    .set({
-      content: parsed.data.content,
-      updatedAt: new Date(),
-    })
-    .where(eq(websiteContentTable.id, settings.id))
-    .returning();
+  try {
+    const settings = await getOrCreateWebsiteContent();
+    const [updated] = await db
+      .update(websiteContentTable)
+      .set({
+        content: parsed.data.content,
+        updatedAt: new Date(),
+      })
+      .where(eq(websiteContentTable.id, settings.id))
+      .returning();
 
-  res.json({
-    content: updated.content ?? {},
-    updatedAt: updated.updatedAt.toISOString(),
-  });
+    res.json({
+      content: updated.content ?? {},
+      updatedAt: updated.updatedAt.toISOString(),
+    });
+  } catch {
+    const fallback = await writeFallbackContent(parsed.data.content);
+    res.json(fallback);
+  }
 });
 
 export default router;
