@@ -14,6 +14,8 @@ export const booksTable = pgTable("books", {
   isFree: boolean("is_free").notNull().default(false),
   isFeatured: boolean("is_featured").notNull().default(false),
   coverImage: text("cover_image").notNull(),
+  previewImage1: text("preview_image_1"),
+  previewImage2: text("preview_image_2"),
   category: text("category").notNull(),
   language: text("language").notNull().default("English"),
   ageGroup: text("age_group").notNull().default("All Ages"),

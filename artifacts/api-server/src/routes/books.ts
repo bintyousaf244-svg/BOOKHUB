@@ -21,6 +21,7 @@ import {
 
 const router = Router();
 let ensureBooksSortOrderColumnPromise: Promise<void> | null = null;
+let ensureBooksPreviewColumnsPromise: Promise<void> | null = null;
 
 function ensureBooksSortOrderColumn() {
   if (!ensureBooksSortOrderColumnPromise) {
@@ -36,9 +37,28 @@ function ensureBooksSortOrderColumn() {
   return ensureBooksSortOrderColumnPromise;
 }
 
+function ensureBooksPreviewColumns() {
+  if (!ensureBooksPreviewColumnsPromise) {
+    ensureBooksPreviewColumnsPromise = db
+      .execute(sql`
+        alter table books
+        add column if not exists preview_image_1 text,
+        add column if not exists preview_image_2 text
+      `)
+      .then(() => undefined)
+      .catch((error) => {
+        ensureBooksPreviewColumnsPromise = null;
+        throw error;
+      });
+  }
+
+  return ensureBooksPreviewColumnsPromise;
+}
+
 router.get("/books/featured", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const books = await db
       .select()
       .from(booksTable)
@@ -59,6 +79,7 @@ router.get("/books/featured", async (req, res) => {
 router.get("/books/on-sale", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const books = await db
       .select()
       .from(booksTable)
@@ -84,6 +105,7 @@ router.get("/books/on-sale", async (req, res) => {
 router.get("/books/free", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const books = await db
       .select()
       .from(booksTable)
@@ -103,6 +125,7 @@ router.get("/books/free", async (req, res) => {
 router.get("/books", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const parsed = ListBooksQueryParams.safeParse(req.query);
 
     if (!parsed.success) {
@@ -277,6 +300,7 @@ router.get("/books/cover", async (req, res) => {
 router.get("/books/:id", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const parsed = GetBookParams.safeParse({
       id: Number(req.params.id),
     });
@@ -325,6 +349,7 @@ router.get("/books/:id", async (req, res) => {
 router.post("/books", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const parsed =
       CreateBookBody.safeParse(req.body);
 
@@ -360,6 +385,10 @@ router.post("/books", async (req, res) => {
           data.isFeatured ?? false,
         coverImage:
           data.coverImage,
+        previewImage1:
+          data.previewImage1 ?? null,
+        previewImage2:
+          data.previewImage2 ?? null,
         category: normalizedCategories,
         language: normalizedLanguages,
         ageGroup: data.ageGroup,
@@ -397,6 +426,7 @@ router.post("/books", async (req, res) => {
 router.put("/books/:id", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const paramsParsed = UpdateBookParams.safeParse({
       id: Number(req.params.id),
     });
@@ -457,6 +487,8 @@ router.put("/books/:id", async (req, res) => {
     if (data.isFree !== undefined) updateData.isFree = data.isFree;
     if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
     if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
+    if (data.previewImage1 !== undefined) updateData.previewImage1 = data.previewImage1;
+    if (data.previewImage2 !== undefined) updateData.previewImage2 = data.previewImage2;
     if (data.category !== undefined) updateData.category = normalizeStoredMultiValue(data.category);
     if (data.language !== undefined) updateData.language = normalizeStoredMultiValue(data.language);
     if (data.ageGroup !== undefined) updateData.ageGroup = data.ageGroup;
@@ -505,6 +537,7 @@ router.put("/books/:id", async (req, res) => {
 router.delete("/books/:id", async (req, res) => {
   try {
     await ensureBooksSortOrderColumn();
+    await ensureBooksPreviewColumns();
     const parsed = DeleteBookParams.safeParse({
       id: Number(req.params.id),
     });
@@ -629,6 +662,8 @@ function mapBook(
     isFree: b.isFree,
     isFeatured: b.isFeatured,
     coverImage: b.coverImage,
+    previewImage1: b.previewImage1 ?? null,
+    previewImage2: b.previewImage2 ?? null,
     category: formatStoredMultiValue(b.category),
     language: formatStoredMultiValue(b.language),
     ageGroup: b.ageGroup,

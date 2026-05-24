@@ -64,6 +64,9 @@ export default function BookDetail() {
   const inCart = items.some((i) => i.bookId === book.id);
   const categoryValues = parseBookMetadataList(book.category);
   const languageValues = parseBookMetadataList(book.language);
+  const previewImages = [book.previewImage1, book.previewImage2].filter(
+    (image): image is string => Boolean(image),
+  );
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -168,6 +171,33 @@ export default function BookDetail() {
           <div className="prose prose-slate dark:prose-invert mb-10 max-w-none leading-relaxed text-muted-foreground">
             <p>{book.description}</p>
           </div>
+
+          {previewImages.length > 0 && (
+            <div className="mb-10 space-y-5">
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-foreground">
+                  Peek Inside This Book
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Preview a few inside pages so customers can see the content before buying.
+                </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {previewImages.map((image, index) => (
+                  <div
+                    key={`${image}-${index}`}
+                    className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+                  >
+                    <img
+                      src={image}
+                      alt={`${book.title} inside page ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm md:flex-row md:p-8">
             <div className="flex flex-col text-center md:text-left">

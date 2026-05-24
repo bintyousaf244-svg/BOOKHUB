@@ -61,6 +61,8 @@ const bookSchema = z.object({
   isFree: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
   coverImage: z.string().min(1, "Cover image is required"),
+  previewImage1: z.string().optional().nullable(),
+  previewImage2: z.string().optional().nullable(),
   sortOrder: z.coerce.number().min(0).default(0),
   category: z.string().min(1, "Category is required"),
   language: z.string().min(1, "Language is required"),
@@ -186,6 +188,8 @@ export default function AdminBookEdit() {
   const queryClient = useQueryClient();
 
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const previewImage1InputRef = useRef<HTMLInputElement>(null);
+  const previewImage2InputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -223,6 +227,8 @@ export default function AdminBookEdit() {
       isFree: false,
       isFeatured: false,
       coverImage: "",
+      previewImage1: "",
+      previewImage2: "",
       sortOrder: 0,
       category: "kids-learning",
       language: "English",
@@ -245,6 +251,8 @@ export default function AdminBookEdit() {
         isFree: book.isFree,
         isFeatured: book.isFeatured,
         coverImage: book.coverImage,
+        previewImage1: book.previewImage1 || "",
+        previewImage2: book.previewImage2 || "",
         sortOrder: book.sortOrder ?? 0,
         category: resolveCategoryNames(book.category, categoriesData),
         language: book.language,
@@ -260,7 +268,12 @@ export default function AdminBookEdit() {
     }
   }, [isEditing, book, form, categoriesData]);
 
-  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: "coverImage" | "previewImage1" | "previewImage2",
+    successMessage: string,
+    inputRef: React.RefObject<HTMLInputElement | null>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -274,14 +287,14 @@ export default function AdminBookEdit() {
 
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      form.setValue("coverImage", dataUrl, { shouldValidate: true, shouldDirty: true });
-      toast({ title: "Cover image saved with this book" });
+      form.setValue(fieldName, dataUrl, { shouldValidate: true, shouldDirty: true });
+      toast({ title: successMessage });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to read image file";
       toast({ title: message, variant: "destructive" });
     }
 
-    if (coverInputRef.current) coverInputRef.current.value = "";
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -316,6 +329,8 @@ export default function AdminBookEdit() {
   const onSubmit = (data: BookFormValues) => {
     const payload = {
       ...data,
+      previewImage1: data.previewImage1 || null,
+      previewImage2: data.previewImage2 || null,
       downloadUrl: data.downloadUrl || null,
     };
 
@@ -354,6 +369,8 @@ export default function AdminBookEdit() {
   const isFree = form.watch("isFree");
   const isOnSale = form.watch("isOnSale");
   const currentCoverImage = form.watch("coverImage");
+  const currentPreviewImage1 = form.watch("previewImage1");
+  const currentPreviewImage2 = form.watch("previewImage2");
   const currentDownloadUrl = form.watch("downloadUrl");
   const isAnyUploading = fileUpload.isUploading;
 
@@ -429,7 +446,14 @@ export default function AdminBookEdit() {
                               type="file"
                               accept="image/*"
                               className="hidden"
-                              onChange={handleCoverChange}
+                              onChange={(event) =>
+                                handleImageChange(
+                                  event,
+                                  "coverImage",
+                                  "Cover image saved with this book",
+                                  coverInputRef,
+                                )
+                              }
                             />
                             <Button
                               type="button"
@@ -470,6 +494,150 @@ export default function AdminBookEdit() {
                           </p>
                           <FormMessage />
                         </div>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="previewImage1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Inside Page Image 1</FormLabel>
+                      <div className="space-y-3">
+                        <div className="flex h-40 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
+                          {currentPreviewImage1 ? (
+                            <img
+                              src={currentPreviewImage1}
+                              alt="Inside page preview 1"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="h-7 w-7 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            ref={previewImage1InputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) =>
+                              handleImageChange(
+                                event,
+                                "previewImage1",
+                                "Inside page image 1 saved with this book",
+                                previewImage1InputRef,
+                              )
+                            }
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => previewImage1InputRef.current?.click()}
+                          >
+                            <Upload className="mr-1 h-4 w-4" />
+                            Upload Image
+                          </Button>
+                          {currentPreviewImage1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                form.setValue("previewImage1", "", {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                })
+                              }
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="mr-1 h-4 w-4" />
+                              Clear
+                            </Button>
+                          )}
+                        </div>
+                        <FormControl>
+                          <Input placeholder="https://example.com/inside-page-1.jpg" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Show one inside page so customers can preview what is inside the book.
+                        </FormDescription>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="previewImage2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Inside Page Image 2</FormLabel>
+                      <div className="space-y-3">
+                        <div className="flex h-40 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
+                          {currentPreviewImage2 ? (
+                            <img
+                              src={currentPreviewImage2}
+                              alt="Inside page preview 2"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="h-7 w-7 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            ref={previewImage2InputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) =>
+                              handleImageChange(
+                                event,
+                                "previewImage2",
+                                "Inside page image 2 saved with this book",
+                                previewImage2InputRef,
+                              )
+                            }
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => previewImage2InputRef.current?.click()}
+                          >
+                            <Upload className="mr-1 h-4 w-4" />
+                            Upload Image
+                          </Button>
+                          {currentPreviewImage2 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                form.setValue("previewImage2", "", {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                })
+                              }
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="mr-1 h-4 w-4" />
+                              Clear
+                            </Button>
+                          )}
+                        </div>
+                        <FormControl>
+                          <Input placeholder="https://example.com/inside-page-2.jpg" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Add a second inside page preview to help customers decide before buying.
+                        </FormDescription>
+                        <FormMessage />
                       </div>
                     </FormItem>
                   )}
