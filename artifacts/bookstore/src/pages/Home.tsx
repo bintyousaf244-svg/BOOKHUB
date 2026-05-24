@@ -18,13 +18,13 @@ function BookSkeleton() {
 }
 
 const freeCircleDesktopPositions = [
-  { size: 120, top: "-5%", left: "calc(50% - 60px)", delay: "0s", z: 2 },
-  { size: 110, top: "10%", right: "5%", delay: "1s", z: 2 },
-  { size: 160, top: "50%", left: "50%", marginTop: -80, marginLeft: -80, delay: "2s", z: 5 },
-  { size: 115, bottom: "5%", right: "10%", delay: "0.5s", z: 2 },
-  { size: 120, bottom: "-15%", left: "calc(50% - 60px)", delay: "1.5s", z: 2 },
-  { size: 110, bottom: "10%", left: "5%", delay: "2.2s", z: 2 },
-  { size: 120, top: "10%", left: "0%", delay: "0.8s", z: 2 },
+  { size: 118, top: "2%", left: "50%", marginLeft: -59, delay: "0s", z: 2 },
+  { size: 112, top: "15%", right: "6%", delay: "0.9s", z: 2 },
+  { size: 168, top: "50%", left: "50%", marginTop: -84, marginLeft: -84, delay: "1.8s", z: 5 },
+  { size: 114, bottom: "14%", right: "10%", delay: "0.4s", z: 2 },
+  { size: 118, bottom: "1%", left: "50%", marginLeft: -59, delay: "1.3s", z: 2 },
+  { size: 112, bottom: "15%", left: "6%", delay: "2.1s", z: 2 },
+  { size: 118, top: "15%", left: "6%", delay: "0.7s", z: 2 },
 ];
 
 export default function Home() {
