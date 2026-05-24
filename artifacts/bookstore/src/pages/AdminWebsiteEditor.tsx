@@ -307,11 +307,14 @@ export default function AdminWebsiteEditor() {
               <Field label="Background Image URL">
                 <Input value={form.home.hero.backgroundImage} onChange={(event) => updateHome("hero", { backgroundImage: event.target.value })} />
               </Field>
+              <Field label="Background Image Opacity" description="Use 1 for a fully visible photo or lower it for a softer background.">
+                <Input type="number" min={0} max={1} step={0.05} value={form.home.hero.backgroundImageOpacity} onChange={(event) => updateHome("hero", { backgroundImageOpacity: Number(event.target.value) || 0 })} />
+              </Field>
               <Field label="Overlay CSS" description="Accepts solid colors or CSS gradients.">
                 <Input value={form.home.hero.overlayColor} onChange={(event) => updateHome("hero", { overlayColor: event.target.value })} />
               </Field>
-              <Field label="Overlay Opacity">
-                <Input type="number" min={0} max={1} step={0.05} value={form.home.hero.overlayOpacity} onChange={(event) => updateHome("hero", { overlayOpacity: Number(event.target.value) || 0.85 })} />
+              <Field label="Overlay Opacity" description="Set to 0 to remove the overlay completely.">
+                <Input type="number" min={0} max={1} step={0.05} value={form.home.hero.overlayOpacity} onChange={(event) => updateHome("hero", { overlayOpacity: Number(event.target.value) || 0 })} />
               </Field>
             </div>
             <Field label="Description">
@@ -505,6 +508,12 @@ export default function AdminWebsiteEditor() {
               </Field>
               <Field label="Banner Background" description="Supports gradients.">
                 <Input value={form.home.freeResources.bannerBackground} onChange={(event) => updateHome("freeResources", { bannerBackground: event.target.value })} />
+              </Field>
+              <Field label="Desktop Orbit Books" description="Total books shown in the desktop circular showcase, including the center book.">
+                <Input type="number" min={1} max={7} value={form.home.freeResources.spotlightDesktopCount} onChange={(event) => updateHome("freeResources", { spotlightDesktopCount: Number(event.target.value) || 7 })} />
+              </Field>
+              <Field label="Mobile Orbit Books" description="Total books shown in the mobile circular showcase.">
+                <Input type="number" min={1} max={6} value={form.home.freeResources.spotlightMobileCount} onChange={(event) => updateHome("freeResources", { spotlightMobileCount: Number(event.target.value) || 6 })} />
               </Field>
               <Field label="Title Size">
                 <Input type="number" min={20} max={56} value={form.home.freeResources.titleSize} onChange={(event) => updateHome("freeResources", { titleSize: Number(event.target.value) || 38 })} />

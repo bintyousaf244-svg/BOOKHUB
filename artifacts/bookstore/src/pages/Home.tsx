@@ -40,7 +40,7 @@ export default function Home() {
   const freeResources = content.home.freeResources;
   const deals = content.home.deals;
   const cta = content.home.cta;
-  const freeResourceSpotlights = freeBooks?.slice(0, 5) ?? [];
+  const freeResourceSpotlights = freeBooks?.slice(0, freeResources.spotlightDesktopCount) ?? [];
   const freeCirclePositions = [
     "w-[120px] h-[120px] top-[-2%] left-[calc(50%-60px)] z-[2]",
     "w-[110px] h-[110px] top-[10%] right-[5%] z-[2]",
@@ -65,11 +65,13 @@ export default function Home() {
       <section className="relative overflow-hidden" style={{ background: hero.backgroundColor, minHeight: 580 }}>
         {hero.backgroundImage && (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: `url("${hero.backgroundImage}")` }}
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url("${hero.backgroundImage}")`, opacity: hero.backgroundImageOpacity }}
           />
         )}
-        <div className="absolute inset-0" style={{ background: hero.overlayColor, opacity: hero.overlayOpacity }} />
+        {hero.overlayOpacity > 0 && (
+          <div className="absolute inset-0" style={{ background: hero.overlayColor, opacity: hero.overlayOpacity }} />
+        )}
         <div className="absolute -right-32 -top-32 w-[500px] h-[500px] rounded-full opacity-10" style={{ background: hero.accentColor }} />
         <div className="absolute -left-16 -bottom-24 w-72 h-72 rounded-full opacity-10" style={{ background: hero.accentColor }} />
 
@@ -245,7 +247,7 @@ export default function Home() {
           <div
             className="relative overflow-hidden rounded-[2rem] px-6 py-10 md:px-10 md:py-14 mb-12"
             style={{
-              background: "linear-gradient(rgba(40, 20, 50, 0.85), rgba(15, 10, 30, 0.95)), radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 18%), linear-gradient(135deg, #4a2955 0%, #24122d 100%)",
+              background: freeResources.bannerBackground,
               boxShadow: "0 30px 90px rgba(83, 37, 108, 0.22)",
             }}
           >
@@ -256,12 +258,12 @@ export default function Home() {
                   <Download className="h-4 w-4" /> {freeResources.badge}
                 </div>
                 <h2
-                  style={{ color: freeResources.textColor, fontFamily: freeResources.fontFamily, fontSize: "clamp(2.8rem, 6vw, 4.6rem)", textShadow: "0 2px 15px rgba(0,0,0,0.8)" }}
+                  style={{ color: freeResources.textColor, fontFamily: freeResources.fontFamily, fontSize: `clamp(2.4rem, 6vw, ${freeResources.titleSize}px)`, textShadow: "0 2px 15px rgba(0,0,0,0.8)" }}
                   className="font-bold leading-[1.06] mb-6 max-w-3xl"
                 >
                   {freeResources.title}
                 </h2>
-                <p className="max-w-2xl mb-8 leading-relaxed" style={{ color: "rgba(255,255,255,0.95)", fontSize: "clamp(1.2rem, 2vw, 1.45rem)", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
+                <p className="max-w-2xl mb-8 leading-relaxed" style={{ color: "rgba(255,255,255,0.95)", fontSize: `clamp(1rem, 2vw, ${freeResources.bodySize}px)`, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
                   {freeResources.description}
                 </p>
 
@@ -298,7 +300,7 @@ export default function Home() {
                     style={{ background: "radial-gradient(circle, rgba(255,215,0,0.25) 0%, rgba(200,150,255,0.10) 40%, rgba(0,0,0,0) 70%)" }}
                   />
                   <div className="hidden lg:block relative w-full h-full">
-                    {freeResourceSpotlights.slice(0, 7).map((book, index) => {
+                    {freeResourceSpotlights.slice(0, freeResources.spotlightDesktopCount).map((book, index) => {
                       const position = freeCircleDesktopPositions[index];
                       if (!position) return null;
 
@@ -328,7 +330,7 @@ export default function Home() {
                     })}
                   </div>
                   <div className="grid grid-cols-2 gap-4 lg:hidden">
-                    {freeResourceSpotlights.slice(0, 4).map((book, index) => (
+                    {freeResourceSpotlights.slice(0, freeResources.spotlightMobileCount).map((book, index) => (
                       <Link key={book.id} href={`/books/${book.id}`}>
                         <div
                           className="rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"

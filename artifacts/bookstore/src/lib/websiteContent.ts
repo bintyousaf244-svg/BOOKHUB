@@ -40,6 +40,7 @@ export interface WebsiteContent {
       titleSize: number;
       bodySize: number;
       backgroundImage: string;
+      backgroundImageOpacity: number;
       overlayColor: string;
       overlayOpacity: number;
     };
@@ -98,6 +99,8 @@ export interface WebsiteContent {
       fontFamily: string;
       titleSize: number;
       bodySize: number;
+      spotlightDesktopCount: number;
+      spotlightMobileCount: number;
     };
     deals: {
       badge: string;
@@ -173,9 +176,10 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 56,
       bodySize: 20,
-      backgroundImage: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=2000&auto=format&fit=crop",
+      backgroundImage: "/hero-reading-family.jpeg",
+      backgroundImageOpacity: 1,
       overlayColor: "linear-gradient(135deg, #582C6F 55%, hsl(270,62%,48%) 100%)",
-      overlayOpacity: 0.85,
+      overlayOpacity: 0,
     },
     trust: {
       title: "Why Families Choose Us",
@@ -236,6 +240,8 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 38,
       bodySize: 18,
+      spotlightDesktopCount: 7,
+      spotlightMobileCount: 6,
     },
     deals: {
       badge: "Limited Offers",
