@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "wouter";
 import { useGetFeaturedBooks, useGetOnSaleBooks, useGetFreeBooks } from "@workspace/api-client-react";
+import { ArrowRight, BookHeart, BookOpen, Download, GraduationCap, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { BookCard } from "@/components/BookCard";
-import { ArrowRight, BookOpen, GraduationCap, BookHeart, ShieldCheck, Sparkles, Star, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useWebsiteContent } from "@/context/WebsiteContentContext";
 
 function BookSkeleton() {
   return (
@@ -15,165 +16,169 @@ function BookSkeleton() {
   );
 }
 
-const PURPLE = "#582C6F";
-const PINK = "#D97B8F";
-const GREEN = "#416D53";
-const GOLD = "#B08B1E";
-const CREAM = "#f5f0e8";
-const CREAM_DARK = "#ebe4d4";
-const PURPLE_LIGHT = "#f3eef8";
-
 export default function Home() {
+  const { content } = useWebsiteContent();
   const { data: featuredBooks, isLoading: loadingFeatured } = useGetFeaturedBooks();
   const { data: onSaleBooks, isLoading: loadingSale } = useGetOnSaleBooks();
   const { data: freeBooks, isLoading: loadingFree } = useGetFreeBooks();
 
+  const hero = content.home.hero;
+  const trust = content.home.trust;
+  const categories = content.home.categories;
+  const featured = content.home.featured;
+  const freeResources = content.home.freeResources;
+  const deals = content.home.deals;
+  const cta = content.home.cta;
+
+  const trustIcons = [GraduationCap, BookHeart, ShieldCheck];
+
   return (
     <div className="flex flex-col w-full">
+      <section className="relative overflow-hidden" style={{ background: hero.backgroundColor, minHeight: 580 }}>
+        {hero.backgroundImage && (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-20"
+            style={{ backgroundImage: `url("${hero.backgroundImage}")` }}
+          />
+        )}
+        <div className="absolute inset-0" style={{ background: hero.overlayColor, opacity: hero.overlayOpacity }} />
+        <div className="absolute -right-32 -top-32 w-[500px] h-[500px] rounded-full opacity-10" style={{ background: hero.accentColor }} />
+        <div className="absolute -left-16 -bottom-24 w-72 h-72 rounded-full opacity-10" style={{ background: hero.accentColor }} />
 
-      {/* ═══ HERO ═══ */}
-      <section className="relative overflow-hidden" style={{ background: PURPLE, minHeight: 580 }}>
-        {/* Background photo */}
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${PURPLE} 55%, hsl(270,62%,48%) 100%)`, opacity: 0.85 }} />
-
-        {/* Decorative circle */}
-        <div className="absolute -right-32 -top-32 w-[500px] h-[500px] rounded-full opacity-10"
-          style={{ background: PINK }} />
-        <div className="absolute -left-16 -bottom-24 w-72 h-72 rounded-full opacity-10"
-          style={{ background: PINK }} />
-
-        <div className="relative z-10 container mx-auto px-4 py-16 md:py-32 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          <div className="flex-1 text-center md:text-left">
-            {/* Pill tag */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
-              style={{ background: "rgba(255,255,255,0.15)", color: "white", border: "1px solid rgba(255,255,255,0.25)" }}>
-              <Sparkles className="h-4 w-4" style={{ color: PINK }} />
-              Welcome to Learner's Grove
+        <div
+          className={`relative z-10 container mx-auto px-4 py-16 md:py-32 flex flex-col gap-8 md:gap-12 ${hero.layout === "center" ? "items-center text-center" : "md:flex-row items-center"}`}
+        >
+          <div className={`flex-1 ${hero.layout === "center" ? "text-center" : "text-center md:text-left"}`}>
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
+              style={{ background: "rgba(255,255,255,0.15)", color: hero.textColor, border: "1px solid rgba(255,255,255,0.25)" }}
+            >
+              <Sparkles className="h-4 w-4" style={{ color: hero.accentColor }} />
+              {hero.eyebrow}
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-serif font-bold leading-tight text-white mb-6">
-              Raise Confident<br />
-              <span style={{ color: PINK }}>Little Learners</span>
+            <h1
+              className="font-bold leading-tight mb-6"
+              style={{ color: hero.textColor, fontFamily: hero.fontFamily, fontSize: `clamp(2.5rem, 4vw, ${hero.titleSize}px)` }}
+            >
+              {hero.titleLine1}
+              <br />
+              <span style={{ color: hero.accentColor }}>{hero.titleHighlight}</span>
             </h1>
-            <p className="text-white/75 text-lg md:text-xl max-w-xl mb-10 leading-relaxed">
-              Handcrafted English & Arabic learning books for kids and adults. Nurture curiosity, build language skills, and ignite a lifelong love of reading.
+            <p
+              className="max-w-xl mb-10 leading-relaxed"
+              style={{ color: `${hero.textColor}bf`, fontSize: hero.bodySize, marginInline: hero.layout === "center" ? "auto" : undefined }}
+            >
+              {hero.description}
             </p>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+            <div className={`flex flex-wrap gap-4 ${hero.layout === "center" ? "justify-center" : "justify-center md:justify-start"}`}>
               <Link href="/books">
-                <button className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-white text-base transition-all hover:opacity-90 active:scale-95 shadow-lg"
-                  style={{ background: PINK }}>
-                  <BookOpen className="h-5 w-5" /> Explore Collection
+                <button className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: hero.accentColor, color: hero.textColor }}>
+                  <BookOpen className="h-5 w-5" /> {hero.primaryButtonLabel}
                 </button>
               </Link>
               <Link href="/free">
-                <button className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-base transition-all hover:bg-white/20 active:scale-95"
-                  style={{ border: "2px solid rgba(255,255,255,0.4)", color: "white" }}>
-                  Free Resources <ArrowRight className="h-4 w-4" />
+                <button
+                  className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold transition-all hover:bg-white/20 active:scale-95"
+                  style={{ border: "2px solid rgba(255,255,255,0.4)", color: hero.textColor }}
+                >
+                  {hero.secondaryButtonLabel} <ArrowRight className="h-4 w-4" />
                 </button>
               </Link>
             </div>
           </div>
 
-          {/* Hero stats — hidden on small screens, 2×2 grid on md+ */}
-          <div className="hidden md:grid flex-shrink-0 grid-cols-2 gap-4 w-64">
-            {[
-              { value: "100+", label: "Books & Articles" },
-              { value: "2", label: "Languages" },
-              { value: "Kids", label: "& Adults" },
-              { value: "Free", label: "Resources" },
-            ].map((s) => (
-              <div key={s.label} className="flex flex-col items-center justify-center p-5 rounded-2xl text-center"
-                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)" }}>
-                <span className="text-2xl font-bold text-white">{s.value}</span>
-                <span className="text-white/60 text-xs mt-1">{s.label}</span>
+          <div className={`flex-shrink-0 ${hero.layout === "center" ? "w-full max-w-3xl" : "hidden md:grid w-64"} md:grid grid-cols-2 gap-4`}>
+            {hero.stats.map((stat) => (
+              <div
+                key={`${stat.value}-${stat.label}`}
+                className="flex flex-col items-center justify-center p-5 rounded-2xl text-center"
+                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)" }}
+              >
+                <span className="text-2xl font-bold" style={{ color: hero.textColor }}>{stat.value}</span>
+                <span className="text-xs mt-1" style={{ color: `${hero.textColor}99` }}>{stat.label}</span>
               </div>
             ))}
           </div>
-          {/* Mobile-only inline stats strip */}
-          <div className="flex md:hidden items-center justify-center gap-6 pt-2 text-white/70 text-sm flex-wrap">
-            <span><strong className="text-white">100+</strong> Books</span>
-            <span className="opacity-40">·</span>
-            <span><strong className="text-white">2</strong> Languages</span>
-            <span className="opacity-40">·</span>
-            <span><strong className="text-white">Free</strong> Resources</span>
+
+          <div className="flex md:hidden items-center justify-center gap-6 pt-2 flex-wrap" style={{ color: `${hero.textColor}b3` }}>
+            {hero.stats.slice(0, 3).map((stat, index) => (
+              <React.Fragment key={`${stat.value}-${stat.label}-mobile`}>
+                {index > 0 && <span className="opacity-40">.</span>}
+                <span><strong style={{ color: hero.textColor }}>{stat.value}</strong> {stat.label}</span>
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ TRUST STRIP ═══ */}
-      <section style={{ background: "white", borderTop: `3px solid ${PINK}` }}>
+      <section style={{ background: trust.backgroundColor, borderTop: `3px solid ${trust.accentColor}` }}>
         <div className="container mx-auto px-4 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {[
-              { icon: <GraduationCap className="h-6 w-6" />, title: "Expert-Crafted", desc: "Every book is thoughtfully designed by educators" },
-              { icon: <BookHeart className="h-6 w-6" />, title: "English & Arabic", desc: "Bilingual learning resources under one roof" },
-              { icon: <ShieldCheck className="h-6 w-6" />, title: "Trusted by Parents", desc: "Safe, enriching content loved by families" },
-            ].map((item) => (
-              <div key={item.title} className="flex items-start gap-4 p-4 rounded-2xl transition-all hover:shadow-md"
-                style={{ background: CREAM }}>
-                <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md"
-                  style={{ background: PURPLE }}>
-                  {item.icon}
+          <div className="text-center mb-6">
+            <h2 style={{ color: trust.textColor, fontFamily: trust.fontFamily, fontSize: trust.titleSize }}>{trust.title}</h2>
+          </div>
+          <div className={`max-w-5xl mx-auto ${trust.layout === "inline" ? "flex flex-col md:flex-row gap-4" : "grid grid-cols-1 md:grid-cols-3 gap-6"}`}>
+            {trust.items.map((item, index) => {
+              const Icon = trustIcons[index % trustIcons.length];
+              return (
+                <div
+                  key={item.title}
+                  className="flex items-start gap-4 p-4 rounded-2xl transition-all hover:shadow-md flex-1"
+                  style={{ background: trust.cardBackgroundColor }}
+                >
+                  <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md" style={{ background: trust.textColor }}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 style={{ color: trust.textColor, fontFamily: trust.fontFamily, fontSize: trust.bodySize + 2 }} className="font-bold">
+                      {item.title}
+                    </h3>
+                    <p style={{ color: `${trust.textColor}bf`, fontSize: trust.bodySize }} className="mt-0.5">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold font-serif text-base" style={{ color: PURPLE }}>{item.title}</h3>
-                  <p className="text-sm mt-0.5" style={{ color: "#6b5a7a" }}>{item.desc}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ═══ CATEGORY CARDS (Kids vs Adults) ═══ */}
-      <section style={{ background: CREAM }} className="py-20">
+      <section style={{ background: categories.backgroundColor }} className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-4"
-              style={{ background: PINK }}>Browse by Age</span>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold" style={{ color: PURPLE }}>
-              A Book for Every Mind
+            <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-4" style={{ background: categories.accentColor }}>
+              {categories.eyebrow}
+            </span>
+            <h2 style={{ color: categories.textColor, fontFamily: categories.fontFamily, fontSize: `clamp(2rem, 4vw, ${categories.titleSize}px)` }} className="font-bold">
+              {categories.title}
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Kids card */}
+          <div className={`${categories.layout === "stack" ? "flex flex-col" : "grid grid-cols-1 md:grid-cols-2"} gap-6 max-w-4xl mx-auto`}>
             <Link href="/books?ageGroup=Kids">
-              <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-                style={{ background: `linear-gradient(135deg, ${PURPLE} 0%, #7a3e96 100%)` }}>
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
-                <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20"
-                  style={{ background: PINK }} />
-                <div className="relative z-10 p-8 h-full flex flex-col justify-between">
-                  <span className="text-5xl">🌟</span>
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">Kids Learning</h3>
-                    <p className="text-white/70 text-sm mb-4">Engaging stories & exercises for young minds</p>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
-                      Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </div>
+              <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" style={{ background: categories.kidsBackground }}>
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
+                <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20" style={{ background: categories.accentColor }} />
+                <div className="relative z-10 p-8 h-full flex flex-col justify-end">
+                  <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: categories.fontFamily }}>{categories.kidsTitle}</h3>
+                  <p className="text-white/80 mb-4" style={{ fontSize: categories.bodySize }}>{categories.kidsDescription}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
+                    Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
               </div>
             </Link>
 
-            {/* Adults card */}
             <Link href="/books?ageGroup=Adults">
-              <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-                style={{ background: `linear-gradient(135deg, ${GREEN} 0%, #2d4d3a 100%)` }}>
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
-                <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20"
-                  style={{ background: "white" }} />
-                <div className="relative z-10 p-8 h-full flex flex-col justify-between">
-                  <span className="text-5xl">📚</span>
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-white mb-2">Adult Education</h3>
-                    <p className="text-white/70 text-sm mb-4">Advanced language & learning materials</p>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
-                      Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </div>
+              <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" style={{ background: categories.adultsBackground }}>
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
+                <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20 bg-white" />
+                <div className="relative z-10 p-8 h-full flex flex-col justify-end">
+                  <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: categories.fontFamily }}>{categories.adultsTitle}</h3>
+                  <p className="text-white/80 mb-4" style={{ fontSize: categories.bodySize }}>{categories.adultsDescription}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
+                    Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
               </div>
             </Link>
@@ -181,124 +186,111 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ FEATURED BOOKS ═══ */}
-      <section style={{ background: "white" }} className="py-20">
+      <section style={{ background: featured.backgroundColor }} className={featured.layout === "spacious" ? "py-24" : "py-20"}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
             <div>
-              <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3"
-                style={{ background: PURPLE }}>Hand-picked</span>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold" style={{ color: PURPLE }}>
-                Featured Collection
+              <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3" style={{ background: featured.textColor }}>
+                {featured.eyebrow}
+              </span>
+              <h2 style={{ color: featured.textColor, fontFamily: featured.fontFamily, fontSize: `clamp(2rem, 4vw, ${featured.titleSize}px)` }} className="font-bold">
+                {featured.title}
               </h2>
-              <p className="mt-2" style={{ color: "#6b5a7a" }}>Our most loved books this season.</p>
+              <p className="mt-2" style={{ color: `${featured.textColor}bf`, fontSize: featured.bodySize }}>{featured.description}</p>
             </div>
             <Link href="/books">
-              <button className="flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90"
-                style={{ background: CREAM_DARK, color: PURPLE }}>
-                View all <ArrowRight className="h-4 w-4" />
+              <button className="flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90" style={{ background: featured.accentColor, color: featured.textColor }}>
+                {featured.buttonLabel} <ArrowRight className="h-4 w-4" />
               </button>
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+          <div className={`grid grid-cols-2 md:grid-cols-3 ${featured.layout === "spacious" ? "lg:grid-cols-3" : "lg:grid-cols-4"} gap-5 md:gap-6`}>
             {loadingFeatured
-              ? Array.from({ length: 4 }).map((_, i) => <BookSkeleton key={i} />)
-              : featuredBooks?.slice(0, 4).map((book) => <BookCard key={book.id} book={book} />)}
+              ? Array.from({ length: 4 }).map((_, index) => <BookSkeleton key={index} />)
+              : featuredBooks?.slice(0, featured.layout === "spacious" ? 6 : 4).map((book) => <BookCard key={book.id} book={book} />)}
           </div>
         </div>
       </section>
 
-      {/* ═══ FREE RESOURCES BANNER ═══ */}
-      <section className="py-20" style={{ background: PURPLE_LIGHT }}>
+      <section className="py-20" style={{ background: freeResources.backgroundColor }}>
         <div className="container mx-auto px-4">
-          {/* Banner */}
-          <div className="relative overflow-hidden rounded-3xl p-10 md:p-14 mb-12 text-center"
-            style={{ background: `linear-gradient(135deg, ${PURPLE} 0%, #7a3e96 100%)` }}>
-            <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-10"
-              style={{ background: PINK }} />
-            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full opacity-10"
-              style={{ background: PINK }} />
+          <div className={`relative overflow-hidden rounded-3xl ${freeResources.layout === "spacious" ? "p-12 md:p-16" : "p-10 md:p-14"} mb-12 text-center`} style={{ background: freeResources.bannerBackground }}>
+            <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full opacity-10" style={{ background: freeResources.accentColor }} />
+            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full opacity-10" style={{ background: freeResources.accentColor }} />
             <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-4"
-                style={{ background: PINK, color: "white" }}>
-                <Download className="h-4 w-4" /> 100% Free
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-4" style={{ background: freeResources.accentColor, color: freeResources.textColor }}>
+                <Download className="h-4 w-4" /> {freeResources.badge}
               </div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3">
-                Knowledge Should Be Accessible
+              <h2 style={{ color: freeResources.textColor, fontFamily: freeResources.fontFamily, fontSize: `clamp(2rem, 4vw, ${freeResources.titleSize}px)` }} className="font-bold mb-3">
+                {freeResources.title}
               </h2>
-              <p className="text-white/70 text-lg max-w-xl mx-auto mb-6">
-                Download free articles, short books, and learning materials crafted for our community.
+              <p className="max-w-xl mx-auto mb-6" style={{ color: `${freeResources.textColor}bf`, fontSize: freeResources.bodySize }}>
+                {freeResources.description}
               </p>
               <Link href="/free">
-                <button className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all hover:opacity-90 active:scale-95"
-                  style={{ background: "white", color: PURPLE }}>
-                  Browse Free Materials <ArrowRight className="h-4 w-4" />
+                <button className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: "#ffffff", color: "#582C6F" }}>
+                  {freeResources.buttonLabel} <ArrowRight className="h-4 w-4" />
                 </button>
               </Link>
             </div>
           </div>
 
-          {/* Free books grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+          <div className={`grid grid-cols-2 md:grid-cols-3 ${freeResources.layout === "spacious" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-4 md:gap-5`}>
             {loadingFree
-              ? Array.from({ length: 5 }).map((_, i) => <BookSkeleton key={i} />)
-              : freeBooks?.slice(0, 5).map((book) => <BookCard key={book.id} book={book} />)}
+              ? Array.from({ length: 5 }).map((_, index) => <BookSkeleton key={index} />)
+              : freeBooks?.slice(0, freeResources.layout === "spacious" ? 8 : 5).map((book) => <BookCard key={book.id} book={book} />)}
           </div>
         </div>
       </section>
 
-      {/* ═══ ON SALE ═══ */}
       {onSaleBooks && onSaleBooks.length > 0 && (
-        <section style={{ background: "white" }} className="py-20">
+        <section style={{ background: deals.backgroundColor }} className={deals.layout === "spacious" ? "py-24" : "py-20"}>
           <div className="container mx-auto px-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
               <div>
-                <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold text-white mb-3"
-                  style={{ background: GOLD }}>
-                  <Star className="h-3.5 w-3.5 fill-current" /> Limited Offers
+                <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold text-white mb-3" style={{ background: deals.accentColor }}>
+                  <Star className="h-3.5 w-3.5 fill-current" /> {deals.badge}
                 </span>
-                <h2 className="text-3xl md:text-4xl font-serif font-bold" style={{ color: PURPLE }}>
-                  Special Deals
+                <h2 style={{ color: deals.textColor, fontFamily: deals.fontFamily, fontSize: `clamp(2rem, 4vw, ${deals.titleSize}px)` }} className="font-bold">
+                  {deals.title}
                 </h2>
-                <p className="mt-2" style={{ color: "hsl(270,20%,48%)" }}>Discounted books — grab them before they're gone.</p>
+                <p className="mt-2" style={{ color: `${deals.textColor}bf`, fontSize: deals.bodySize }}>{deals.description}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+            <div className={`grid grid-cols-2 md:grid-cols-3 ${deals.layout === "spacious" ? "lg:grid-cols-3" : "lg:grid-cols-4"} gap-5 md:gap-6`}>
               {loadingSale
-                ? Array.from({ length: 4 }).map((_, i) => <BookSkeleton key={i} />)
-                : onSaleBooks.slice(0, 4).map((book) => <BookCard key={book.id} book={book} />)}
+                ? Array.from({ length: 4 }).map((_, index) => <BookSkeleton key={index} />)
+                : onSaleBooks.slice(0, deals.layout === "spacious" ? 6 : 4).map((book) => <BookCard key={book.id} book={book} />)}
             </div>
           </div>
         </section>
       )}
 
-      {/* ═══ BOTTOM CTA ═══ */}
-      <section className="py-20" style={{ background: CREAM }}>
-        <div className="container mx-auto px-4 text-center max-w-2xl">
-          <div className="text-5xl mb-6">📖</div>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4" style={{ color: PURPLE }}>
-            Start Learning Today
-          </h2>
-          <p className="text-lg mb-8" style={{ color: "hsl(270,20%,48%)" }}>
-            Join thousands of learners who trust Learner's Grove for bilingual education that actually works.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
+      <section className="py-20" style={{ background: cta.backgroundColor }}>
+        <div className={`container mx-auto px-4 max-w-4xl ${cta.layout === "split" ? "grid md:grid-cols-[1.2fr_0.8fr] items-center gap-8" : "text-center max-w-2xl"}`}>
+          <div className={cta.layout === "split" ? "" : "text-center"}>
+            <div className="inline-flex items-center px-4 py-1 rounded-full text-sm font-bold mb-6" style={{ background: `${cta.secondaryAccentColor}26`, color: cta.secondaryAccentColor }}>
+              {cta.badge}
+            </div>
+            <h2 style={{ color: cta.textColor, fontFamily: cta.fontFamily, fontSize: `clamp(2rem, 4vw, ${cta.titleSize}px)` }} className="font-bold mb-4">
+              {cta.title}
+            </h2>
+            <p className="mb-8" style={{ color: `${cta.textColor}bf`, fontSize: cta.bodySize }}>{cta.description}</p>
+          </div>
+          <div className={`flex flex-wrap gap-4 ${cta.layout === "split" ? "justify-start" : "justify-center"}`}>
             <Link href="/books">
-              <button className="px-8 py-3.5 rounded-full font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-lg"
-                style={{ background: PURPLE }}>
-                Browse All Books
+              <button className="px-8 py-3.5 rounded-full font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: cta.accentColor }}>
+                {cta.primaryButtonLabel}
               </button>
             </Link>
             <Link href="/free">
-              <button className="px-8 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95"
-                style={{ background: PINK, color: "white" }}>
-                Free Resources
+              <button className="px-8 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95" style={{ background: cta.secondaryAccentColor, color: "#ffffff" }}>
+                {cta.secondaryButtonLabel}
               </button>
             </Link>
           </div>
         </div>
       </section>
-
     </div>
   );
 }

@@ -7,6 +7,7 @@ import categoriesRouter from "./categories";
 import storageRouter from "./storage";
 import discountCodesRouter from "./discountCodes";
 import paymentSettingsRouter from "./paymentSettings";
+import websiteContentRouter from "./websiteContent";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(categoriesRouter);
 router.use(storageRouter);
 router.use(discountCodesRouter);
 router.use(paymentSettingsRouter);
+router.use(websiteContentRouter);
 
 export default router;

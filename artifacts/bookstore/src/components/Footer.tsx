@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { apiFetch } from "@/lib/api";
+import { useWebsiteContent } from "@/context/WebsiteContentContext";
 
 interface SocialLinks {
   facebookUrl: string;
   instagramUrl: string;
   websiteUrl: string;
 }
-
-const PURPLE = "#582C6F";
-const PURPLE_DARK = "#3a1d49";
-const PINK = "#D97B8F";
 
 function FacebookIcon() {
   return (
@@ -31,7 +28,8 @@ function InstagramIcon() {
 function GlobeIcon() {
   return (
     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
+      <circle cx="12" cy="12" r="10" />
+      <line x1="2" y1="12" x2="22" y2="12" />
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
     </svg>
   );
@@ -39,62 +37,80 @@ function GlobeIcon() {
 
 export function Footer() {
   const [social, setSocial] = useState<SocialLinks>({ facebookUrl: "", instagramUrl: "", websiteUrl: "" });
+  const { content } = useWebsiteContent();
+  const footer = content.footer;
 
   useEffect(() => {
     apiFetch("/api/payment-settings")
-      .then((r) => r.json())
-      .then((d) => setSocial({ facebookUrl: d.facebookUrl || "", instagramUrl: d.instagramUrl || "", websiteUrl: d.websiteUrl || "" }))
+      .then((response) => response.json())
+      .then((data) => setSocial({ facebookUrl: data.facebookUrl || "", instagramUrl: data.instagramUrl || "", websiteUrl: data.websiteUrl || "" }))
       .catch(() => {});
   }, []);
 
   const hasSocial = social.facebookUrl || social.instagramUrl || social.websiteUrl;
 
   return (
-    <footer style={{ background: PURPLE_DARK }}>
-      {/* Top wave divider */}
-      <div style={{ background: PURPLE_DARK, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
-          className="w-full block" style={{ height: 40, marginBottom: -1, fill: "hsl(33,33%,94%)" }}>
+    <footer style={{ background: footer.backgroundColor, color: footer.textColor }}>
+      <div style={{ background: footer.backgroundColor, lineHeight: 0 }}>
+        <svg
+          viewBox="0 0 1440 60"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          className="w-full block"
+          style={{ height: 40, marginBottom: -1, fill: "hsl(33,33%,94%)" }}
+        >
           <path d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z" />
         </svg>
       </div>
 
       <div className="container mx-auto px-4 pt-12 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-
-          {/* Brand column */}
           <div className="md:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 mb-5">
-              <img src="/logo.png" alt="Learner's Grove" className="h-12 w-12 object-contain drop-shadow-lg" />
-              <span className="text-xl font-bold font-serif tracking-tight text-white">
-                Learner's Grove
+              <img src="/logo.png" alt={footer.brandName} className="h-12 w-12 object-contain drop-shadow-lg" />
+              <span className="text-xl font-bold tracking-tight" style={{ color: footer.textColor, fontFamily: footer.fontFamily }}>
+                {footer.brandName}
               </span>
             </Link>
-            <p className="text-white/60 max-w-xs text-sm leading-relaxed mb-6">
-              Handcrafted English & Arabic learning books for kids and adults. A home for curious minds to bloom.
+            <p className="max-w-xs leading-relaxed mb-6" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize }}>
+              {footer.description}
             </p>
 
-            {/* Social icons */}
             {hasSocial && (
               <div className="flex items-center gap-3">
                 {social.facebookUrl && (
-                  <a href={social.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                  <a
+                    href={social.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
                     className="flex items-center justify-center w-9 h-9 rounded-full text-white transition-all hover:scale-110"
-                    style={{ background: "#1877f2" }}>
+                    style={{ background: "#1877f2" }}
+                  >
                     <FacebookIcon />
                   </a>
                 )}
                 {social.instagramUrl && (
-                  <a href={social.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+                  <a
+                    href={social.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
                     className="flex items-center justify-center w-9 h-9 rounded-full text-white transition-all hover:scale-110"
-                    style={{ background: "linear-gradient(135deg, #f09433, #e6683c, #dc2743)" }}>
+                    style={{ background: "linear-gradient(135deg, #f09433, #e6683c, #dc2743)" }}
+                  >
                     <InstagramIcon />
                   </a>
                 )}
                 {social.websiteUrl && (
-                  <a href={social.websiteUrl} target="_blank" rel="noopener noreferrer" aria-label="Website"
+                  <a
+                    href={social.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Website"
                     className="flex items-center justify-center w-9 h-9 rounded-full text-white transition-all hover:scale-110"
-                    style={{ background: PINK }}>
+                    style={{ background: footer.accentColor }}
+                  >
                     <GlobeIcon />
                   </a>
                 )}
@@ -102,63 +118,68 @@ export function Footer() {
             )}
           </div>
 
-          {/* Shop links */}
           <div>
-            <h3 className="font-bold text-sm uppercase tracking-widest mb-5 text-white/40">Shop</h3>
+            <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize }}>Shop</h3>
             <ul className="space-y-3">
               {[
                 { href: "/books", label: "All Books" },
                 { href: "/books?ageGroup=Kids", label: "Kids Learning" },
                 { href: "/books?ageGroup=Adults", label: "Adult Education" },
                 { href: "/free", label: "Free Resources" },
-              ].map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
-                    {l.label}
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize }}>
+                    {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Account links */}
           <div>
-            <h3 className="font-bold text-sm uppercase tracking-widest mb-5 text-white/40">Account</h3>
+            <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize }}>Account</h3>
             <ul className="space-y-3">
               {[
                 { href: "/my-orders", label: "My Orders" },
                 { href: "/cart", label: "Shopping Cart" },
                 ...(social.websiteUrl ? [{ href: social.websiteUrl, label: "Our Website", ext: true }] : []),
-              ].map((l) => (
-                <li key={l.href}>
-                  {"ext" in l && l.ext ? (
-                    <a href={l.href} target="_blank" rel="noopener noreferrer"
-                      className="text-sm text-white/60 hover:text-white transition-colors">
-                      {l.label}
+              ].map((link) => (
+                <li key={link.href}>
+                  {"ext" in link && link.ext ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-white transition-colors"
+                      style={{ color: footer.mutedTextColor, fontSize: footer.bodySize }}
+                    >
+                      {link.label}
                     </a>
                   ) : (
-                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
-                      {l.label}
+                    <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize }}>
+                      {link.label}
                     </Link>
                   )}
                 </li>
               ))}
               <li>
-                <Link href="/admin" className="text-xs text-white/25 hover:text-white/50 transition-colors">Admin</Link>
+                <Link href="/admin" className="hover:text-white/50 transition-colors" style={{ color: "rgba(255,255,255,0.25)", fontSize: 12 }}>
+                  Admin
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.10)" }}>
-          <p className="text-xs text-white/35">&copy; {new Date().getFullYear()} Learner's Grove. All rights reserved.</p>
+        <div className="mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: "1px solid rgba(255,255,255,0.10)" }}>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+            &copy; {new Date().getFullYear()} {footer.brandName}. All rights reserved.
+          </p>
           {hasSocial && (
             <div className="flex items-center gap-5">
-              {social.facebookUrl && <a href={social.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-white/35 hover:text-white/70 transition-colors">Facebook</a>}
-              {social.instagramUrl && <a href={social.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-white/35 hover:text-white/70 transition-colors">Instagram</a>}
-              {social.websiteUrl && <a href={social.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-white/35 hover:text-white/70 transition-colors">Website</a>}
+              {social.facebookUrl && <a href={social.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white/70 transition-colors" style={{ color: "rgba(255,255,255,0.35)" }}>Facebook</a>}
+              {social.instagramUrl && <a href={social.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white/70 transition-colors" style={{ color: "rgba(255,255,255,0.35)" }}>Instagram</a>}
+              {social.websiteUrl && <a href={social.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white/70 transition-colors" style={{ color: "rgba(255,255,255,0.35)" }}>Website</a>}
             </div>
           )}
         </div>
