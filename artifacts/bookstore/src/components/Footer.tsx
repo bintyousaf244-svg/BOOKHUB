@@ -40,6 +40,22 @@ export function Footer() {
   const { content } = useWebsiteContent();
   const footer = content.footer;
 
+  const shopLinks = footer.shopLinks && footer.shopLinks.length > 0 ? footer.shopLinks : [
+    { href: "/books", label: "All Books" },
+    { href: "/books?ageGroup=Kids", label: "Kids Learning" },
+    { href: "/books?ageGroup=Adults", label: "Adult Education" },
+    { href: "/free", label: "Free Resources" },
+  ];
+
+  const rawAccountLinks = footer.accountLinks && footer.accountLinks.length > 0 ? footer.accountLinks : [
+    { href: "/my-orders", label: "My Orders" },
+    { href: "/cart", label: "Shopping Cart" },
+  ];
+
+  const accountLinks = social.websiteUrl
+    ? [...rawAccountLinks, { href: social.websiteUrl, label: "Our Website", ext: true }]
+    : rawAccountLinks;
+
   useEffect(() => {
     apiFetch("/api/payment-settings")
       .then((response) => response.json())
@@ -121,12 +137,7 @@ export function Footer() {
           <div>
             <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize }}>Shop</h3>
             <ul className="space-y-3">
-              {[
-                { href: "/books", label: "All Books" },
-                { href: "/books?ageGroup=Kids", label: "Kids Learning" },
-                { href: "/books?ageGroup=Adults", label: "Adult Education" },
-                { href: "/free", label: "Free Resources" },
-              ].map((link) => (
+              {shopLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize }}>
                     {link.label}
@@ -139,11 +150,7 @@ export function Footer() {
           <div>
             <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize }}>Account</h3>
             <ul className="space-y-3">
-              {[
-                { href: "/my-orders", label: "My Orders" },
-                { href: "/cart", label: "Shopping Cart" },
-                ...(social.websiteUrl ? [{ href: social.websiteUrl, label: "Our Website", ext: true }] : []),
-              ].map((link) => (
+              {accountLinks.map((link) => (
                 <li key={link.href}>
                   {"ext" in link && link.ext ? (
                     <a

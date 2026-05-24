@@ -24,7 +24,7 @@ export function Navbar() {
     setOpen(false);
   }, [location]);
 
-  const links = [
+  const links = navbar.links && navbar.links.length > 0 ? navbar.links : [
     { href: "/books", label: "All Books", forceReload: true },
     { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
     { href: "/books?ageGroup=Adults", label: "Adults", forceReload: true },
@@ -92,7 +92,7 @@ export function Navbar() {
               </button>
             </Link>
 
-            <Link href="/books">
+            <Link href={navbar.ctaLink || "/books"}>
               <button
                 className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all hover:opacity-90 active:scale-95"
                 style={{ background: navbar.ctaBackgroundColor, color: navbar.ctaTextColor }}
@@ -163,7 +163,7 @@ export function Navbar() {
                 </Link>
               )}
               <div className="pt-2 pb-1">
-                <Link href="/books">
+                <Link href={navbar.ctaLink || "/books"}>
                   <button
                     className="w-full py-3 rounded-full text-sm font-bold transition-all"
                     style={{ background: navbar.ctaBackgroundColor, color: navbar.ctaTextColor }}

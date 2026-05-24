@@ -11,6 +11,8 @@ export interface WebsiteContent {
     ctaLabel: string;
     ctaBackgroundColor: string;
     ctaTextColor: string;
+    ctaLink: string;
+    links: Array<{ href: string; label: string; forceReload?: boolean }>;
   };
   footer: {
     brandName: string;
@@ -22,6 +24,8 @@ export interface WebsiteContent {
     fontFamily: string;
     headingSize: number;
     bodySize: number;
+    shopLinks: Array<{ href: string; label: string }>;
+    accountLinks: Array<{ href: string; label: string }>;
   };
   home: {
     hero: {
@@ -43,11 +47,17 @@ export interface WebsiteContent {
       backgroundImageOpacity: number;
       overlayColor: string;
       overlayOpacity: number;
+      primaryButtonLink?: string;
+      secondaryButtonLink?: string;
+      primaryButtonBgColor?: string;
+      primaryButtonTextColor?: string;
+      secondaryButtonBgColor?: string;
+      secondaryButtonTextColor?: string;
     };
     trust: {
       title: string;
       layout: Extract<LayoutMode, "cards" | "inline">;
-      items: Array<{ title: string; description: string }>;
+      items: Array<{ title: string; description: string; iconName?: string }>;
       backgroundColor: string;
       textColor: string;
       accentColor: string;
@@ -72,6 +82,10 @@ export interface WebsiteContent {
       adultsDescription: string;
       kidsBackground: string;
       adultsBackground: string;
+      kidsTextColor?: string;
+      adultsTextColor?: string;
+      kidsLink?: string;
+      adultsLink?: string;
     };
     featured: {
       eyebrow: string;
@@ -85,6 +99,9 @@ export interface WebsiteContent {
       fontFamily: string;
       titleSize: number;
       bodySize: number;
+      buttonLink?: string;
+      buttonBgColor?: string;
+      buttonTextColor?: string;
     };
     freeResources: {
       badge: string;
@@ -101,6 +118,13 @@ export interface WebsiteContent {
       bodySize: number;
       spotlightDesktopCount: number;
       spotlightMobileCount: number;
+      bullets: string[];
+      checkmarkColor: string;
+      checkmarkTextColor: string;
+      buttonBackgroundColor: string;
+      buttonTextColor: string;
+      buttonLink: string;
+      bannerLayout: "left" | "right";
     };
     deals: {
       badge: string;
@@ -128,6 +152,10 @@ export interface WebsiteContent {
       fontFamily: string;
       titleSize: number;
       bodySize: number;
+      primaryButtonLink: string;
+      secondaryButtonLink: string;
+      primaryButtonTextColor?: string;
+      secondaryButtonTextColor?: string;
     };
   };
 }
@@ -143,6 +171,15 @@ export const defaultWebsiteContent: WebsiteContent = {
     ctaLabel: "Shop Now",
     ctaBackgroundColor: "#D97B8F",
     ctaTextColor: "#ffffff",
+    ctaLink: "/books",
+    links: [
+      { href: "/books", label: "All Books", forceReload: true },
+      { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
+      { href: "/books?ageGroup=Adults", label: "Adults", forceReload: true },
+      { href: "/books?ageGroup=All%20Ages", label: "All Ages", forceReload: true },
+      { href: "/free", label: "Free Resources", forceReload: false },
+      { href: "/my-orders", label: "My Orders", forceReload: false },
+    ],
   },
   footer: {
     brandName: "Learner's Grove",
@@ -154,6 +191,16 @@ export const defaultWebsiteContent: WebsiteContent = {
     fontFamily: "Georgia, serif",
     headingSize: 14,
     bodySize: 14,
+    shopLinks: [
+      { href: "/books", label: "All Books" },
+      { href: "/books?ageGroup=Kids", label: "Kids Learning" },
+      { href: "/books?ageGroup=Adults", label: "Adult Education" },
+      { href: "/free", label: "Free Resources" },
+    ],
+    accountLinks: [
+      { href: "/my-orders", label: "My Orders" },
+      { href: "/cart", label: "Shopping Cart" },
+    ],
   },
   home: {
     hero: {
@@ -180,14 +227,16 @@ export const defaultWebsiteContent: WebsiteContent = {
       backgroundImageOpacity: 1,
       overlayColor: "linear-gradient(135deg, #582C6F 55%, hsl(270,62%,48%) 100%)",
       overlayOpacity: 0,
+      primaryButtonLink: "/books",
+      secondaryButtonLink: "/free",
     },
     trust: {
       title: "Why Families Choose Us",
       layout: "cards",
       items: [
-        { title: "Expert-Crafted", description: "Every book is thoughtfully designed by educators" },
-        { title: "English & Arabic", description: "Bilingual learning resources under one roof" },
-        { title: "Trusted by Parents", description: "Safe, enriching content loved by families" },
+        { title: "Expert-Crafted", description: "Every book is thoughtfully designed by educators", iconName: "GraduationCap" },
+        { title: "English & Arabic", description: "Bilingual learning resources under one roof", iconName: "BookHeart" },
+        { title: "Trusted by Parents", description: "Safe, enriching content loved by families", iconName: "ShieldCheck" },
       ],
       backgroundColor: "#ffffff",
       textColor: "#582C6F",
@@ -213,6 +262,10 @@ export const defaultWebsiteContent: WebsiteContent = {
       adultsDescription: "Advanced language & learning materials",
       kidsBackground: "linear-gradient(135deg, #582C6F 0%, #7a3e96 100%)",
       adultsBackground: "linear-gradient(135deg, #416D53 0%, #2d4d3a 100%)",
+      kidsTextColor: "#ffffff",
+      adultsTextColor: "#ffffff",
+      kidsLink: "/books?ageGroup=Kids",
+      adultsLink: "/books?ageGroup=Adults",
     },
     featured: {
       eyebrow: "Hand-picked",
@@ -226,6 +279,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 38,
       bodySize: 16,
+      buttonLink: "/books",
     },
     freeResources: {
       badge: "100% Free",
@@ -242,6 +296,17 @@ export const defaultWebsiteContent: WebsiteContent = {
       bodySize: 18,
       spotlightDesktopCount: 7,
       spotlightMobileCount: 6,
+      bullets: [
+        "Free books visitors can preview before downloading",
+        "Clickable covers open the exact book page",
+        "A magical showcase for your free learning materials",
+      ],
+      checkmarkColor: "#bfa345",
+      checkmarkTextColor: "rgba(255,255,255,0.95)",
+      buttonBackgroundColor: "#4a2955",
+      buttonTextColor: "#ffffff",
+      buttonLink: "/free",
+      bannerLayout: "left",
     },
     deals: {
       badge: "Limited Offers",
@@ -269,6 +334,8 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 38,
       bodySize: 18,
+      primaryButtonLink: "/books",
+      secondaryButtonLink: "/free",
     },
   },
 };
@@ -306,3 +373,4 @@ function mergeDeep<T>(base: T, incoming: unknown): T {
 export function resolveWebsiteContent(content?: unknown): WebsiteContent {
   return mergeDeep(defaultWebsiteContent, content ?? {});
 }
+

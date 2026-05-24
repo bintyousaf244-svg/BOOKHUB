@@ -49,6 +49,132 @@ function SectionCard({
   );
 }
 
+interface ListEditorProps<T> {
+  items: T[];
+  onChange: (newItems: T[]) => void;
+  renderItemFields: (item: T, index: number, updateItem: (patch: Partial<T>) => void) => React.ReactNode;
+  newItemTemplate: T;
+  label: string;
+  addButtonLabel?: string;
+}
+
+function ListEditor<T extends Record<string, any>>({
+  items = [],
+  onChange,
+  renderItemFields,
+  newItemTemplate,
+  label,
+  addButtonLabel = "Add Item",
+}: ListEditorProps<T>) {
+  const handleAdd = () => {
+    onChange([...items, { ...newItemTemplate }]);
+  };
+
+  const handleRemove = (indexToRemove: number) => {
+    onChange(items.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleUpdate = (indexToUpdate: number, patch: Partial<T>) => {
+    onChange(
+      items.map((item, idx) => (idx === indexToUpdate ? { ...item, ...patch } : item))
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between border-b pb-2">
+        <Label className="text-base font-semibold">{label}</Label>
+        <Button type="button" size="sm" variant="outline" onClick={handleAdd}>
+          {addButtonLabel}
+        </Button>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-xs text-muted-foreground italic">No items added yet.</p>
+      ) : (
+        <div className="space-y-4">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex gap-4 items-start p-4 rounded-xl border bg-muted/30 relative">
+              <div className="flex-1 grid gap-4">
+                {renderItemFields(item, idx, (patch) => handleUpdate(idx, patch))}
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="mt-6"
+                onClick={() => handleRemove(idx)}
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface StringListEditorProps {
+  items: string[];
+  onChange: (newItems: string[]) => void;
+  label: string;
+  addButtonLabel?: string;
+}
+
+function StringListEditor({
+  items = [],
+  onChange,
+  label,
+  addButtonLabel = "Add Item",
+}: StringListEditorProps) {
+  const handleAdd = () => {
+    onChange([...items, ""]);
+  };
+
+  const handleRemove = (idxToRemove: number) => {
+    onChange(items.filter((_, idx) => idx !== idxToRemove));
+  };
+
+  const handleUpdate = (idxToUpdate: number, newVal: string) => {
+    onChange(items.map((item, idx) => (idx === idxToUpdate ? newVal : item)));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between border-b pb-2">
+        <Label className="text-base font-semibold">{label}</Label>
+        <Button type="button" size="sm" variant="outline" onClick={handleAdd}>
+          {addButtonLabel}
+        </Button>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-xs text-muted-foreground italic">No items added yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+              <Input
+                value={item}
+                placeholder="List bullet text..."
+                onChange={(e) => handleUpdate(idx, e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => handleRemove(idx)}
+              >
+                Delete
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function parsePairs(value: string) {
   return value
     .split("\n")
@@ -202,6 +328,9 @@ export default function AdminWebsiteEditor() {
               <Field label="CTA Label">
                 <Input value={form.navbar.ctaLabel} onChange={(event) => updateNavbar({ ctaLabel: event.target.value })} />
               </Field>
+              <Field label="CTA Target URL">
+                <Input value={form.navbar.ctaLink} onChange={(event) => updateNavbar({ ctaLink: event.target.value })} />
+              </Field>
               <Field label="Background Color">
                 <Input type="color" value={form.navbar.backgroundColor} onChange={(event) => updateNavbar({ backgroundColor: event.target.value })} />
               </Field>
@@ -223,6 +352,34 @@ export default function AdminWebsiteEditor() {
               <Field label="Font Family" description="Examples: Georgia, serif or 'Trebuchet MS', sans-serif">
                 <Input value={form.navbar.fontFamily} onChange={(event) => updateNavbar({ fontFamily: event.target.value })} />
               </Field>
+            </div>
+            <div className="mt-6 pt-6 border-t">
+              <ListEditor
+                items={form.navbar.links || []}
+                onChange={(links) => updateNavbar({ links })}
+                newItemTemplate={{ href: "/new-link", label: "New Link", forceReload: false }}
+                label="Navigation Links"
+                addButtonLabel="Add Nav Link"
+                renderItemFields={(item, idx, update) => (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                    <Field label="Label">
+                      <Input value={item.label} onChange={(e) => update({ label: e.target.value })} />
+                    </Field>
+                    <Field label="URL Path">
+                      <Input value={item.href} onChange={(e) => update({ href: e.target.value })} />
+                    </Field>
+                    <Field label="Force Reload">
+                      <Select value={item.forceReload ? "true" : "false"} onValueChange={(val) => update({ forceReload: val === "true" })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">True (External/Static)</SelectItem>
+                          <SelectItem value="false">False (Client Route)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                )}
+              />
             </div>
           </SectionCard>
 
@@ -256,6 +413,44 @@ export default function AdminWebsiteEditor() {
             <Field label="Footer Description">
               <Textarea rows={4} value={form.footer.description} onChange={(event) => updateFooter({ description: event.target.value })} />
             </Field>
+
+            <div className="mt-6 pt-6 border-t grid gap-6 md:grid-cols-2">
+              <ListEditor
+                items={form.footer.shopLinks || []}
+                onChange={(shopLinks) => updateFooter({ shopLinks })}
+                newItemTemplate={{ href: "/new-link", label: "New Link" }}
+                label="Footer Shop Links"
+                addButtonLabel="Add Shop Link"
+                renderItemFields={(item, idx, update) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <Field label="Label">
+                      <Input value={item.label} onChange={(e) => update({ label: e.target.value })} />
+                    </Field>
+                    <Field label="URL Path">
+                      <Input value={item.href} onChange={(e) => update({ href: e.target.value })} />
+                    </Field>
+                  </div>
+                )}
+              />
+
+              <ListEditor
+                items={form.footer.accountLinks || []}
+                onChange={(accountLinks) => updateFooter({ accountLinks })}
+                newItemTemplate={{ href: "/new-link", label: "New Link" }}
+                label="Footer Account Links"
+                addButtonLabel="Add Account Link"
+                renderItemFields={(item, idx, update) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <Field label="Label">
+                      <Input value={item.label} onChange={(e) => update({ label: e.target.value })} />
+                    </Field>
+                    <Field label="URL Path">
+                      <Input value={item.href} onChange={(e) => update({ href: e.target.value })} />
+                    </Field>
+                  </div>
+                )}
+              />
+            </div>
           </SectionCard>
         </TabsContent>
 
@@ -274,11 +469,29 @@ export default function AdminWebsiteEditor() {
               <Field label="Headline Highlight">
                 <Input value={form.home.hero.titleHighlight} onChange={(event) => updateHome("hero", { titleHighlight: event.target.value })} />
               </Field>
-              <Field label="Primary Button">
+              <Field label="Primary Button Text">
                 <Input value={form.home.hero.primaryButtonLabel} onChange={(event) => updateHome("hero", { primaryButtonLabel: event.target.value })} />
               </Field>
-              <Field label="Secondary Button">
+              <Field label="Primary Button URL">
+                <Input value={form.home.hero.primaryButtonLink || ""} placeholder="/books" onChange={(event) => updateHome("hero", { primaryButtonLink: event.target.value })} />
+              </Field>
+              <Field label="Primary Button Background Color">
+                <Input type="color" value={form.home.hero.primaryButtonBgColor || form.home.hero.accentColor} onChange={(event) => updateHome("hero", { primaryButtonBgColor: event.target.value })} />
+              </Field>
+              <Field label="Primary Button Text Color">
+                <Input type="color" value={form.home.hero.primaryButtonTextColor || form.home.hero.textColor} onChange={(event) => updateHome("hero", { primaryButtonTextColor: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button Text">
                 <Input value={form.home.hero.secondaryButtonLabel} onChange={(event) => updateHome("hero", { secondaryButtonLabel: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button URL">
+                <Input value={form.home.hero.secondaryButtonLink || ""} placeholder="/free" onChange={(event) => updateHome("hero", { secondaryButtonLink: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button Background Color">
+                <Input type="color" value={form.home.hero.secondaryButtonBgColor || "#000000"} onChange={(event) => updateHome("hero", { secondaryButtonBgColor: event.target.value === "#000000" ? undefined : event.target.value })} />
+              </Field>
+              <Field label="Secondary Button Text Color">
+                <Input type="color" value={form.home.hero.secondaryButtonTextColor || form.home.hero.textColor} onChange={(event) => updateHome("hero", { secondaryButtonTextColor: event.target.value })} />
               </Field>
               <Field label="Layout">
                 <Select value={form.home.hero.layout} onValueChange={(value) => updateHome("hero", { layout: value as WebsiteContent["home"]["hero"]["layout"] })}>
@@ -320,13 +533,25 @@ export default function AdminWebsiteEditor() {
             <Field label="Description">
               <Textarea rows={4} value={form.home.hero.description} onChange={(event) => updateHome("hero", { description: event.target.value })} />
             </Field>
-            <Field label="Stats" description='One item per line in the format `value | label`.'>
-              <Textarea
-                rows={4}
-                value={form.home.hero.stats.map((item) => `${item.value} | ${item.label}`).join("\n")}
-                onChange={(event) => updateHome("hero", { stats: parsePairs(event.target.value) })}
+            <div className="mt-6 pt-6 border-t">
+              <ListEditor
+                items={form.home.hero.stats || []}
+                onChange={(stats) => updateHome("hero", { stats })}
+                newItemTemplate={{ value: "100+", label: "New Stat" }}
+                label="Hero Stats List"
+                addButtonLabel="Add Stat Card"
+                renderItemFields={(item, idx, update) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <Field label="Value (e.g. 100+)">
+                      <Input value={item.value} onChange={(e) => update({ value: e.target.value })} />
+                    </Field>
+                    <Field label="Label">
+                      <Input value={item.label} onChange={(e) => update({ label: e.target.value })} />
+                    </Field>
+                  </div>
+                )}
               />
-            </Field>
+            </div>
           </SectionCard>
 
           <SectionCard title="Trust Strip" description="Update the highlight cards under the hero and switch between card and inline layouts.">
@@ -365,13 +590,39 @@ export default function AdminWebsiteEditor() {
                 <Input value={form.home.trust.fontFamily} onChange={(event) => updateHome("trust", { fontFamily: event.target.value })} />
               </Field>
             </div>
-            <Field label="Trust Items" description='One item per line in the format `title | description`.'>
-              <Textarea
-                rows={4}
-                value={form.home.trust.items.map((item) => `${item.title} | ${item.description}`).join("\n")}
-                onChange={(event) => updateHome("trust", { items: parseDescriptions(event.target.value) })}
+            <div className="mt-6 pt-6 border-t">
+              <ListEditor
+                items={form.home.trust.items || []}
+                onChange={(items) => updateHome("trust", { items })}
+                newItemTemplate={{ title: "New Item", description: "Description here", iconName: "GraduationCap" }}
+                label="Trust Highlight Items"
+                addButtonLabel="Add Item"
+                renderItemFields={(item, idx, update) => (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                    <Field label="Title">
+                      <Input value={item.title} onChange={(e) => update({ title: e.target.value })} />
+                    </Field>
+                    <Field label="Description">
+                      <Input value={item.description} onChange={(e) => update({ description: e.target.value })} />
+                    </Field>
+                    <Field label="Icon Component">
+                      <Select value={item.iconName || "GraduationCap"} onValueChange={(val) => update({ iconName: val })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GraduationCap">Graduation Cap</SelectItem>
+                          <SelectItem value="BookHeart">Book Heart</SelectItem>
+                          <SelectItem value="ShieldCheck">Shield Check</SelectItem>
+                          <SelectItem value="Star">Star</SelectItem>
+                          <SelectItem value="Sparkles">Sparkles</SelectItem>
+                          <SelectItem value="Heart">Heart</SelectItem>
+                          <SelectItem value="BookOpen">Book Open</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                )}
               />
-            </Field>
+            </div>
           </SectionCard>
 
           <SectionCard title="Category Cards" description="Control the age-based cards, titles, card descriptions, colors, and grid/stack layout.">
@@ -421,6 +672,18 @@ export default function AdminWebsiteEditor() {
               <Field label="Adults Card Background" description="Supports gradients.">
                 <Input value={form.home.categories.adultsBackground} onChange={(event) => updateHome("categories", { adultsBackground: event.target.value })} />
               </Field>
+              <Field label="Kids Text Color">
+                <Input type="color" value={form.home.categories.kidsTextColor || "#ffffff"} onChange={(event) => updateHome("categories", { kidsTextColor: event.target.value })} />
+              </Field>
+              <Field label="Adults Text Color">
+                <Input type="color" value={form.home.categories.adultsTextColor || "#ffffff"} onChange={(event) => updateHome("categories", { adultsTextColor: event.target.value })} />
+              </Field>
+              <Field label="Kids Link URL">
+                <Input value={form.home.categories.kidsLink || ""} placeholder="/books?ageGroup=Kids" onChange={(event) => updateHome("categories", { kidsLink: event.target.value })} />
+              </Field>
+              <Field label="Adults Link URL">
+                <Input value={form.home.categories.adultsLink || ""} placeholder="/books?ageGroup=Adults" onChange={(event) => updateHome("categories", { adultsLink: event.target.value })} />
+              </Field>
             </div>
             <Field label="Kids Description">
               <Textarea rows={3} value={form.home.categories.kidsDescription} onChange={(event) => updateHome("categories", { kidsDescription: event.target.value })} />
@@ -467,6 +730,15 @@ export default function AdminWebsiteEditor() {
               </Field>
               <Field label="Body Size">
                 <Input type="number" min={12} max={24} value={form.home.featured.bodySize} onChange={(event) => updateHome("featured", { bodySize: Number(event.target.value) || 16 })} />
+              </Field>
+              <Field label="Button Link URL">
+                <Input value={form.home.featured.buttonLink || ""} placeholder="/books" onChange={(event) => updateHome("featured", { buttonLink: event.target.value })} />
+              </Field>
+              <Field label="Button Background Color">
+                <Input type="color" value={form.home.featured.buttonBgColor || form.home.featured.accentColor} onChange={(event) => updateHome("featured", { buttonBgColor: event.target.value })} />
+              </Field>
+              <Field label="Button Text Color">
+                <Input type="color" value={form.home.featured.buttonTextColor || form.home.featured.textColor} onChange={(event) => updateHome("featured", { buttonTextColor: event.target.value })} />
               </Field>
             </div>
             <Field label="Description">
@@ -521,10 +793,42 @@ export default function AdminWebsiteEditor() {
               <Field label="Body Size">
                 <Input type="number" min={12} max={24} value={form.home.freeResources.bodySize} onChange={(event) => updateHome("freeResources", { bodySize: Number(event.target.value) || 18 })} />
               </Field>
+              <Field label="Banner Layout">
+                <Select value={form.home.freeResources.bannerLayout || "left"} onValueChange={(value) => updateHome("freeResources", { bannerLayout: value as "left" | "right" })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left aligned layout</SelectItem>
+                    <SelectItem value="right">Right aligned layout</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Checkmark Color">
+                <Input type="color" value={form.home.freeResources.checkmarkColor || "#bfa345"} onChange={(event) => updateHome("freeResources", { checkmarkColor: event.target.value })} />
+              </Field>
+              <Field label="Checkmark Text Color">
+                <Input type="color" value={form.home.freeResources.checkmarkTextColor || "#ffffff"} onChange={(event) => updateHome("freeResources", { checkmarkTextColor: event.target.value })} />
+              </Field>
+              <Field label="Button Background Color">
+                <Input type="color" value={form.home.freeResources.buttonBackgroundColor || "#4a2955"} onChange={(event) => updateHome("freeResources", { buttonBackgroundColor: event.target.value })} />
+              </Field>
+              <Field label="Button Text Color">
+                <Input type="color" value={form.home.freeResources.buttonTextColor || "#ffffff"} onChange={(event) => updateHome("freeResources", { buttonTextColor: event.target.value })} />
+              </Field>
+              <Field label="Button Link URL">
+                <Input value={form.home.freeResources.buttonLink || ""} placeholder="/free" onChange={(event) => updateHome("freeResources", { buttonLink: event.target.value })} />
+              </Field>
             </div>
             <Field label="Description">
               <Textarea rows={3} value={form.home.freeResources.description} onChange={(event) => updateHome("freeResources", { description: event.target.value })} />
             </Field>
+            <div className="mt-6 pt-6 border-t">
+              <StringListEditor
+                items={form.home.freeResources.bullets || []}
+                onChange={(bullets) => updateHome("freeResources", { bullets })}
+                label="Free Resources Checkmarks list"
+                addButtonLabel="Add Bullet"
+              />
+            </div>
           </SectionCard>
 
           <SectionCard title="Special Deals" description="Change the sale section label, text, and how dense the deal cards appear.">
@@ -611,6 +915,18 @@ export default function AdminWebsiteEditor() {
               </Field>
               <Field label="Body Size">
                 <Input type="number" min={12} max={24} value={form.home.cta.bodySize} onChange={(event) => updateHome("cta", { bodySize: Number(event.target.value) || 18 })} />
+              </Field>
+              <Field label="Primary Button URL">
+                <Input value={form.home.cta.primaryButtonLink || ""} placeholder="/books" onChange={(event) => updateHome("cta", { primaryButtonLink: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button URL">
+                <Input value={form.home.cta.secondaryButtonLink || ""} placeholder="/free" onChange={(event) => updateHome("cta", { secondaryButtonLink: event.target.value })} />
+              </Field>
+              <Field label="Primary Button Text Color">
+                <Input type="color" value={form.home.cta.primaryButtonTextColor || "#ffffff"} onChange={(event) => updateHome("cta", { primaryButtonTextColor: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button Text Color">
+                <Input type="color" value={form.home.cta.secondaryButtonTextColor || "#ffffff"} onChange={(event) => updateHome("cta", { secondaryButtonTextColor: event.target.value })} />
               </Field>
             </div>
             <Field label="Description">

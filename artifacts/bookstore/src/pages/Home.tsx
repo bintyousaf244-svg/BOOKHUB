@@ -2,10 +2,18 @@ import React from "react";
 import { Link } from "wouter";
 import { useGetFeaturedBooks, useGetOnSaleBooks, useGetFreeBooks } from "@workspace/api-client-react";
 import { ArrowRight, BookHeart, BookOpen, Download, GraduationCap, ShieldCheck, Sparkles, Star } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { BookCard } from "@/components/BookCard";
 import { BookCoverImage } from "@/components/BookCoverImage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWebsiteContent } from "@/context/WebsiteContentContext";
+
+const getTrustIcon = (name?: string, index: number = 0) => {
+  const trustIcons = [GraduationCap, BookHeart, ShieldCheck];
+  if (!name) return trustIcons[index % trustIcons.length];
+  const IconComponent = (LucideIcons as any)[name];
+  return IconComponent || trustIcons[index % trustIcons.length];
+};
 
 function BookSkeleton() {
   return (
@@ -102,15 +110,25 @@ export default function Home() {
               {hero.description}
             </p>
             <div className={`flex flex-wrap gap-4 ${hero.layout === "center" ? "justify-center" : "justify-center md:justify-start"}`}>
-              <Link href="/books">
-                <button className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: hero.accentColor, color: hero.textColor }}>
+              <Link href={hero.primaryButtonLink || "/books"}>
+                <button
+                  className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg"
+                  style={{
+                    background: hero.primaryButtonBgColor || hero.accentColor,
+                    color: hero.primaryButtonTextColor || hero.textColor,
+                  }}
+                >
                   <BookOpen className="h-5 w-5" /> {hero.primaryButtonLabel}
                 </button>
               </Link>
-              <Link href="/free">
+              <Link href={hero.secondaryButtonLink || "/free"}>
                 <button
-                  className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold transition-all hover:bg-white/20 active:scale-95"
-                  style={{ border: "2px solid rgba(255,255,255,0.4)", color: hero.textColor }}
+                  className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold transition-all active:scale-95"
+                  style={{
+                    background: hero.secondaryButtonBgColor || "transparent",
+                    border: hero.secondaryButtonBgColor ? "none" : "2px solid rgba(255,255,255,0.4)",
+                    color: hero.secondaryButtonTextColor || hero.textColor,
+                  }}
                 >
                   {hero.secondaryButtonLabel} <ArrowRight className="h-4 w-4" />
                 </button>
@@ -149,7 +167,7 @@ export default function Home() {
           </div>
           <div className={`max-w-5xl mx-auto ${trust.layout === "inline" ? "flex flex-col md:flex-row gap-4" : "grid grid-cols-1 md:grid-cols-3 gap-6"}`}>
             {trust.items.map((item, index) => {
-              const Icon = trustIcons[index % trustIcons.length];
+              const Icon = getTrustIcon(item.iconName, index);
               return (
                 <div
                   key={item.title}
@@ -185,28 +203,28 @@ export default function Home() {
             </h2>
           </div>
           <div className={`${categories.layout === "stack" ? "flex flex-col" : "grid grid-cols-1 md:grid-cols-2"} gap-6 max-w-4xl mx-auto`}>
-            <Link href="/books?ageGroup=Kids">
+            <Link href={categories.kidsLink || "/books?ageGroup=Kids"}>
               <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" style={{ background: categories.kidsBackground }}>
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20" style={{ background: categories.accentColor }} />
                 <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                  <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: categories.fontFamily }}>{categories.kidsTitle}</h3>
-                  <p className="text-white/80 mb-4" style={{ fontSize: categories.bodySize }}>{categories.kidsDescription}</p>
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
+                  <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: categories.fontFamily, color: categories.kidsTextColor || "#ffffff" }}>{categories.kidsTitle}</h3>
+                  <p className="mb-4" style={{ fontSize: categories.bodySize, color: categories.kidsTextColor ? `${categories.kidsTextColor}cc` : "rgba(255,255,255,0.8)" }}>{categories.kidsDescription}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: categories.kidsTextColor || "#ffffff" }}>
                     Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
               </div>
             </Link>
 
-            <Link href="/books?ageGroup=Adults">
+            <Link href={categories.adultsLink || "/books?ageGroup=Adults"}>
               <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" style={{ background: categories.adultsBackground }}>
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20 bg-white" />
                 <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                  <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: categories.fontFamily }}>{categories.adultsTitle}</h3>
-                  <p className="text-white/80 mb-4" style={{ fontSize: categories.bodySize }}>{categories.adultsDescription}</p>
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-white">
+                  <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: categories.fontFamily, color: categories.adultsTextColor || "#ffffff" }}>{categories.adultsTitle}</h3>
+                  <p className="mb-4" style={{ fontSize: categories.bodySize, color: categories.adultsTextColor ? `${categories.adultsTextColor}cc` : "rgba(255,255,255,0.8)" }}>{categories.adultsDescription}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: categories.adultsTextColor || "#ffffff" }}>
                     Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
@@ -228,8 +246,14 @@ export default function Home() {
               </h2>
               <p className="mt-2" style={{ color: `${featured.textColor}bf`, fontSize: featured.bodySize }}>{featured.description}</p>
             </div>
-            <Link href="/books">
-              <button className="flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90" style={{ background: featured.accentColor, color: featured.textColor }}>
+            <Link href={featured.buttonLink || "/books"}>
+              <button
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-bold transition-all hover:opacity-90"
+                style={{
+                  background: featured.buttonBgColor || featured.accentColor,
+                  color: featured.buttonTextColor || featured.textColor,
+                }}
+              >
                 {featured.buttonLabel} <ArrowRight className="h-4 w-4" />
               </button>
             </Link>
@@ -252,7 +276,7 @@ export default function Home() {
             }}
           >
             <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08), transparent 18%), radial-gradient(circle at 80% 18%, rgba(255,255,255,0.07), transparent 16%)" }} />
-            <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-12">
+            <div className={`relative z-10 flex flex-col gap-10 lg:items-center lg:gap-12 ${freeResources.bannerLayout === "right" ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
               <div className="flex-1 min-w-[300px]">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-5" style={{ background: freeResources.accentColor, color: freeResources.textColor }}>
                   <Download className="h-4 w-4" /> {freeResources.badge}
@@ -268,26 +292,26 @@ export default function Home() {
                 </p>
 
                 <div className="space-y-4 mb-10">
-                  {[
+                  {(freeResources.bullets && freeResources.bullets.length > 0 ? freeResources.bullets : [
                     "Free books visitors can preview before downloading",
                     "Clickable covers open the exact book page",
                     "A magical showcase for your free learning materials",
-                  ].map((point) => (
+                  ]).map((point) => (
                     <div
                       key={point}
                       className="flex items-center gap-4"
                       style={{ color: freeResources.textColor }}
                     >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm flex-shrink-0" style={{ color: "#bfa345", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm flex-shrink-0" style={{ color: freeResources.checkmarkColor || "#bfa345", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
                         <span style={{ fontSize: 20, lineHeight: 1 }}>✓</span>
                       </span>
-                      <span className="text-lg leading-snug" style={{ color: "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>{point}</span>
+                      <span className="text-lg leading-snug" style={{ color: freeResources.checkmarkTextColor || "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>{point}</span>
                     </div>
                   ))}
                 </div>
 
-                <Link href="/free">
-                  <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-xl transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: "#4a2955", color: "#ffffff", boxShadow: "0 12px 25px rgba(74, 41, 85, 0.3)" }}>
+                <Link href={freeResources.buttonLink || "/free"}>
+                  <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-xl transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: freeResources.buttonBackgroundColor || "#4a2955", color: freeResources.buttonTextColor || "#ffffff", boxShadow: `0 12px 25px ${freeResources.buttonBackgroundColor ? freeResources.buttonBackgroundColor + "40" : "rgba(74, 41, 85, 0.3)"}` }}>
                     {freeResources.buttonLabel} <ArrowRight className="h-4 w-4" />
                   </button>
                 </Link>
@@ -394,13 +418,13 @@ export default function Home() {
             <p className="mb-8" style={{ color: `${cta.textColor}bf`, fontSize: cta.bodySize }}>{cta.description}</p>
           </div>
           <div className={`flex flex-wrap gap-4 ${cta.layout === "split" ? "justify-start" : "justify-center"}`}>
-            <Link href="/books">
-              <button className="px-8 py-3.5 rounded-full font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: cta.accentColor }}>
+            <Link href={cta.primaryButtonLink || "/books"}>
+              <button className="px-8 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg" style={{ background: cta.accentColor, color: cta.primaryButtonTextColor || "#ffffff" }}>
                 {cta.primaryButtonLabel}
               </button>
             </Link>
-            <Link href="/free">
-              <button className="px-8 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95" style={{ background: cta.secondaryAccentColor, color: "#ffffff" }}>
+            <Link href={cta.secondaryButtonLink || "/free"}>
+              <button className="px-8 py-3.5 rounded-full font-bold transition-all hover:opacity-90 active:scale-95" style={{ background: cta.secondaryAccentColor, color: cta.secondaryButtonTextColor || "#ffffff" }}>
                 {cta.secondaryButtonLabel}
               </button>
             </Link>
