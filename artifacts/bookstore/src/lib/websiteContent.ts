@@ -177,6 +177,7 @@ export interface WebsiteContent {
       backgroundImageOpacity?: number;
       overlayColor?: string;
       overlayOpacity?: number;
+      spotlightBookHeight?: number;
     };
     deals: {
       badge: string;
@@ -377,8 +378,9 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 38,
       bodySize: 18,
-      spotlightDesktopCount: 7,
+      spotlightDesktopCount: 6,
       spotlightMobileCount: 6,
+      spotlightBookHeight: 130,
       bullets: [
         "Free books visitors can preview before downloading",
         "Clickable covers open the exact book page",

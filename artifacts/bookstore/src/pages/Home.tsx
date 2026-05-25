@@ -349,13 +349,15 @@ export default function Home() {
               </div>
 
               <div className="flex-1 min-w-[280px]">
-                <div className="grid grid-cols-3 gap-3 md:gap-4">
+                <div className="grid grid-cols-3 gap-2">
                   {freeResourceSpotlights.slice(0, 6).map((book, index) => (
                     <Link key={book.id} href={`/books/${book.id}`}>
                       <div
-                        className="group/book relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl"
+                        className="group/book relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl"
                         style={{
                           aspectRatio: "3 / 4",
+                          maxHeight: `${freeResources.spotlightBookHeight ?? 130}px`,
+                          width: "100%",
                           boxShadow: "4px 4px 16px rgba(0,0,0,0.45), -1px 0 4px rgba(0,0,0,0.15), inset -2px 0 6px rgba(0,0,0,0.25)",
                           animation: `bookhub-free-float 5s ease-in-out ${index * 0.5}s infinite alternate`,
                           borderRadius: "4px 12px 12px 4px",
@@ -379,7 +381,7 @@ export default function Home() {
           <div className={`grid grid-cols-2 md:grid-cols-3 ${freeResources.layout === "spacious" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-4 md:gap-5`}>
             {loadingFree
               ? Array.from({ length: 5 }).map((_, index) => <BookSkeleton key={index} />)
-              : freeBooks?.slice(0, freeResources.layout === "spacious" ? 8 : 5).map((book) => <BookCard key={book.id} book={book} />)}
+              : freeBooks?.slice(6, 6 + (freeResources.layout === "spacious" ? 8 : 5)).map((book) => <BookCard key={book.id} book={book} />)}
           </div>
         </div>
       </section>

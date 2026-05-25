@@ -1088,7 +1088,7 @@ export default function AdminWebsiteEditor() {
             </Field>
           </SectionCard>
 
-          <SectionCard title="Free Resources Banner" description="Style the free-resources section including the badge, banner gradient, button label, and preview grid density.">
+          <SectionCard title="Free Resources Banner" description="Style the free-resources section including the badge, banner gradient, button label, book card size, and preview grid.">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Badge">
                 <Input value={form.home.freeResources.badge} onChange={(event) => updateHome("freeResources", { badge: event.target.value })} />
@@ -1123,11 +1123,8 @@ export default function AdminWebsiteEditor() {
               <Field label="Banner Background" description="Supports gradients.">
                 <Input value={form.home.freeResources.bannerBackground} onChange={(event) => updateHome("freeResources", { bannerBackground: event.target.value })} />
               </Field>
-              <Field label="Desktop Orbit Books" description="Total books shown in the desktop circular showcase, including the center book.">
-                <Input type="number" min={1} max={7} value={form.home.freeResources.spotlightDesktopCount} onChange={(event) => updateHome("freeResources", { spotlightDesktopCount: Number(event.target.value) || 7 })} />
-              </Field>
-              <Field label="Mobile Orbit Books" description="Total books shown in the mobile circular showcase.">
-                <Input type="number" min={1} max={6} value={form.home.freeResources.spotlightMobileCount} onChange={(event) => updateHome("freeResources", { spotlightMobileCount: Number(event.target.value) || 6 })} />
+              <Field label="Book Card Height (px)" description="Max height of each book cover in the 3×2 banner grid. Lower = smaller books.">
+                <Input type="number" min={80} max={250} value={form.home.freeResources.spotlightBookHeight ?? 130} onChange={(event) => updateHome("freeResources", { spotlightBookHeight: Number(event.target.value) || 130 })} />
               </Field>
               <Field label="Title Size">
                 <Input type="number" min={20} max={56} value={form.home.freeResources.titleSize} onChange={(event) => updateHome("freeResources", { titleSize: Number(event.target.value) || 38 })} />
