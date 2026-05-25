@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Save, RotateCcw, Palette, Type, LayoutTemplate, Monitor } from "lucide-react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { Save, RotateCcw, Palette, Type, LayoutTemplate, Monitor, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api";
 import { WebsiteContent, TextEffect, defaultWebsiteContent, resolveWebsiteContent } from "@/lib/websiteContent";
@@ -285,21 +285,92 @@ function parseDescriptions(value: string) {
     });
 }
 
+const DRAFT_KEY = "bookhub-editor-draft";
+
+interface EditorDraft {
+  content: WebsiteContent;
+  timestamp: number;
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+}
+
+function loadDraft(): EditorDraft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as EditorDraft;
+    // Discard drafts older than 24 hours
+    if (Date.now() - parsed.timestamp > 24 * 60 * 60 * 1000) {
+      clearDraft();
+      return null;
+    }
+    return parsed;
+  } catch {
+    clearDraft();
+    return null;
+  }
+}
+
+function saveDraft(content: WebsiteContent) {
+  try {
+    const draft: EditorDraft = { content, timestamp: Date.now() };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch { /* ignore quota errors */ }
+}
+
 export default function AdminWebsiteEditor() {
   const { toast } = useToast();
   const [form, setForm] = useState<WebsiteContent>(defaultWebsiteContent);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<WebsiteContent | null>(null);
+  const serverDataLoaded = useRef(false);
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // --- Fetch server data and check for draft ---
   useEffect(() => {
     apiFetch("/api/website-content")
       .then((response) => response.json())
-      .then((data) => setForm(resolveWebsiteContent(data.content)))
+      .then((data) => {
+        const serverContent = resolveWebsiteContent(data.content);
+        setForm(serverContent);
+        serverDataLoaded.current = true;
+
+        // Check if there's a saved draft that differs from server
+        const draft = loadDraft();
+        if (draft && JSON.stringify(draft.content) !== JSON.stringify(serverContent)) {
+          setPendingDraft(draft.content);
+        } else {
+          // Draft matches server data or doesn't exist — clean up
+          clearDraft();
+        }
+      })
       .catch(() => {
         toast({ title: "Using default editor content", variant: "destructive" });
+        serverDataLoaded.current = true;
+        // Still check for draft even on error
+        const draft = loadDraft();
+        if (draft) setPendingDraft(draft.content);
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  // --- Debounced auto-save to localStorage ---
+  useEffect(() => {
+    // Don't persist until the server data has loaded at least once
+    if (!serverDataLoaded.current) return;
+
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(() => {
+      saveDraft(form);
+    }, 500);
+
+    return () => {
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    };
+  }, [form]);
 
   const updateNavbar = (patch: Partial<WebsiteContent["navbar"]>) => {
     setForm((current) => ({ ...current, navbar: { ...current.navbar, ...patch } }));
@@ -325,6 +396,21 @@ export default function AdminWebsiteEditor() {
     }));
   };
 
+  // --- Draft restoration handlers ---
+  const handleRestoreDraft = useCallback(() => {
+    if (pendingDraft) {
+      setForm(pendingDraft);
+      setPendingDraft(null);
+      toast({ title: "Draft restored", description: "Your unsaved changes have been restored. Click Save to keep them." });
+    }
+  }, [pendingDraft, toast]);
+
+  const handleDiscardDraft = useCallback(() => {
+    setPendingDraft(null);
+    clearDraft();
+    toast({ title: "Draft discarded" });
+  }, [toast]);
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -338,6 +424,8 @@ export default function AdminWebsiteEditor() {
         throw new Error("Failed");
       }
 
+      clearDraft();
+      setPendingDraft(null);
       toast({ title: "Website editor saved" });
     } catch {
       toast({ title: "Failed to save website editor", variant: "destructive" });
@@ -365,7 +453,7 @@ export default function AdminWebsiteEditor() {
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
-            onClick={() => setForm(defaultWebsiteContent)}
+            onClick={() => { setForm(defaultWebsiteContent); clearDraft(); setPendingDraft(null); }}
             disabled={isSaving}
           >
             <RotateCcw className="h-4 w-4 mr-2" />
@@ -377,6 +465,30 @@ export default function AdminWebsiteEditor() {
           </Button>
         </div>
       </div>
+
+      {pendingDraft && (
+        <Card className="border-amber-500/40 bg-amber-500/10 animate-in fade-in slide-in-from-top-2 duration-300">
+          <CardContent className="pt-5 pb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Unsaved draft found</p>
+                <p className="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5">
+                  You have unsaved changes from a previous session. Would you like to restore them?
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              <Button size="sm" variant="outline" onClick={handleDiscardDraft}>
+                Discard
+              </Button>
+              <Button size="sm" onClick={handleRestoreDraft} className="bg-amber-600 hover:bg-amber-700 text-white">
+                Restore Draft
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6 grid gap-4 md:grid-cols-3">
@@ -842,6 +954,37 @@ export default function AdminWebsiteEditor() {
               <Field label="Adults Link URL">
                 <Input value={form.home.categories.adultsLink || ""} placeholder="/books?ageGroup=Adults" onChange={(event) => updateHome("categories", { adultsLink: event.target.value })} />
               </Field>
+            </div>
+            <div className="mt-6 pt-6 border-t">
+              <Label className="text-base font-semibold mb-4 block">Card Background Images &amp; Overlays</Label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Kids Background Image URL" description="URL/path to background image for the Kids card.">
+                  <Input value={form.home.categories.kidsBackgroundImage || ""} placeholder="/kids-learning-bg.png" onChange={(event) => updateHome("categories", { kidsBackgroundImage: event.target.value })} />
+                </Field>
+                <Field label="Kids Background Image Opacity" description="0 = hidden, 1 = fully visible">
+                  <Input type="number" min={0} max={1} step={0.05} value={form.home.categories.kidsBackgroundImageOpacity ?? 0.45} onChange={(event) => updateHome("categories", { kidsBackgroundImageOpacity: Number(event.target.value) })} />
+                </Field>
+                <Field label="Kids Overlay Color" description="Supports gradients.">
+                  <Input value={form.home.categories.kidsOverlayColor || ""} placeholder="linear-gradient(135deg, #582C6F 50%, #3a1d49 100%)" onChange={(event) => updateHome("categories", { kidsOverlayColor: event.target.value })} />
+                </Field>
+                <Field label="Kids Overlay Opacity" description="0 = no overlay, 1 = fully opaque">
+                  <Input type="number" min={0} max={1} step={0.05} value={form.home.categories.kidsOverlayOpacity ?? 0} onChange={(event) => updateHome("categories", { kidsOverlayOpacity: Number(event.target.value) })} />
+                </Field>
+                <Field label="Adults Background Image URL" description="URL/path to background image for the Adults card.">
+                  <Input value={form.home.categories.adultsBackgroundImage || ""} placeholder="/adults-learning-bg.png" onChange={(event) => updateHome("categories", { adultsBackgroundImage: event.target.value })} />
+                </Field>
+                <Field label="Adults Background Image Opacity" description="0 = hidden, 1 = fully visible">
+                  <Input type="number" min={0} max={1} step={0.05} value={form.home.categories.adultsBackgroundImageOpacity ?? 0.45} onChange={(event) => updateHome("categories", { adultsBackgroundImageOpacity: Number(event.target.value) })} />
+                </Field>
+                <Field label="Adults Overlay Color" description="Supports gradients.">
+                  <Input value={form.home.categories.adultsOverlayColor || ""} placeholder="linear-gradient(135deg, #416D53 50%, #2d4d3a 100%)" onChange={(event) => updateHome("categories", { adultsOverlayColor: event.target.value })} />
+                </Field>
+                <Field label="Adults Overlay Opacity" description="0 = no overlay, 1 = fully opaque">
+                  <Input type="number" min={0} max={1} step={0.05} value={form.home.categories.adultsOverlayOpacity ?? 0} onChange={(event) => updateHome("categories", { adultsOverlayOpacity: Number(event.target.value) })} />
+                </Field>
+              </div>
+            </div>
+            <div className="mt-6 pt-6 border-t grid gap-4 md:grid-cols-2">
               <TextEffectField
                 label="Title Effect"
                 value={form.home.categories.titleEffect}
@@ -1023,6 +1166,18 @@ export default function AdminWebsiteEditor() {
                 defaultColor={form.home.freeResources.accentColor}
                 description="Applies to the description and bullet list."
               />
+              <Field label="Background Image URL" description="URL/path to background image for the banner.">
+                <Input value={form.home.freeResources.backgroundImage || ""} placeholder="/magic-book-bg.png" onChange={(event) => updateHome("freeResources", { backgroundImage: event.target.value })} />
+              </Field>
+              <Field label="Background Image Opacity" description="0 = hidden, 1 = fully visible">
+                <Input type="number" min={0} max={1} step={0.05} value={form.home.freeResources.backgroundImageOpacity ?? 0.35} onChange={(event) => updateHome("freeResources", { backgroundImageOpacity: Number(event.target.value) })} />
+              </Field>
+              <Field label="Overlay Color" description="Supports gradients. Shown on top of the background image.">
+                <Input value={form.home.freeResources.overlayColor || ""} placeholder="linear-gradient(135deg, #582C6F 0%, #3a1d49 100%)" onChange={(event) => updateHome("freeResources", { overlayColor: event.target.value })} />
+              </Field>
+              <Field label="Overlay Opacity" description="0 = no overlay, 1 = fully opaque">
+                <Input type="number" min={0} max={1} step={0.05} value={form.home.freeResources.overlayOpacity ?? 0} onChange={(event) => updateHome("freeResources", { overlayOpacity: Number(event.target.value) })} />
+              </Field>
               <Field label="Checkmark Color">
                 <Input type="color" value={form.home.freeResources.checkmarkColor || "#bfa345"} onChange={(event) => updateHome("freeResources", { checkmarkColor: event.target.value })} />
               </Field>

@@ -221,6 +221,15 @@ export default function Home() {
           <div className={`${categories.layout === "stack" ? "flex flex-col" : "grid grid-cols-1 md:grid-cols-2"} gap-6 max-w-4xl mx-auto`}>
             <Link href={categories.kidsLink || "/books?ageGroup=Kids"}>
               <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" style={{ background: categories.kidsBackground }}>
+                {categories.kidsBackgroundImage && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url("${categories.kidsBackgroundImage}")`, opacity: categories.kidsBackgroundImageOpacity ?? 0.45 }}
+                  />
+                )}
+                {(categories.kidsOverlayOpacity ?? 0) > 0 && (
+                  <div className="absolute inset-0" style={{ background: categories.kidsOverlayColor || "rgba(0,0,0,0.4)", opacity: categories.kidsOverlayOpacity }} />
+                )}
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20" style={{ background: categories.accentColor }} />
                 <div className="relative z-10 p-8 h-full flex flex-col justify-end">
@@ -235,6 +244,15 @@ export default function Home() {
 
             <Link href={categories.adultsLink || "/books?ageGroup=Adults"}>
               <div className="group relative overflow-hidden rounded-3xl cursor-pointer h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" style={{ background: categories.adultsBackground }}>
+                {categories.adultsBackgroundImage && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url("${categories.adultsBackgroundImage}")`, opacity: categories.adultsBackgroundImageOpacity ?? 0.45 }}
+                  />
+                )}
+                {(categories.adultsOverlayOpacity ?? 0) > 0 && (
+                  <div className="absolute inset-0" style={{ background: categories.adultsOverlayColor || "rgba(0,0,0,0.4)", opacity: categories.adultsOverlayOpacity }} />
+                )}
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20 bg-white" />
                 <div className="relative z-10 p-8 h-full flex flex-col justify-end">
@@ -291,6 +309,15 @@ export default function Home() {
               boxShadow: "0 30px 90px rgba(83, 37, 108, 0.22)",
             }}
           >
+            {freeResources.backgroundImage && (
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url("${freeResources.backgroundImage}")`, opacity: freeResources.backgroundImageOpacity ?? 0.35 }}
+              />
+            )}
+            {(freeResources.overlayOpacity ?? 0) > 0 && (
+              <div className="absolute inset-0" style={{ background: freeResources.overlayColor || "rgba(0,0,0,0.4)", opacity: freeResources.overlayOpacity }} />
+            )}
             <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08), transparent 18%), radial-gradient(circle at 80% 18%, rgba(255,255,255,0.07), transparent 16%)" }} />
             <div className={`relative z-10 flex flex-col gap-10 lg:items-center lg:gap-12 ${freeResources.bannerLayout === "right" ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
               <div className="flex-1 min-w-[300px]">
