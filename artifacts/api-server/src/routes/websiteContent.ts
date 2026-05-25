@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, websiteContentTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
@@ -38,7 +38,30 @@ async function writeFallbackContent(content: Record<string, unknown>) {
   return payload;
 }
 
+let ensureTablePromise: Promise<void> | null = null;
+function ensureWebsiteContentTable() {
+  if (!ensureTablePromise) {
+    ensureTablePromise = db
+      .execute(
+        sql`
+          CREATE TABLE IF NOT EXISTS website_content (
+            id SERIAL PRIMARY KEY,
+            content JSONB NOT NULL DEFAULT '{}'::jsonb,
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )
+        `
+      )
+      .then(() => undefined)
+      .catch((err) => {
+        ensureTablePromise = null;
+        throw err;
+      });
+  }
+  return ensureTablePromise;
+}
+
 async function getOrCreateWebsiteContent() {
+  await ensureWebsiteContentTable();
   const rows = await db.select().from(websiteContentTable).limit(1);
   if (rows[0]) {
     return rows[0];
