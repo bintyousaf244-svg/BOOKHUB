@@ -114,6 +114,14 @@ export interface WebsiteContent {
       bodyEffect?: TextEffect;
       bodyEffectColor?: string;
       bodyEffectIntensity?: number;
+      kidsBackgroundImage?: string;
+      adultsBackgroundImage?: string;
+      kidsBackgroundImageOpacity?: number;
+      adultsBackgroundImageOpacity?: number;
+      kidsOverlayColor?: string;
+      adultsOverlayColor?: string;
+      kidsOverlayOpacity?: number;
+      adultsOverlayOpacity?: number;
     };
     featured: {
       eyebrow: string;
@@ -165,6 +173,10 @@ export interface WebsiteContent {
       bodyEffect?: TextEffect;
       bodyEffectColor?: string;
       bodyEffectIntensity?: number;
+      backgroundImage?: string;
+      backgroundImageOpacity?: number;
+      overlayColor?: string;
+      overlayOpacity?: number;
     };
     deals: {
       badge: string;
@@ -327,6 +339,14 @@ export const defaultWebsiteContent: WebsiteContent = {
       adultsLink: "/books?ageGroup=Adults",
       titleEffect: "none",
       bodyEffect: "none",
+      kidsBackgroundImage: "/kids-learning-bg.png",
+      kidsBackgroundImageOpacity: 0.45,
+      kidsOverlayColor: "linear-gradient(135deg, #582C6F 50%, #3a1d49 100%)",
+      kidsOverlayOpacity: 0.8,
+      adultsBackgroundImage: "/adults-learning-bg.png",
+      adultsBackgroundImageOpacity: 0.45,
+      adultsOverlayColor: "linear-gradient(135deg, #416D53 50%, #2d4d3a 100%)",
+      adultsOverlayOpacity: 0.8,
     },
     featured: {
       eyebrow: "Hand-picked",
@@ -372,6 +392,10 @@ export const defaultWebsiteContent: WebsiteContent = {
       bannerLayout: "left",
       titleEffect: "shadow",
       bodyEffect: "shadow",
+      backgroundImage: "/magic-book-bg.png",
+      backgroundImageOpacity: 0.35,
+      overlayColor: "linear-gradient(135deg, #582C6F 0%, #3a1d49 100%)",
+      overlayOpacity: 0.8,
     },
     deals: {
       badge: "Limited Offers",
