@@ -85,11 +85,11 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 mb-5">
               <img src="/logo.png" alt={footer.brandName} className="h-12 w-12 object-contain drop-shadow-lg" />
-              <span className="text-xl font-bold tracking-tight" style={{ color: footer.textColor, fontFamily: footer.fontFamily, ...getTextEffectStyle(footer.titleEffect, footer.accentColor, footer.textColor) }}>
+              <span className="text-xl font-bold tracking-tight" style={{ color: footer.textColor, fontFamily: footer.fontFamily, ...getTextEffectStyle(footer.titleEffect, footer.accentColor, footer.textColor, footer.titleEffectColor, footer.titleEffectIntensity) }}>
                 {footer.brandName}
               </span>
             </Link>
-            <p className="max-w-xs leading-relaxed mb-6" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor) }}>
+            <p className="max-w-xs leading-relaxed mb-6" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor, footer.bodyEffectColor, footer.bodyEffectIntensity) }}>
               {footer.description}
             </p>
 
@@ -136,11 +136,11 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize, ...getTextEffectStyle(footer.titleEffect, footer.accentColor, footer.mutedTextColor) }}>Shop</h3>
+            <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize, ...getTextEffectStyle(footer.titleEffect, footer.accentColor, footer.mutedTextColor, footer.titleEffectColor, footer.titleEffectIntensity) }}>Shop</h3>
             <ul className="space-y-3">
               {shopLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor) }}>
+                  <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor, footer.bodyEffectColor, footer.bodyEffectIntensity) }}>
                     {link.label}
                   </Link>
                 </li>
@@ -149,7 +149,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize, ...getTextEffectStyle(footer.titleEffect, footer.accentColor, footer.mutedTextColor) }}>Account</h3>
+            <h3 className="font-bold uppercase tracking-widest mb-5" style={{ color: footer.mutedTextColor, fontSize: footer.headingSize, ...getTextEffectStyle(footer.titleEffect, footer.accentColor, footer.mutedTextColor, footer.titleEffectColor, footer.titleEffectIntensity) }}>Account</h3>
             <ul className="space-y-3">
               {accountLinks.map((link) => (
                 <li key={link.href}>
@@ -159,12 +159,12 @@ export function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-white transition-colors"
-                      style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor) }}
+                      style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor, footer.bodyEffectColor, footer.bodyEffectIntensity) }}
                     >
                       {link.label}
                     </a>
                   ) : (
-                    <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor) }}>
+                    <Link href={link.href} className="hover:text-white transition-colors" style={{ color: footer.mutedTextColor, fontSize: footer.bodySize, ...getTextEffectStyle(footer.bodyEffect, footer.accentColor, footer.mutedTextColor, footer.bodyEffectColor, footer.bodyEffectIntensity) }}>
                       {link.label}
                     </Link>
                   )}

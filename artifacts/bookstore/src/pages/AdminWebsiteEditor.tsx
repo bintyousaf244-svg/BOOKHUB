@@ -54,26 +54,80 @@ function TextEffectField({
   label,
   value,
   onChange,
+  effectColor,
+  onChangeColor,
+  effectIntensity,
+  onChangeIntensity,
+  defaultColor = "#D97B8F",
   description,
 }: {
   label: string;
   value?: TextEffect;
   onChange: (value: TextEffect) => void;
+  effectColor?: string;
+  onChangeColor?: (color: string) => void;
+  effectIntensity?: number;
+  onChangeIntensity?: (intensity: number) => void;
+  defaultColor?: string;
   description?: string;
 }) {
   return (
-    <Field label={label} description={description}>
-      <Select value={value || "none"} onValueChange={(next) => onChange(next as TextEffect)}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
-        <SelectContent>
-          {TEXT_EFFECT_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </Field>
+    <div className="space-y-3">
+      <Field label={label} description={description}>
+        <Select value={value || "none"} onValueChange={(next) => onChange(next as TextEffect)}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {TEXT_EFFECT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
+      {value && value !== "none" && onChangeColor && onChangeIntensity && (
+        <div className="grid grid-cols-2 gap-4 p-3 rounded-xl border bg-muted/20 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Effect Color</Label>
+            <div className="flex gap-2 items-center">
+              <Input
+                type="color"
+                className="w-10 h-10 p-1 cursor-pointer rounded-lg border-2 border-muted-foreground/20"
+                value={effectColor || defaultColor}
+                onChange={(e) => onChangeColor(e.target.value)}
+              />
+              <Input
+                type="text"
+                className="h-9 text-xs uppercase"
+                value={effectColor || defaultColor}
+                onChange={(e) => onChangeColor(e.target.value)}
+                placeholder="#000000"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <Label className="text-xs font-semibold">Effect Intensity</Label>
+              <span className="text-[10px] font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                {effectIntensity !== undefined ? effectIntensity : 5}/10
+              </span>
+            </div>
+            <div className="flex items-center gap-2 pt-1.5">
+              <input
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                className="w-full accent-primary cursor-pointer h-2 bg-muted rounded-lg appearance-none"
+                value={effectIntensity !== undefined ? effectIntensity : 5}
+                onChange={(e) => onChangeIntensity(Number(e.target.value))}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -384,6 +438,11 @@ export default function AdminWebsiteEditor() {
                 label="Text Effect"
                 value={form.navbar.textEffect}
                 onChange={(textEffect) => updateNavbar({ textEffect })}
+                effectColor={form.navbar.textEffectColor}
+                onChangeColor={(textEffectColor) => updateNavbar({ textEffectColor })}
+                effectIntensity={form.navbar.textEffectIntensity}
+                onChangeIntensity={(textEffectIntensity) => updateNavbar({ textEffectIntensity })}
+                defaultColor={form.navbar.accentColor}
                 description="Applies to the brand name and navigation text."
               />
             </div>
@@ -447,12 +506,22 @@ export default function AdminWebsiteEditor() {
                 label="Title Effect"
                 value={form.footer.titleEffect}
                 onChange={(titleEffect) => updateFooter({ titleEffect })}
+                effectColor={form.footer.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateFooter({ titleEffectColor })}
+                effectIntensity={form.footer.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateFooter({ titleEffectIntensity })}
+                defaultColor={form.footer.accentColor}
                 description="Used for the footer brand name and column headings."
               />
               <TextEffectField
                 label="Body Effect"
                 value={form.footer.bodyEffect}
                 onChange={(bodyEffect) => updateFooter({ bodyEffect })}
+                effectColor={form.footer.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateFooter({ bodyEffectColor })}
+                effectIntensity={form.footer.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateFooter({ bodyEffectIntensity })}
+                defaultColor={form.footer.accentColor}
                 description="Used for the footer description and link text."
               />
             </div>
@@ -548,8 +617,28 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.hero.titleEffect} onChange={(titleEffect) => updateHome("hero", { titleEffect })} description="Used for the main hero heading." />
-              <TextEffectField label="Body Effect" value={form.home.hero.bodyEffect} onChange={(bodyEffect) => updateHome("hero", { bodyEffect })} description="Used for the hero description text." />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.hero.titleEffect}
+                onChange={(titleEffect) => updateHome("hero", { titleEffect })}
+                effectColor={form.home.hero.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("hero", { titleEffectColor })}
+                effectIntensity={form.home.hero.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("hero", { titleEffectIntensity })}
+                defaultColor={form.home.hero.accentColor}
+                description="Used for the main hero heading."
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.hero.bodyEffect}
+                onChange={(bodyEffect) => updateHome("hero", { bodyEffect })}
+                effectColor={form.home.hero.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("hero", { bodyEffectColor })}
+                effectIntensity={form.home.hero.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("hero", { bodyEffectIntensity })}
+                defaultColor={form.home.hero.accentColor}
+                description="Used for the hero description text."
+              />
               <Field label="Title Size">
                 <Input type="number" min={32} max={84} value={form.home.hero.titleSize} onChange={(event) => updateHome("hero", { titleSize: Number(event.target.value) || 56 })} />
               </Field>
@@ -637,8 +726,27 @@ export default function AdminWebsiteEditor() {
               <Field label="Font Family">
                 <Input value={form.home.trust.fontFamily} onChange={(event) => updateHome("trust", { fontFamily: event.target.value })} />
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.trust.titleEffect} onChange={(titleEffect) => updateHome("trust", { titleEffect })} />
-              <TextEffectField label="Body Effect" value={form.home.trust.bodyEffect} onChange={(bodyEffect) => updateHome("trust", { bodyEffect })} description="Applies to trust card titles and descriptions." />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.trust.titleEffect}
+                onChange={(titleEffect) => updateHome("trust", { titleEffect })}
+                effectColor={form.home.trust.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("trust", { titleEffectColor })}
+                effectIntensity={form.home.trust.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("trust", { titleEffectIntensity })}
+                defaultColor={form.home.trust.accentColor}
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.trust.bodyEffect}
+                onChange={(bodyEffect) => updateHome("trust", { bodyEffect })}
+                effectColor={form.home.trust.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("trust", { bodyEffectColor })}
+                effectIntensity={form.home.trust.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("trust", { bodyEffectIntensity })}
+                defaultColor={form.home.trust.accentColor}
+                description="Applies to trust card titles and descriptions."
+              />
             </div>
             <div className="mt-6 pt-6 border-t">
               <ListEditor
@@ -734,8 +842,27 @@ export default function AdminWebsiteEditor() {
               <Field label="Adults Link URL">
                 <Input value={form.home.categories.adultsLink || ""} placeholder="/books?ageGroup=Adults" onChange={(event) => updateHome("categories", { adultsLink: event.target.value })} />
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.categories.titleEffect} onChange={(titleEffect) => updateHome("categories", { titleEffect })} />
-              <TextEffectField label="Body Effect" value={form.home.categories.bodyEffect} onChange={(bodyEffect) => updateHome("categories", { bodyEffect })} description="Applies to the category card titles and descriptions." />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.categories.titleEffect}
+                onChange={(titleEffect) => updateHome("categories", { titleEffect })}
+                effectColor={form.home.categories.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("categories", { titleEffectColor })}
+                effectIntensity={form.home.categories.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("categories", { titleEffectIntensity })}
+                defaultColor={form.home.categories.accentColor}
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.categories.bodyEffect}
+                onChange={(bodyEffect) => updateHome("categories", { bodyEffect })}
+                effectColor={form.home.categories.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("categories", { bodyEffectColor })}
+                effectIntensity={form.home.categories.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("categories", { bodyEffectIntensity })}
+                defaultColor={form.home.categories.accentColor}
+                description="Applies to the category card titles and descriptions."
+              />
             </div>
             <Field label="Kids Description">
               <Textarea rows={3} value={form.home.categories.kidsDescription} onChange={(event) => updateHome("categories", { kidsDescription: event.target.value })} />
@@ -792,8 +919,26 @@ export default function AdminWebsiteEditor() {
               <Field label="Button Text Color">
                 <Input type="color" value={form.home.featured.buttonTextColor || form.home.featured.textColor} onChange={(event) => updateHome("featured", { buttonTextColor: event.target.value })} />
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.featured.titleEffect} onChange={(titleEffect) => updateHome("featured", { titleEffect })} />
-              <TextEffectField label="Body Effect" value={form.home.featured.bodyEffect} onChange={(bodyEffect) => updateHome("featured", { bodyEffect })} />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.featured.titleEffect}
+                onChange={(titleEffect) => updateHome("featured", { titleEffect })}
+                effectColor={form.home.featured.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("featured", { titleEffectColor })}
+                effectIntensity={form.home.featured.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("featured", { titleEffectIntensity })}
+                defaultColor={form.home.featured.accentColor}
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.featured.bodyEffect}
+                onChange={(bodyEffect) => updateHome("featured", { bodyEffect })}
+                effectColor={form.home.featured.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("featured", { bodyEffectColor })}
+                effectIntensity={form.home.featured.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("featured", { bodyEffectIntensity })}
+                defaultColor={form.home.featured.accentColor}
+              />
             </div>
             <Field label="Description">
               <Textarea rows={3} value={form.home.featured.description} onChange={(event) => updateHome("featured", { description: event.target.value })} />
@@ -856,8 +1001,28 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.freeResources.titleEffect} onChange={(titleEffect) => updateHome("freeResources", { titleEffect })} description="Applies to the free resources heading." />
-              <TextEffectField label="Body Effect" value={form.home.freeResources.bodyEffect} onChange={(bodyEffect) => updateHome("freeResources", { bodyEffect })} description="Applies to the description and bullet list." />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.freeResources.titleEffect}
+                onChange={(titleEffect) => updateHome("freeResources", { titleEffect })}
+                effectColor={form.home.freeResources.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("freeResources", { titleEffectColor })}
+                effectIntensity={form.home.freeResources.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("freeResources", { titleEffectIntensity })}
+                defaultColor={form.home.freeResources.accentColor}
+                description="Applies to the free resources heading."
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.freeResources.bodyEffect}
+                onChange={(bodyEffect) => updateHome("freeResources", { bodyEffect })}
+                effectColor={form.home.freeResources.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("freeResources", { bodyEffectColor })}
+                effectIntensity={form.home.freeResources.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("freeResources", { bodyEffectIntensity })}
+                defaultColor={form.home.freeResources.accentColor}
+                description="Applies to the description and bullet list."
+              />
               <Field label="Checkmark Color">
                 <Input type="color" value={form.home.freeResources.checkmarkColor || "#bfa345"} onChange={(event) => updateHome("freeResources", { checkmarkColor: event.target.value })} />
               </Field>
@@ -922,8 +1087,26 @@ export default function AdminWebsiteEditor() {
               <Field label="Body Size">
                 <Input type="number" min={12} max={24} value={form.home.deals.bodySize} onChange={(event) => updateHome("deals", { bodySize: Number(event.target.value) || 16 })} />
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.deals.titleEffect} onChange={(titleEffect) => updateHome("deals", { titleEffect })} />
-              <TextEffectField label="Body Effect" value={form.home.deals.bodyEffect} onChange={(bodyEffect) => updateHome("deals", { bodyEffect })} />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.deals.titleEffect}
+                onChange={(titleEffect) => updateHome("deals", { titleEffect })}
+                effectColor={form.home.deals.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("deals", { titleEffectColor })}
+                effectIntensity={form.home.deals.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("deals", { titleEffectIntensity })}
+                defaultColor={form.home.deals.accentColor}
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.deals.bodyEffect}
+                onChange={(bodyEffect) => updateHome("deals", { bodyEffect })}
+                effectColor={form.home.deals.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("deals", { bodyEffectColor })}
+                effectIntensity={form.home.deals.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("deals", { bodyEffectIntensity })}
+                defaultColor={form.home.deals.accentColor}
+              />
             </div>
             <Field label="Description">
               <Textarea rows={3} value={form.home.deals.description} onChange={(event) => updateHome("deals", { description: event.target.value })} />
@@ -953,8 +1136,28 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
-              <TextEffectField label="Title Effect" value={form.home.cta.titleEffect} onChange={(titleEffect) => updateHome("cta", { titleEffect })} description="Applies to the CTA title." />
-              <TextEffectField label="Body Effect" value={form.home.cta.bodyEffect} onChange={(bodyEffect) => updateHome("cta", { bodyEffect })} description="Applies to the CTA description." />
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.cta.titleEffect}
+                onChange={(titleEffect) => updateHome("cta", { titleEffect })}
+                effectColor={form.home.cta.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("cta", { titleEffectColor })}
+                effectIntensity={form.home.cta.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("cta", { titleEffectIntensity })}
+                defaultColor={form.home.cta.accentColor}
+                description="Applies to the CTA title."
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.cta.bodyEffect}
+                onChange={(bodyEffect) => updateHome("cta", { bodyEffect })}
+                effectColor={form.home.cta.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("cta", { bodyEffectColor })}
+                effectIntensity={form.home.cta.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("cta", { bodyEffectIntensity })}
+                defaultColor={form.home.cta.accentColor}
+                description="Applies to the CTA description."
+              />
               <Field label="Font Family">
                 <Input value={form.home.cta.fontFamily} onChange={(event) => updateHome("cta", { fontFamily: event.target.value })} />
               </Field>

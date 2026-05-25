@@ -15,6 +15,8 @@ export interface WebsiteContent {
     ctaLink: string;
     links: Array<{ href: string; label: string; forceReload?: boolean }>;
     textEffect?: TextEffect;
+    textEffectColor?: string;
+    textEffectIntensity?: number;
   };
   footer: {
     brandName: string;
@@ -29,7 +31,11 @@ export interface WebsiteContent {
     shopLinks: Array<{ href: string; label: string }>;
     accountLinks: Array<{ href: string; label: string }>;
     titleEffect?: TextEffect;
+    titleEffectColor?: string;
+    titleEffectIntensity?: number;
     bodyEffect?: TextEffect;
+    bodyEffectColor?: string;
+    bodyEffectIntensity?: number;
   };
   home: {
     hero: {
@@ -58,7 +64,11 @@ export interface WebsiteContent {
       secondaryButtonBgColor?: string;
       secondaryButtonTextColor?: string;
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
     trust: {
       title: string;
@@ -72,7 +82,11 @@ export interface WebsiteContent {
       titleSize: number;
       bodySize: number;
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
     categories: {
       eyebrow: string;
@@ -95,7 +109,11 @@ export interface WebsiteContent {
       kidsLink?: string;
       adultsLink?: string;
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
     featured: {
       eyebrow: string;
@@ -113,7 +131,11 @@ export interface WebsiteContent {
       buttonBgColor?: string;
       buttonTextColor?: string;
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
     freeResources: {
       badge: string;
@@ -138,7 +160,11 @@ export interface WebsiteContent {
       buttonLink: string;
       bannerLayout: "left" | "right";
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
     deals: {
       badge: string;
@@ -152,7 +178,11 @@ export interface WebsiteContent {
       titleSize: number;
       bodySize: number;
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
     cta: {
       badge: string;
@@ -173,7 +203,11 @@ export interface WebsiteContent {
       primaryButtonTextColor?: string;
       secondaryButtonTextColor?: string;
       titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
       bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
     };
   };
 }

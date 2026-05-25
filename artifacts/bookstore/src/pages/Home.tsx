@@ -94,7 +94,7 @@ export default function Home() {
                 background: "rgba(255,255,255,0.15)",
                 color: hero.textColor,
                 border: "1px solid rgba(255,255,255,0.25)",
-                ...getTextEffectStyle(hero.bodyEffect, hero.accentColor, hero.textColor),
+                ...getTextEffectStyle(hero.bodyEffect, hero.accentColor, hero.textColor, hero.bodyEffectColor, hero.bodyEffectIntensity),
               }}
             >
               <Sparkles className="h-4 w-4" style={{ color: hero.accentColor }} />
@@ -107,7 +107,7 @@ export default function Home() {
                 color: hero.textColor,
                 fontFamily: hero.fontFamily,
                 fontSize: `clamp(2.5rem, 4vw, ${hero.titleSize}px)`,
-                ...getTextEffectStyle(hero.titleEffect, hero.accentColor, hero.textColor),
+                ...getTextEffectStyle(hero.titleEffect, hero.accentColor, hero.textColor, hero.titleEffectColor, hero.titleEffectIntensity),
               }}
             >
               {hero.titleLine1}
@@ -120,7 +120,7 @@ export default function Home() {
                 color: `${hero.textColor}bf`,
                 fontSize: hero.bodySize,
                 marginInline: hero.layout === "center" ? "auto" : undefined,
-                ...getTextEffectStyle(hero.bodyEffect, hero.accentColor, hero.textColor),
+                ...getTextEffectStyle(hero.bodyEffect, hero.accentColor, hero.textColor, hero.bodyEffectColor, hero.bodyEffectIntensity),
               }}
             >
               {hero.description}
@@ -179,7 +179,7 @@ export default function Home() {
       <section style={{ background: trust.backgroundColor, borderTop: `3px solid ${trust.accentColor}` }}>
         <div className="container mx-auto px-4 py-10">
           <div className="text-center mb-6">
-            <h2 style={{ color: trust.textColor, fontFamily: trust.fontFamily, fontSize: trust.titleSize, ...getTextEffectStyle(trust.titleEffect, trust.accentColor, trust.textColor) }}>{trust.title}</h2>
+            <h2 style={{ color: trust.textColor, fontFamily: trust.fontFamily, fontSize: trust.titleSize, ...getTextEffectStyle(trust.titleEffect, trust.accentColor, trust.textColor, trust.titleEffectColor, trust.titleEffectIntensity) }}>{trust.title}</h2>
           </div>
           <div className={`max-w-5xl mx-auto ${trust.layout === "inline" ? "flex flex-col md:flex-row gap-4" : "grid grid-cols-1 md:grid-cols-3 gap-6"}`}>
             {trust.items.map((item, index) => {
@@ -194,10 +194,10 @@ export default function Home() {
                     <Icon className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 style={{ color: trust.textColor, fontFamily: trust.fontFamily, fontSize: trust.bodySize + 2, ...getTextEffectStyle(trust.bodyEffect, trust.accentColor, trust.textColor) }} className="font-bold">
+                    <h3 style={{ color: trust.textColor, fontFamily: trust.fontFamily, fontSize: trust.bodySize + 2, ...getTextEffectStyle(trust.bodyEffect, trust.accentColor, trust.textColor, trust.bodyEffectColor, trust.bodyEffectIntensity) }} className="font-bold">
                       {item.title}
                     </h3>
-                    <p style={{ color: `${trust.textColor}bf`, fontSize: trust.bodySize, ...getTextEffectStyle(trust.bodyEffect, trust.accentColor, trust.textColor) }} className="mt-0.5">
+                    <p style={{ color: `${trust.textColor}bf`, fontSize: trust.bodySize, ...getTextEffectStyle(trust.bodyEffect, trust.accentColor, trust.textColor, trust.bodyEffectColor, trust.bodyEffectIntensity) }} className="mt-0.5">
                       {item.description}
                     </p>
                   </div>
@@ -211,10 +211,10 @@ export default function Home() {
       <section style={{ background: categories.backgroundColor }} className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-4" style={{ background: categories.accentColor, ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, "#ffffff") }}>
+            <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-4" style={{ background: categories.accentColor, ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, "#ffffff", categories.bodyEffectColor, categories.bodyEffectIntensity) }}>
               {categories.eyebrow}
             </span>
-            <h2 style={{ color: categories.textColor, fontFamily: categories.fontFamily, fontSize: `clamp(2rem, 4vw, ${categories.titleSize}px)`, ...getTextEffectStyle(categories.titleEffect, categories.accentColor, categories.textColor) }} className="font-bold">
+            <h2 style={{ color: categories.textColor, fontFamily: categories.fontFamily, fontSize: `clamp(2rem, 4vw, ${categories.titleSize}px)`, ...getTextEffectStyle(categories.titleEffect, categories.accentColor, categories.textColor, categories.titleEffectColor, categories.titleEffectIntensity) }} className="font-bold">
               {categories.title}
             </h2>
           </div>
@@ -224,8 +224,8 @@ export default function Home() {
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20" style={{ background: categories.accentColor }} />
                 <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                  <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: categories.fontFamily, color: categories.kidsTextColor || "#ffffff", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.kidsTextColor || "#ffffff") }}>{categories.kidsTitle}</h3>
-                  <p className="mb-4" style={{ fontSize: categories.bodySize, color: categories.kidsTextColor ? `${categories.kidsTextColor}cc` : "rgba(255,255,255,0.8)", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.kidsTextColor || "#ffffff") }}>{categories.kidsDescription}</p>
+                  <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: categories.fontFamily, color: categories.kidsTextColor || "#ffffff", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.kidsTextColor || "#ffffff", categories.bodyEffectColor, categories.bodyEffectIntensity) }}>{categories.kidsTitle}</h3>
+                  <p className="mb-4" style={{ fontSize: categories.bodySize, color: categories.kidsTextColor ? `${categories.kidsTextColor}cc` : "rgba(255,255,255,0.8)", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.kidsTextColor || "#ffffff", categories.bodyEffectColor, categories.bodyEffectIntensity) }}>{categories.kidsDescription}</p>
                   <span className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: categories.kidsTextColor || "#ffffff" }}>
                     Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </span>
@@ -238,8 +238,8 @@ export default function Home() {
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors duration-300" />
                 <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full opacity-20 bg-white" />
                 <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                  <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: categories.fontFamily, color: categories.adultsTextColor || "#ffffff", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.adultsTextColor || "#ffffff") }}>{categories.adultsTitle}</h3>
-                  <p className="mb-4" style={{ fontSize: categories.bodySize, color: categories.adultsTextColor ? `${categories.adultsTextColor}cc` : "rgba(255,255,255,0.8)", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.adultsTextColor || "#ffffff") }}>{categories.adultsDescription}</p>
+                  <h3 className="text-2xl font-bold mb-2" style={{ fontFamily: categories.fontFamily, color: categories.adultsTextColor || "#ffffff", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.adultsTextColor || "#ffffff", categories.bodyEffectColor, categories.bodyEffectIntensity) }}>{categories.adultsTitle}</h3>
+                  <p className="mb-4" style={{ fontSize: categories.bodySize, color: categories.adultsTextColor ? `${categories.adultsTextColor}cc` : "rgba(255,255,255,0.8)", ...getTextEffectStyle(categories.bodyEffect, categories.accentColor, categories.adultsTextColor || "#ffffff", categories.bodyEffectColor, categories.bodyEffectIntensity) }}>{categories.adultsDescription}</p>
                   <span className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: categories.adultsTextColor || "#ffffff" }}>
                     Explore <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </span>
@@ -254,13 +254,13 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
             <div>
-              <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3" style={{ background: featured.textColor, ...getTextEffectStyle(featured.bodyEffect, featured.accentColor, "#ffffff") }}>
+              <span className="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3" style={{ background: featured.textColor, ...getTextEffectStyle(featured.bodyEffect, featured.accentColor, "#ffffff", featured.bodyEffectColor, featured.bodyEffectIntensity) }}>
                 {featured.eyebrow}
               </span>
-              <h2 style={{ color: featured.textColor, fontFamily: featured.fontFamily, fontSize: `clamp(2rem, 4vw, ${featured.titleSize}px)`, ...getTextEffectStyle(featured.titleEffect, featured.accentColor, featured.textColor) }} className="font-bold">
+              <h2 style={{ color: featured.textColor, fontFamily: featured.fontFamily, fontSize: `clamp(2rem, 4vw, ${featured.titleSize}px)`, ...getTextEffectStyle(featured.titleEffect, featured.accentColor, featured.textColor, featured.titleEffectColor, featured.titleEffectIntensity) }} className="font-bold">
                 {featured.title}
               </h2>
-              <p className="mt-2" style={{ color: `${featured.textColor}bf`, fontSize: featured.bodySize, ...getTextEffectStyle(featured.bodyEffect, featured.accentColor, featured.textColor) }}>{featured.description}</p>
+              <p className="mt-2" style={{ color: `${featured.textColor}bf`, fontSize: featured.bodySize, ...getTextEffectStyle(featured.bodyEffect, featured.accentColor, featured.textColor, featured.bodyEffectColor, featured.bodyEffectIntensity) }}>{featured.description}</p>
             </div>
             <Link href={featured.buttonLink || "/books"}>
               <button
@@ -294,7 +294,7 @@ export default function Home() {
             <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 15% 25%, rgba(255,255,255,0.08), transparent 18%), radial-gradient(circle at 80% 18%, rgba(255,255,255,0.07), transparent 16%)" }} />
             <div className={`relative z-10 flex flex-col gap-10 lg:items-center lg:gap-12 ${freeResources.bannerLayout === "right" ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
               <div className="flex-1 min-w-[300px]">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-5" style={{ background: freeResources.accentColor, color: freeResources.textColor, ...getTextEffectStyle(freeResources.bodyEffect, freeResources.accentColor, freeResources.textColor) }}>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-5" style={{ background: freeResources.accentColor, color: freeResources.textColor, ...getTextEffectStyle(freeResources.bodyEffect, freeResources.accentColor, freeResources.textColor, freeResources.bodyEffectColor, freeResources.bodyEffectIntensity) }}>
                   <Download className="h-4 w-4" /> {freeResources.badge}
                 </div>
                 <h2
@@ -302,13 +302,13 @@ export default function Home() {
                     color: freeResources.textColor,
                     fontFamily: freeResources.fontFamily,
                     fontSize: `clamp(2.4rem, 6vw, ${freeResources.titleSize}px)`,
-                    ...getTextEffectStyle(freeResources.titleEffect, freeResources.accentColor, freeResources.textColor),
+                    ...getTextEffectStyle(freeResources.titleEffect, freeResources.accentColor, freeResources.textColor, freeResources.titleEffectColor, freeResources.titleEffectIntensity),
                   }}
                   className="font-bold leading-[1.06] mb-6 max-w-3xl"
                 >
                   {freeResources.title}
                 </h2>
-                <p className="max-w-2xl mb-8 leading-relaxed" style={{ color: "rgba(255,255,255,0.95)", fontSize: `clamp(1rem, 2vw, ${freeResources.bodySize}px)`, textShadow: "0 2px 8px rgba(0,0,0,0.6)", ...getTextEffectStyle(freeResources.bodyEffect, freeResources.accentColor, freeResources.textColor) }}>
+                <p className="max-w-2xl mb-8 leading-relaxed" style={{ color: "rgba(255,255,255,0.95)", fontSize: `clamp(1rem, 2vw, ${freeResources.bodySize}px)`, textShadow: "0 2px 8px rgba(0,0,0,0.6)", ...getTextEffectStyle(freeResources.bodyEffect, freeResources.accentColor, freeResources.textColor, freeResources.bodyEffectColor, freeResources.bodyEffectIntensity) }}>
                   {freeResources.description}
                 </p>
 
@@ -326,7 +326,7 @@ export default function Home() {
                       <span className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm flex-shrink-0" style={{ color: freeResources.checkmarkColor || "#bfa345", textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}>
                         <span style={{ fontSize: 20, lineHeight: 1 }}>✓</span>
                       </span>
-                      <span className="text-lg leading-snug" style={{ color: freeResources.checkmarkTextColor || "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.6)", ...getTextEffectStyle(freeResources.bodyEffect, freeResources.accentColor, freeResources.checkmarkTextColor || freeResources.textColor) }}>{point}</span>
+                      <span className="text-lg leading-snug" style={{ color: freeResources.checkmarkTextColor || "rgba(255,255,255,0.95)", textShadow: "0 2px 8px rgba(0,0,0,0.6)", ...getTextEffectStyle(freeResources.bodyEffect, freeResources.accentColor, freeResources.checkmarkTextColor || freeResources.textColor, freeResources.bodyEffectColor, freeResources.bodyEffectIntensity) }}>{point}</span>
                     </div>
                   ))}
                 </div>
@@ -404,33 +404,48 @@ export default function Home() {
         </div>
       </section>
 
-      {onSaleBooks && onSaleBooks.length > 0 && (
-        <section style={{ background: deals.backgroundColor }} className={deals.layout === "spacious" ? "py-24" : "py-20"}>
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
-              <div>
-                <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold text-white mb-3" style={{ background: deals.accentColor, ...getTextEffectStyle(deals.bodyEffect, deals.accentColor, "#ffffff") }}>
-                  <Star className="h-3.5 w-3.5 fill-current" /> {deals.badge}
-                </span>
-                <h2 style={{ color: deals.textColor, fontFamily: deals.fontFamily, fontSize: `clamp(2rem, 4vw, ${deals.titleSize}px)`, ...getTextEffectStyle(deals.titleEffect, deals.accentColor, deals.textColor) }} className="font-bold">
-                  {deals.title}
-                </h2>
-                <p className="mt-2" style={{ color: `${deals.textColor}bf`, fontSize: deals.bodySize, ...getTextEffectStyle(deals.bodyEffect, deals.accentColor, deals.textColor) }}>{deals.description}</p>
-              </div>
+      <section style={{ background: deals.backgroundColor }} className={deals.layout === "spacious" ? "py-24" : "py-20"}>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
+            <div>
+              <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold text-white mb-3" style={{ background: deals.accentColor, ...getTextEffectStyle(deals.bodyEffect, deals.accentColor, "#ffffff", deals.bodyEffectColor, deals.bodyEffectIntensity) }}>
+                <Star className="h-3.5 w-3.5 fill-current" /> {deals.badge}
+              </span>
+              <h2 style={{ color: deals.textColor, fontFamily: deals.fontFamily, fontSize: `clamp(2rem, 4vw, ${deals.titleSize}px)`, ...getTextEffectStyle(deals.titleEffect, deals.accentColor, deals.textColor, deals.titleEffectColor, deals.titleEffectIntensity) }} className="font-bold">
+                {deals.title}
+              </h2>
+              <p className="mt-2" style={{ color: `${deals.textColor}bf`, fontSize: deals.bodySize, ...getTextEffectStyle(deals.bodyEffect, deals.accentColor, deals.textColor, deals.bodyEffectColor, deals.bodyEffectIntensity) }}>{deals.description}</p>
             </div>
+          </div>
+          {onSaleBooks && onSaleBooks.length > 0 ? (
             <div className={`grid grid-cols-2 md:grid-cols-3 ${deals.layout === "spacious" ? "lg:grid-cols-3" : "lg:grid-cols-4"} gap-5 md:gap-6`}>
               {loadingSale
                 ? Array.from({ length: 4 }).map((_, index) => <BookSkeleton key={index} />)
                 : onSaleBooks.slice(0, deals.layout === "spacious" ? 6 : 4).map((book) => <BookCard key={book.id} book={book} />)}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center p-8 md:p-12 rounded-[2rem] border-2 border-dashed max-w-2xl mx-auto backdrop-blur-sm shadow-sm transition-all duration-300" style={{ borderColor: `${deals.textColor}26`, background: `${deals.textColor}05` }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 animate-bounce" style={{ background: `${deals.accentColor}1a`, color: deals.accentColor }}>
+                <Star className="h-8 w-8 fill-current" style={{ color: deals.accentColor }} />
+              </div>
+              <h3 className="text-xl font-bold mb-2" style={{ color: deals.textColor, fontFamily: deals.fontFamily, ...getTextEffectStyle(deals.titleEffect, deals.accentColor, deals.textColor, deals.titleEffectColor, deals.titleEffectIntensity) }}>No Active Deals Right Now</h3>
+              <p className="max-w-md leading-relaxed" style={{ color: `${deals.textColor}a6`, fontSize: deals.bodySize - 2, ...getTextEffectStyle(deals.bodyEffect, deals.accentColor, deals.textColor, deals.bodyEffectColor, deals.bodyEffectIntensity) }}>
+                We are working on bringing new special offers to the store. Please check back later or explore our featured collection of books!
+              </p>
+              <Link href="/books" className="mt-6">
+                <button className="px-6 py-2.5 rounded-full text-xs font-bold transition-all hover:opacity-90 active:scale-95 shadow-md hover:shadow-lg" style={{ background: deals.accentColor, color: "#ffffff" }}>
+                  Browse All Books
+                </button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
 
       <section className="py-20" style={{ background: cta.backgroundColor }}>
         <div className={`container mx-auto px-4 max-w-4xl ${cta.layout === "split" ? "grid md:grid-cols-[1.2fr_0.8fr] items-center gap-8" : "text-center max-w-2xl"}`}>
           <div className={cta.layout === "split" ? "" : "text-center"}>
-            <div className="inline-flex items-center px-4 py-1 rounded-full text-sm font-bold mb-6" style={{ background: `${cta.secondaryAccentColor}26`, color: cta.secondaryAccentColor, ...getTextEffectStyle(cta.bodyEffect, cta.secondaryAccentColor, cta.secondaryAccentColor) }}>
+            <div className="inline-flex items-center px-4 py-1 rounded-full text-sm font-bold mb-6" style={{ background: `${cta.secondaryAccentColor}26`, color: cta.secondaryAccentColor, ...getTextEffectStyle(cta.bodyEffect, cta.secondaryAccentColor, cta.secondaryAccentColor, cta.bodyEffectColor, cta.bodyEffectIntensity) }}>
               {cta.badge}
             </div>
             <h2
@@ -438,13 +453,13 @@ export default function Home() {
                 color: cta.textColor,
                 fontFamily: cta.fontFamily,
                 fontSize: `clamp(2rem, 4vw, ${cta.titleSize}px)`,
-                ...getTextEffectStyle(cta.titleEffect, cta.accentColor, cta.textColor),
+                ...getTextEffectStyle(cta.titleEffect, cta.accentColor, cta.textColor, cta.titleEffectColor, cta.titleEffectIntensity),
               }}
               className="font-bold mb-4"
             >
               {cta.title}
             </h2>
-            <p className="mb-8" style={{ color: `${cta.textColor}bf`, fontSize: cta.bodySize, ...getTextEffectStyle(cta.bodyEffect, cta.accentColor, cta.textColor) }}>{cta.description}</p>
+            <p className="mb-8" style={{ color: `${cta.textColor}bf`, fontSize: cta.bodySize, ...getTextEffectStyle(cta.bodyEffect, cta.accentColor, cta.textColor, cta.bodyEffectColor, cta.bodyEffectIntensity) }}>{cta.description}</p>
           </div>
           <div className={`flex flex-wrap gap-4 ${cta.layout === "split" ? "justify-start" : "justify-center"}`}>
             <Link href={cta.primaryButtonLink || "/books"}>

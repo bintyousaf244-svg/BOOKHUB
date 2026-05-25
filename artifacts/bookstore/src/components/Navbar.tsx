@@ -45,7 +45,7 @@ export function Navbar() {
             <img src="/logo.png" alt={navbar.brandName} className="h-10 w-10 object-contain drop-shadow" />
             <span
               className="text-lg font-bold tracking-tight leading-tight hidden sm:block"
-              style={{ color: navbar.textColor, fontFamily: navbar.fontFamily, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor) }}
+              style={{ color: navbar.textColor, fontFamily: navbar.fontFamily, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor, navbar.textEffectColor, navbar.textEffectIntensity) }}
             >
               {navbar.brandName}
             </span>
@@ -58,7 +58,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className="px-3 py-1.5 font-medium hover:bg-white/10 rounded-full transition-all"
-                  style={{ color: `${navbar.textColor}cc`, fontSize: navbar.navFontSize, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor) }}
+                  style={{ color: `${navbar.textColor}cc`, fontSize: navbar.navFontSize, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor, navbar.textEffectColor, navbar.textEffectIntensity) }}
                 >
                   {link.label}
                 </a>
@@ -67,7 +67,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className="px-3 py-1.5 font-medium hover:bg-white/10 rounded-full transition-all"
-                  style={{ color: `${navbar.textColor}cc`, fontSize: navbar.navFontSize, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor) }}
+                  style={{ color: `${navbar.textColor}cc`, fontSize: navbar.navFontSize, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor, navbar.textEffectColor, navbar.textEffectIntensity) }}
                 >
                   {link.label}
                 </Link>
@@ -139,7 +139,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     className="px-4 py-3 text-base font-medium hover:bg-white/10 rounded-xl transition-all"
-                    style={{ color: `${navbar.textColor}e6`, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor) }}
+                    style={{ color: `${navbar.textColor}e6`, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor, navbar.textEffectColor, navbar.textEffectIntensity) }}
                   >
                     {link.label}
                   </a>
@@ -148,7 +148,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     className="px-4 py-3 text-base font-medium hover:bg-white/10 rounded-xl transition-all"
-                    style={{ color: `${navbar.textColor}e6`, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor) }}
+                    style={{ color: `${navbar.textColor}e6`, ...getTextEffectStyle(navbar.textEffect, navbar.accentColor, navbar.textColor, navbar.textEffectColor, navbar.textEffectIntensity) }}
                   >
                     {link.label}
                   </Link>
