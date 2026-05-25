@@ -26,15 +26,7 @@ function BookSkeleton() {
   );
 }
 
-const freeCircleDesktopPositions = [
-  { size: 118, top: "2%", left: "50%", marginLeft: -59, delay: "0s", z: 2 },
-  { size: 112, top: "15%", right: "6%", delay: "0.9s", z: 2 },
-  { size: 168, top: "50%", left: "50%", marginTop: -84, marginLeft: -84, delay: "1.8s", z: 5 },
-  { size: 114, bottom: "14%", right: "10%", delay: "0.4s", z: 2 },
-  { size: 118, bottom: "1%", left: "50%", marginLeft: -59, delay: "1.3s", z: 2 },
-  { size: 112, bottom: "15%", left: "6%", delay: "2.1s", z: 2 },
-  { size: 118, top: "15%", left: "6%", delay: "0.7s", z: 2 },
-];
+
 
 export default function Home() {
   const { content } = useWebsiteContent();
@@ -49,16 +41,7 @@ export default function Home() {
   const freeResources = content.home.freeResources;
   const deals = content.home.deals;
   const cta = content.home.cta;
-  const freeResourceSpotlights = freeBooks?.slice(0, freeResources.spotlightDesktopCount) ?? [];
-  const freeCirclePositions = [
-    "w-[120px] h-[120px] top-[-2%] left-[calc(50%-60px)] z-[2]",
-    "w-[110px] h-[110px] top-[10%] right-[5%] z-[2]",
-    "w-[160px] h-[160px] top-[50%] left-[50%] -mt-[80px] -ml-[80px] z-[5]",
-    "w-[115px] h-[115px] bottom-[5%] right-[10%] z-[2]",
-    "w-[120px] h-[120px] bottom-[-12%] left-[calc(50%-60px)] z-[2]",
-    "w-[110px] h-[110px] bottom-[10%] left-[5%] z-[2]",
-    "w-[120px] h-[120px] top-[10%] left-[0%] z-[2]",
-  ];
+  const freeResourceSpotlights = freeBooks?.slice(0, 6) ?? [];
 
   const trustIcons = [GraduationCap, BookHeart, ShieldCheck];
 
@@ -365,59 +348,29 @@ export default function Home() {
                 </Link>
               </div>
 
-              <div className="flex-1 min-w-[300px]">
-                <div className="relative h-[380px] md:h-[420px] lg:h-[400px]">
-                  <div
-                    className="absolute top-1/2 left-1/2 w-[90%] h-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[25px]"
-                    style={{ background: "radial-gradient(circle, rgba(255,215,0,0.25) 0%, rgba(200,150,255,0.10) 40%, rgba(0,0,0,0) 70%)" }}
-                  />
-                  <div className="hidden lg:block relative w-full h-full">
-                    {freeResourceSpotlights.slice(0, freeResources.spotlightDesktopCount).map((book, index) => {
-                      const position = freeCircleDesktopPositions[index];
-                      if (!position) return null;
-
-                      return (
-                        <Link key={book.id} href={`/books/${book.id}`}>
-                          <div
-                            className="absolute rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 hover:-translate-y-2"
-                            style={{
-                              width: position.size,
-                              height: position.size,
-                              top: position.top,
-                              right: position.right,
-                              bottom: position.bottom,
-                              left: position.left,
-                              marginTop: position.marginTop,
-                              marginLeft: position.marginLeft,
-                              zIndex: position.z,
-                              border: "3px solid rgba(255,255,255,0.6)",
-                              boxShadow: "0 0 30px rgba(255,215,0,0.30), 0 15px 35px rgba(0,0,0,0.50)",
-                              animation: `bookhub-free-float 6s ease-in-out ${position.delay} infinite alternate`,
-                            }}
-                          >
-                            <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full object-cover" />
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 lg:hidden">
-                    {freeResourceSpotlights.slice(0, freeResources.spotlightMobileCount).map((book, index) => (
-                      <Link key={book.id} href={`/books/${book.id}`}>
-                        <div
-                          className="rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
-                          style={{
-                            aspectRatio: "1 / 1",
-                            border: "3px solid rgba(255,255,255,0.6)",
-                            boxShadow: "0 0 20px rgba(255,215,0,0.20), 0 10px 25px rgba(0,0,0,0.35)",
-                            animation: `bookhub-free-float 6s ease-in-out ${index * 0.4}s infinite alternate`,
-                          }}
-                        >
-                          <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full object-cover" />
+              <div className="flex-1 min-w-[280px]">
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
+                  {freeResourceSpotlights.slice(0, 6).map((book, index) => (
+                    <Link key={book.id} href={`/books/${book.id}`}>
+                      <div
+                        className="group/book relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl"
+                        style={{
+                          aspectRatio: "3 / 4",
+                          boxShadow: "4px 4px 16px rgba(0,0,0,0.45), -1px 0 4px rgba(0,0,0,0.15), inset -2px 0 6px rgba(0,0,0,0.25)",
+                          animation: `bookhub-free-float 5s ease-in-out ${index * 0.5}s infinite alternate`,
+                          borderRadius: "4px 12px 12px 4px",
+                        }}
+                      >
+                        {/* Book spine edge */}
+                        <div className="absolute left-0 top-0 bottom-0 w-[3px] z-10" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.35), rgba(255,255,255,0.10), rgba(0,0,0,0.15))" }} />
+                        <BookCoverImage src={book.coverImage} alt={book.title} className="h-full w-full object-cover" />
+                        {/* Hover overlay with title */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover/book:opacity-100 transition-opacity duration-300 flex items-end p-2">
+                          <p className="text-white text-xs font-semibold leading-tight line-clamp-2 drop-shadow-lg">{book.title}</p>
                         </div>
-                      </Link>
-                    ))}
-                  </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
