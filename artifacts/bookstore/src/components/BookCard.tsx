@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "wouter";
-import { Book } from "@workspace/api-client-react/src/generated/api.schemas";
+import { Book } from "@workspace/api-client-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Download } from "lucide-react";

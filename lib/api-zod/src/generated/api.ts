@@ -58,8 +58,6 @@ export const ListBooksResponse = zod.object({
       isFree: zod.boolean(),
       isFeatured: zod.boolean(),
       coverImage: zod.string(),
-      previewImage1: zod.string().nullish(),
-      previewImage2: zod.string().nullish(),
       category: zod.string(),
       language: zod.string(),
       ageGroup: zod.string(),
@@ -79,13 +77,14 @@ export const ListBooksResponse = zod.object({
 /**
  * @summary Create a new book (admin only)
  */
+export const createBookBodySortOrderDefault = 0;
 export const createBookBodyIsOnSaleDefault = false;
 export const createBookBodyIsFreeDefault = false;
 export const createBookBodyIsFeaturedDefault = false;
 export const createBookBodyStockDefault = 100;
 
 export const CreateBookBody = zod.object({
-  sortOrder: zod.number().default(0),
+  sortOrder: zod.number().default(createBookBodySortOrderDefault),
   title: zod.string(),
   description: zod.string(),
   author: zod.string(),
@@ -95,8 +94,6 @@ export const CreateBookBody = zod.object({
   isFree: zod.boolean().default(createBookBodyIsFreeDefault),
   isFeatured: zod.boolean().default(createBookBodyIsFeaturedDefault),
   coverImage: zod.string(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string(),
   language: zod.string(),
   ageGroup: zod.string(),
@@ -124,8 +121,6 @@ export const GetBookResponse = zod.object({
   isFree: zod.boolean(),
   isFeatured: zod.boolean(),
   coverImage: zod.string(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string(),
   language: zod.string(),
   ageGroup: zod.string(),
@@ -155,8 +150,6 @@ export const UpdateBookBody = zod.object({
   isFree: zod.boolean().optional(),
   isFeatured: zod.boolean().optional(),
   coverImage: zod.string().optional(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string().optional(),
   language: zod.string().optional(),
   ageGroup: zod.string().optional(),
@@ -177,8 +170,6 @@ export const UpdateBookResponse = zod.object({
   isFree: zod.boolean(),
   isFeatured: zod.boolean(),
   coverImage: zod.string(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string(),
   language: zod.string(),
   ageGroup: zod.string(),
@@ -217,8 +208,6 @@ export const GetFeaturedBooksResponseItem = zod.object({
   isFree: zod.boolean(),
   isFeatured: zod.boolean(),
   coverImage: zod.string(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string(),
   language: zod.string(),
   ageGroup: zod.string(),
@@ -246,8 +235,6 @@ export const GetOnSaleBooksResponseItem = zod.object({
   isFree: zod.boolean(),
   isFeatured: zod.boolean(),
   coverImage: zod.string(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string(),
   language: zod.string(),
   ageGroup: zod.string(),
@@ -275,8 +262,6 @@ export const GetFreeBooksResponseItem = zod.object({
   isFree: zod.boolean(),
   isFeatured: zod.boolean(),
   coverImage: zod.string(),
-  previewImage1: zod.string().nullish(),
-  previewImage2: zod.string().nullish(),
   category: zod.string(),
   language: zod.string(),
   ageGroup: zod.string(),
@@ -476,8 +461,6 @@ export const GetAdminStatsResponse = zod.object({
       isFree: zod.boolean(),
       isFeatured: zod.boolean(),
       coverImage: zod.string(),
-      previewImage1: zod.string().nullish(),
-      previewImage2: zod.string().nullish(),
       category: zod.string(),
       language: zod.string(),
       ageGroup: zod.string(),

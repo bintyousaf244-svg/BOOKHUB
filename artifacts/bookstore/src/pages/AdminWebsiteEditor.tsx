@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Save, RotateCcw, Palette, Type, LayoutTemplate, Monitor } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api";
-import { WebsiteContent, defaultWebsiteContent, resolveWebsiteContent } from "@/lib/websiteContent";
+import { WebsiteContent, TextEffect, defaultWebsiteContent, resolveWebsiteContent } from "@/lib/websiteContent";
+import { TEXT_EFFECT_OPTIONS } from "@/lib/textEffects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,33 @@ function SectionCard({
       </CardHeader>
       <CardContent className="space-y-6">{children}</CardContent>
     </Card>
+  );
+}
+
+function TextEffectField({
+  label,
+  value,
+  onChange,
+  description,
+}: {
+  label: string;
+  value?: TextEffect;
+  onChange: (value: TextEffect) => void;
+  description?: string;
+}) {
+  return (
+    <Field label={label} description={description}>
+      <Select value={value || "none"} onValueChange={(next) => onChange(next as TextEffect)}>
+        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {TEXT_EFFECT_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
   );
 }
 
@@ -352,6 +380,12 @@ export default function AdminWebsiteEditor() {
               <Field label="Font Family" description="Examples: Georgia, serif or 'Trebuchet MS', sans-serif">
                 <Input value={form.navbar.fontFamily} onChange={(event) => updateNavbar({ fontFamily: event.target.value })} />
               </Field>
+              <TextEffectField
+                label="Text Effect"
+                value={form.navbar.textEffect}
+                onChange={(textEffect) => updateNavbar({ textEffect })}
+                description="Applies to the brand name and navigation text."
+              />
             </div>
             <div className="mt-6 pt-6 border-t">
               <ListEditor
@@ -409,6 +443,18 @@ export default function AdminWebsiteEditor() {
               <Field label="Body Size">
                 <Input type="number" min={12} max={24} value={form.footer.bodySize} onChange={(event) => updateFooter({ bodySize: Number(event.target.value) || 14 })} />
               </Field>
+              <TextEffectField
+                label="Title Effect"
+                value={form.footer.titleEffect}
+                onChange={(titleEffect) => updateFooter({ titleEffect })}
+                description="Used for the footer brand name and column headings."
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.footer.bodyEffect}
+                onChange={(bodyEffect) => updateFooter({ bodyEffect })}
+                description="Used for the footer description and link text."
+              />
             </div>
             <Field label="Footer Description">
               <Textarea rows={4} value={form.footer.description} onChange={(event) => updateFooter({ description: event.target.value })} />
@@ -502,19 +548,8 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Title Visual Effect" description="Add premium glow, outline, 3D shadow or background highlight to the hero heading.">
-                <Select value={form.home.hero.titleEffect || "none"} onValueChange={(value) => updateHome("hero", { titleEffect: value as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None (Plain Text)</SelectItem>
-                    <SelectItem value="glow">Vibrant Glow</SelectItem>
-                    <SelectItem value="outline">High Contrast Outline</SelectItem>
-                    <SelectItem value="highlight">Gradient Background Highlight</SelectItem>
-                    <SelectItem value="3d">Retro 3D Perspective</SelectItem>
-                    <SelectItem value="shadow">Deep Drop Shadow</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
+              <TextEffectField label="Title Effect" value={form.home.hero.titleEffect} onChange={(titleEffect) => updateHome("hero", { titleEffect })} description="Used for the main hero heading." />
+              <TextEffectField label="Body Effect" value={form.home.hero.bodyEffect} onChange={(bodyEffect) => updateHome("hero", { bodyEffect })} description="Used for the hero description text." />
               <Field label="Title Size">
                 <Input type="number" min={32} max={84} value={form.home.hero.titleSize} onChange={(event) => updateHome("hero", { titleSize: Number(event.target.value) || 56 })} />
               </Field>
@@ -602,6 +637,8 @@ export default function AdminWebsiteEditor() {
               <Field label="Font Family">
                 <Input value={form.home.trust.fontFamily} onChange={(event) => updateHome("trust", { fontFamily: event.target.value })} />
               </Field>
+              <TextEffectField label="Title Effect" value={form.home.trust.titleEffect} onChange={(titleEffect) => updateHome("trust", { titleEffect })} />
+              <TextEffectField label="Body Effect" value={form.home.trust.bodyEffect} onChange={(bodyEffect) => updateHome("trust", { bodyEffect })} description="Applies to trust card titles and descriptions." />
             </div>
             <div className="mt-6 pt-6 border-t">
               <ListEditor
@@ -697,6 +734,8 @@ export default function AdminWebsiteEditor() {
               <Field label="Adults Link URL">
                 <Input value={form.home.categories.adultsLink || ""} placeholder="/books?ageGroup=Adults" onChange={(event) => updateHome("categories", { adultsLink: event.target.value })} />
               </Field>
+              <TextEffectField label="Title Effect" value={form.home.categories.titleEffect} onChange={(titleEffect) => updateHome("categories", { titleEffect })} />
+              <TextEffectField label="Body Effect" value={form.home.categories.bodyEffect} onChange={(bodyEffect) => updateHome("categories", { bodyEffect })} description="Applies to the category card titles and descriptions." />
             </div>
             <Field label="Kids Description">
               <Textarea rows={3} value={form.home.categories.kidsDescription} onChange={(event) => updateHome("categories", { kidsDescription: event.target.value })} />
@@ -753,6 +792,8 @@ export default function AdminWebsiteEditor() {
               <Field label="Button Text Color">
                 <Input type="color" value={form.home.featured.buttonTextColor || form.home.featured.textColor} onChange={(event) => updateHome("featured", { buttonTextColor: event.target.value })} />
               </Field>
+              <TextEffectField label="Title Effect" value={form.home.featured.titleEffect} onChange={(titleEffect) => updateHome("featured", { titleEffect })} />
+              <TextEffectField label="Body Effect" value={form.home.featured.bodyEffect} onChange={(bodyEffect) => updateHome("featured", { bodyEffect })} />
             </div>
             <Field label="Description">
               <Textarea rows={3} value={form.home.featured.description} onChange={(event) => updateHome("featured", { description: event.target.value })} />
@@ -815,19 +856,8 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Title Visual Effect" description="Apply premium text styling effects to the heading.">
-                <Select value={form.home.freeResources.titleEffect || "none"} onValueChange={(value) => updateHome("freeResources", { titleEffect: value as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None (Plain Text)</SelectItem>
-                    <SelectItem value="glow">Vibrant Glow</SelectItem>
-                    <SelectItem value="outline">High Contrast Outline</SelectItem>
-                    <SelectItem value="highlight">Gradient Background Highlight</SelectItem>
-                    <SelectItem value="3d">Retro 3D Perspective</SelectItem>
-                    <SelectItem value="shadow">Deep Drop Shadow</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
+              <TextEffectField label="Title Effect" value={form.home.freeResources.titleEffect} onChange={(titleEffect) => updateHome("freeResources", { titleEffect })} description="Applies to the free resources heading." />
+              <TextEffectField label="Body Effect" value={form.home.freeResources.bodyEffect} onChange={(bodyEffect) => updateHome("freeResources", { bodyEffect })} description="Applies to the description and bullet list." />
               <Field label="Checkmark Color">
                 <Input type="color" value={form.home.freeResources.checkmarkColor || "#bfa345"} onChange={(event) => updateHome("freeResources", { checkmarkColor: event.target.value })} />
               </Field>
@@ -892,6 +922,8 @@ export default function AdminWebsiteEditor() {
               <Field label="Body Size">
                 <Input type="number" min={12} max={24} value={form.home.deals.bodySize} onChange={(event) => updateHome("deals", { bodySize: Number(event.target.value) || 16 })} />
               </Field>
+              <TextEffectField label="Title Effect" value={form.home.deals.titleEffect} onChange={(titleEffect) => updateHome("deals", { titleEffect })} />
+              <TextEffectField label="Body Effect" value={form.home.deals.bodyEffect} onChange={(bodyEffect) => updateHome("deals", { bodyEffect })} />
             </div>
             <Field label="Description">
               <Textarea rows={3} value={form.home.deals.description} onChange={(event) => updateHome("deals", { description: event.target.value })} />
@@ -921,19 +953,8 @@ export default function AdminWebsiteEditor() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Title Visual Effect" description="Apply premium text styling effects to the call-to-action title.">
-                <Select value={form.home.cta.titleEffect || "none"} onValueChange={(value) => updateHome("cta", { titleEffect: value as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None (Plain Text)</SelectItem>
-                    <SelectItem value="glow">Vibrant Glow</SelectItem>
-                    <SelectItem value="outline">High Contrast Outline</SelectItem>
-                    <SelectItem value="highlight">Gradient Background Highlight</SelectItem>
-                    <SelectItem value="3d">Retro 3D Perspective</SelectItem>
-                    <SelectItem value="shadow">Deep Drop Shadow</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
+              <TextEffectField label="Title Effect" value={form.home.cta.titleEffect} onChange={(titleEffect) => updateHome("cta", { titleEffect })} description="Applies to the CTA title." />
+              <TextEffectField label="Body Effect" value={form.home.cta.bodyEffect} onChange={(bodyEffect) => updateHome("cta", { bodyEffect })} description="Applies to the CTA description." />
               <Field label="Font Family">
                 <Input value={form.home.cta.fontFamily} onChange={(event) => updateHome("cta", { fontFamily: event.target.value })} />
               </Field>

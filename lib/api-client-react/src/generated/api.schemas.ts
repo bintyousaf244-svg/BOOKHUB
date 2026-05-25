@@ -107,8 +107,6 @@ export interface Book {
   isFree: boolean;
   isFeatured: boolean;
   coverImage: string;
-  previewImage1?: string | null;
-  previewImage2?: string | null;
   category: string;
   language: string;
   ageGroup: string;
@@ -138,8 +136,6 @@ export interface CreateBookBody {
   isFree?: boolean;
   isFeatured?: boolean;
   coverImage: string;
-  previewImage1?: string | null;
-  previewImage2?: string | null;
   category: string;
   language: string;
   ageGroup: string;
@@ -159,8 +155,6 @@ export interface UpdateBookBody {
   isFree?: boolean;
   isFeatured?: boolean;
   coverImage?: string;
-  previewImage1?: string | null;
-  previewImage2?: string | null;
   category?: string;
   language?: string;
   ageGroup?: string;

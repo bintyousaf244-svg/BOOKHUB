@@ -1,5 +1,5 @@
 export type LayoutMode = "left" | "center" | "split" | "grid" | "stack" | "cards" | "inline" | "compact" | "spacious";
-export type TextEffect = "none" | "glow" | "outline" | "highlight" | "3d" | "shadow";
+export type TextEffect = "none" | "bold" | "glow" | "outline" | "background" | "highlight" | "3d" | "shadow";
 
 export interface WebsiteContent {
   navbar: {
@@ -14,6 +14,7 @@ export interface WebsiteContent {
     ctaTextColor: string;
     ctaLink: string;
     links: Array<{ href: string; label: string; forceReload?: boolean }>;
+    textEffect?: TextEffect;
   };
   footer: {
     brandName: string;
@@ -27,6 +28,8 @@ export interface WebsiteContent {
     bodySize: number;
     shopLinks: Array<{ href: string; label: string }>;
     accountLinks: Array<{ href: string; label: string }>;
+    titleEffect?: TextEffect;
+    bodyEffect?: TextEffect;
   };
   home: {
     hero: {
@@ -55,6 +58,7 @@ export interface WebsiteContent {
       secondaryButtonBgColor?: string;
       secondaryButtonTextColor?: string;
       titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
     trust: {
       title: string;
@@ -67,6 +71,8 @@ export interface WebsiteContent {
       fontFamily: string;
       titleSize: number;
       bodySize: number;
+      titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
     categories: {
       eyebrow: string;
@@ -88,6 +94,8 @@ export interface WebsiteContent {
       adultsTextColor?: string;
       kidsLink?: string;
       adultsLink?: string;
+      titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
     featured: {
       eyebrow: string;
@@ -104,6 +112,8 @@ export interface WebsiteContent {
       buttonLink?: string;
       buttonBgColor?: string;
       buttonTextColor?: string;
+      titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
     freeResources: {
       badge: string;
@@ -128,6 +138,7 @@ export interface WebsiteContent {
       buttonLink: string;
       bannerLayout: "left" | "right";
       titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
     deals: {
       badge: string;
@@ -140,6 +151,8 @@ export interface WebsiteContent {
       fontFamily: string;
       titleSize: number;
       bodySize: number;
+      titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
     cta: {
       badge: string;
@@ -160,6 +173,7 @@ export interface WebsiteContent {
       primaryButtonTextColor?: string;
       secondaryButtonTextColor?: string;
       titleEffect?: TextEffect;
+      bodyEffect?: TextEffect;
     };
   };
 }
@@ -176,6 +190,7 @@ export const defaultWebsiteContent: WebsiteContent = {
     ctaBackgroundColor: "#D97B8F",
     ctaTextColor: "#ffffff",
     ctaLink: "/books",
+    textEffect: "none",
     links: [
       { href: "/books", label: "All Books", forceReload: true },
       { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
@@ -195,6 +210,8 @@ export const defaultWebsiteContent: WebsiteContent = {
     fontFamily: "Georgia, serif",
     headingSize: 14,
     bodySize: 14,
+    titleEffect: "none",
+    bodyEffect: "none",
     shopLinks: [
       { href: "/books", label: "All Books" },
       { href: "/books?ageGroup=Kids", label: "Kids Learning" },
@@ -234,6 +251,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       primaryButtonLink: "/books",
       secondaryButtonLink: "/free",
       titleEffect: "none",
+      bodyEffect: "none",
     },
     trust: {
       title: "Why Families Choose Us",
@@ -250,6 +268,8 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 26,
       bodySize: 14,
+      titleEffect: "none",
+      bodyEffect: "none",
     },
     categories: {
       eyebrow: "Browse by Age",
@@ -271,6 +291,8 @@ export const defaultWebsiteContent: WebsiteContent = {
       adultsTextColor: "#ffffff",
       kidsLink: "/books?ageGroup=Kids",
       adultsLink: "/books?ageGroup=Adults",
+      titleEffect: "none",
+      bodyEffect: "none",
     },
     featured: {
       eyebrow: "Hand-picked",
@@ -285,6 +307,8 @@ export const defaultWebsiteContent: WebsiteContent = {
       titleSize: 38,
       bodySize: 16,
       buttonLink: "/books",
+      titleEffect: "none",
+      bodyEffect: "none",
     },
     freeResources: {
       badge: "100% Free",
@@ -313,6 +337,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       buttonLink: "/free",
       bannerLayout: "left",
       titleEffect: "shadow",
+      bodyEffect: "shadow",
     },
     deals: {
       badge: "Limited Offers",
@@ -325,6 +350,8 @@ export const defaultWebsiteContent: WebsiteContent = {
       fontFamily: "Georgia, serif",
       titleSize: 38,
       bodySize: 16,
+      titleEffect: "none",
+      bodyEffect: "none",
     },
     cta: {
       badge: "Start Learning",
@@ -343,6 +370,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       primaryButtonLink: "/books",
       secondaryButtonLink: "/free",
       titleEffect: "none",
+      bodyEffect: "none",
     },
   },
 };
@@ -380,4 +408,3 @@ function mergeDeep<T>(base: T, incoming: unknown): T {
 export function resolveWebsiteContent(content?: unknown): WebsiteContent {
   return mergeDeep(defaultWebsiteContent, content ?? {});
 }
-

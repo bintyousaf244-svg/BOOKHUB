@@ -386,9 +386,9 @@ router.post("/books", async (req, res) => {
         coverImage:
           data.coverImage,
         previewImage1:
-          data.previewImage1 ?? null,
+          (data as any).previewImage1 ?? null,
         previewImage2:
-          data.previewImage2 ?? null,
+          (data as any).previewImage2 ?? null,
         category: normalizedCategories,
         language: normalizedLanguages,
         ageGroup: normalizeStoredMultiValue(data.ageGroup),
@@ -487,8 +487,8 @@ router.put("/books/:id", async (req, res) => {
     if (data.isFree !== undefined) updateData.isFree = data.isFree;
     if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
     if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
-    if (data.previewImage1 !== undefined) updateData.previewImage1 = data.previewImage1;
-    if (data.previewImage2 !== undefined) updateData.previewImage2 = data.previewImage2;
+    if ((data as any).previewImage1 !== undefined) updateData.previewImage1 = (data as any).previewImage1;
+    if ((data as any).previewImage2 !== undefined) updateData.previewImage2 = (data as any).previewImage2;
     if (data.category !== undefined) updateData.category = normalizeStoredMultiValue(data.category);
     if (data.language !== undefined) updateData.language = normalizeStoredMultiValue(data.language);
     if (data.ageGroup !== undefined) updateData.ageGroup = normalizeStoredMultiValue(data.ageGroup);

@@ -15,7 +15,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tag, CheckCircle, X, Loader2, Copy, Check } from "lucide-react";
 import { apiFetch } from "@/lib/api";
-import type { ApiError } from "@workspace/api-client-react";
 import { BookCoverImage } from "@/components/BookCoverImage";
 
 const checkoutSchema = z.object({
@@ -266,7 +265,13 @@ export default function Checkout() {
 
     createOrder.mutate({
       data: {
-        ...data,
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        paymentMethod: data.paymentMethod,
+        address: data.address || "",
+        city: data.city || "",
+        paymentReference: data.paymentReference || "",
         notes: notes || undefined,
         items: availableItems.map((i) => ({
           bookId: Number(i.bookId),
@@ -282,7 +287,7 @@ export default function Checkout() {
       },
       onError: (error) => {
         setIsValidatingCart(false);
-        const apiError = error as ApiError<{ error?: string; missingBookIds?: number[] }>;
+        const apiError = error as any;
         const missingBookIds = apiError?.data?.missingBookIds ?? [];
 
         if (missingBookIds.length > 0) {

@@ -11,7 +11,6 @@ import {
   getGetBookQueryKey,
   getListBooksQueryKey,
 } from "@workspace/api-client-react";
-import type { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -109,7 +108,7 @@ function resolveCategoryNames(
 }
 
 function getBookSaveErrorMessage(error: unknown): string {
-  const apiError = error as ApiError<{ error?: string }>;
+  const apiError = error as any;
   const apiMessage = apiError?.data?.error;
 
   if (apiError?.status === 413) {
@@ -246,8 +245,8 @@ export default function AdminBookEdit() {
         isFree: book.isFree,
         isFeatured: book.isFeatured,
         coverImage: book.coverImage,
-        previewImage1: book.previewImage1 || "",
-        previewImage2: book.previewImage2 || "",
+        previewImage1: (book as any).previewImage1 || "",
+        previewImage2: (book as any).previewImage2 || "",
         sortOrder: book.sortOrder ?? 0,
         category: resolveCategoryNames(book.category, categoriesData),
         language: book.language,

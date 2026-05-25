@@ -65,7 +65,7 @@ export default function BookDetail() {
   const categoryValues = parseBookMetadataList(book.category);
   const languageValues = parseBookMetadataList(book.language);
   const ageGroupValues = parseBookMetadataList(book.ageGroup);
-  const previewImages = [book.previewImage1, book.previewImage2].filter(
+  const previewImages = [(book as any).previewImage1, (book as any).previewImage2].filter(
     (image): image is string => Boolean(image),
   );
 

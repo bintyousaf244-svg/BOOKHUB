@@ -14,7 +14,7 @@ export default function AdminOrders() {
   const { data, isLoading } = useListOrders({ 
     status: statusFilter === "all" ? undefined : statusFilter,
     limit: 100 
-  });
+  } as any);
   
   const updateStatus = useUpdateOrderStatus();
   const queryClient = useQueryClient();
