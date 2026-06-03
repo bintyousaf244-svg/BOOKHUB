@@ -508,9 +508,10 @@ export default function AdminWebsiteEditor() {
       </Card>
 
       <Tabs defaultValue="shared" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="shared">Shared Store Sections</TabsTrigger>
           <TabsTrigger value="homepage">Homepage Sections</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
         </TabsList>
 
         <TabsContent value="shared" className="space-y-6">
@@ -1265,6 +1266,92 @@ export default function AdminWebsiteEditor() {
             </Field>
           </SectionCard>
 
+          <SectionCard title="Bottom CTA" description="Customize the final call-to-action block, including text, colors, and centered or split layout.">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Badge">
+                <Input value={form.home.cta.badge} onChange={(event) => updateHome("cta", { badge: event.target.value })} />
+              </Field>
+              <Field label="Section Title">
+                <Input value={form.home.cta.title} onChange={(event) => updateHome("cta", { title: event.target.value })} />
+              </Field>
+              <Field label="Primary Button">
+                <Input value={form.home.cta.primaryButtonLabel} onChange={(event) => updateHome("cta", { primaryButtonLabel: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button">
+                <Input value={form.home.cta.secondaryButtonLabel} onChange={(event) => updateHome("cta", { secondaryButtonLabel: event.target.value })} />
+              </Field>
+              <Field label="Layout">
+                <Select value={form.home.cta.layout} onValueChange={(value) => updateHome("cta", { layout: value as WebsiteContent["home"]["cta"]["layout"] })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="center">Centered</SelectItem>
+                    <SelectItem value="split">Split</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.cta.titleEffect}
+                onChange={(titleEffect) => updateHome("cta", { titleEffect })}
+                effectColor={form.home.cta.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("cta", { titleEffectColor })}
+                effectIntensity={form.home.cta.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("cta", { titleEffectIntensity })}
+                defaultColor={form.home.cta.accentColor}
+                description="Applies to the CTA title."
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.cta.bodyEffect}
+                onChange={(bodyEffect) => updateHome("cta", { bodyEffect })}
+                effectColor={form.home.cta.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("cta", { bodyEffectColor })}
+                effectIntensity={form.home.cta.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("cta", { bodyEffectIntensity })}
+                defaultColor={form.home.cta.accentColor}
+                description="Applies to the CTA description."
+              />
+              <Field label="Font Family">
+                <Input value={form.home.cta.fontFamily} onChange={(event) => updateHome("cta", { fontFamily: event.target.value })} />
+              </Field>
+              <Field label="Background Color">
+                <Input type="color" value={form.home.cta.backgroundColor} onChange={(event) => updateHome("cta", { backgroundColor: event.target.value })} />
+              </Field>
+              <Field label="Text Color">
+                <Input type="color" value={form.home.cta.textColor} onChange={(event) => updateHome("cta", { textColor: event.target.value })} />
+              </Field>
+              <Field label="Primary Accent">
+                <Input type="color" value={form.home.cta.accentColor} onChange={(event) => updateHome("cta", { accentColor: event.target.value })} />
+              </Field>
+              <Field label="Secondary Accent">
+                <Input type="color" value={form.home.cta.secondaryAccentColor} onChange={(event) => updateHome("cta", { secondaryAccentColor: event.target.value })} />
+              </Field>
+              <Field label="Title Size">
+                <Input type="number" min={20} max={56} value={form.home.cta.titleSize} onChange={(event) => updateHome("cta", { titleSize: Number(event.target.value) || 38 })} />
+              </Field>
+              <Field label="Body Size">
+                <Input type="number" min={12} max={24} value={form.home.cta.bodySize} onChange={(event) => updateHome("cta", { bodySize: Number(event.target.value) || 18 })} />
+              </Field>
+              <Field label="Primary Button URL">
+                <Input value={form.home.cta.primaryButtonLink || ""} placeholder="/books" onChange={(event) => updateHome("cta", { primaryButtonLink: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button URL">
+                <Input value={form.home.cta.secondaryButtonLink || ""} placeholder="/free" onChange={(event) => updateHome("cta", { secondaryButtonLink: event.target.value })} />
+              </Field>
+              <Field label="Primary Button Text Color">
+                <Input type="color" value={form.home.cta.primaryButtonTextColor || "#ffffff"} onChange={(event) => updateHome("cta", { primaryButtonTextColor: event.target.value })} />
+              </Field>
+              <Field label="Secondary Button Text Color">
+                <Input type="color" value={form.home.cta.secondaryButtonTextColor || "#ffffff"} onChange={(event) => updateHome("cta", { secondaryButtonTextColor: event.target.value })} />
+              </Field>
+            </div>
+            <Field label="Description">
+              <Textarea rows={3} value={form.home.cta.description} onChange={(event) => updateHome("cta", { description: event.target.value })} />
+            </Field>
+          </SectionCard>
+        </TabsContent>
+
+        <TabsContent value="reviews" className="space-y-6">
           <SectionCard title="Customer Reviews" description="Manage the homepage review cards and the dedicated reviews page content.">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Badge">
@@ -1360,90 +1447,6 @@ export default function AdminWebsiteEditor() {
                 )}
               />
             </div>
-          </SectionCard>
-
-          <SectionCard title="Bottom CTA" description="Customize the final call-to-action block, including text, colors, and centered or split layout.">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Badge">
-                <Input value={form.home.cta.badge} onChange={(event) => updateHome("cta", { badge: event.target.value })} />
-              </Field>
-              <Field label="Section Title">
-                <Input value={form.home.cta.title} onChange={(event) => updateHome("cta", { title: event.target.value })} />
-              </Field>
-              <Field label="Primary Button">
-                <Input value={form.home.cta.primaryButtonLabel} onChange={(event) => updateHome("cta", { primaryButtonLabel: event.target.value })} />
-              </Field>
-              <Field label="Secondary Button">
-                <Input value={form.home.cta.secondaryButtonLabel} onChange={(event) => updateHome("cta", { secondaryButtonLabel: event.target.value })} />
-              </Field>
-              <Field label="Layout">
-                <Select value={form.home.cta.layout} onValueChange={(value) => updateHome("cta", { layout: value as WebsiteContent["home"]["cta"]["layout"] })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="center">Centered</SelectItem>
-                    <SelectItem value="split">Split</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <TextEffectField
-                label="Title Effect"
-                value={form.home.cta.titleEffect}
-                onChange={(titleEffect) => updateHome("cta", { titleEffect })}
-                effectColor={form.home.cta.titleEffectColor}
-                onChangeColor={(titleEffectColor) => updateHome("cta", { titleEffectColor })}
-                effectIntensity={form.home.cta.titleEffectIntensity}
-                onChangeIntensity={(titleEffectIntensity) => updateHome("cta", { titleEffectIntensity })}
-                defaultColor={form.home.cta.accentColor}
-                description="Applies to the CTA title."
-              />
-              <TextEffectField
-                label="Body Effect"
-                value={form.home.cta.bodyEffect}
-                onChange={(bodyEffect) => updateHome("cta", { bodyEffect })}
-                effectColor={form.home.cta.bodyEffectColor}
-                onChangeColor={(bodyEffectColor) => updateHome("cta", { bodyEffectColor })}
-                effectIntensity={form.home.cta.bodyEffectIntensity}
-                onChangeIntensity={(bodyEffectIntensity) => updateHome("cta", { bodyEffectIntensity })}
-                defaultColor={form.home.cta.accentColor}
-                description="Applies to the CTA description."
-              />
-              <Field label="Font Family">
-                <Input value={form.home.cta.fontFamily} onChange={(event) => updateHome("cta", { fontFamily: event.target.value })} />
-              </Field>
-              <Field label="Background Color">
-                <Input type="color" value={form.home.cta.backgroundColor} onChange={(event) => updateHome("cta", { backgroundColor: event.target.value })} />
-              </Field>
-              <Field label="Text Color">
-                <Input type="color" value={form.home.cta.textColor} onChange={(event) => updateHome("cta", { textColor: event.target.value })} />
-              </Field>
-              <Field label="Primary Accent">
-                <Input type="color" value={form.home.cta.accentColor} onChange={(event) => updateHome("cta", { accentColor: event.target.value })} />
-              </Field>
-              <Field label="Secondary Accent">
-                <Input type="color" value={form.home.cta.secondaryAccentColor} onChange={(event) => updateHome("cta", { secondaryAccentColor: event.target.value })} />
-              </Field>
-              <Field label="Title Size">
-                <Input type="number" min={20} max={56} value={form.home.cta.titleSize} onChange={(event) => updateHome("cta", { titleSize: Number(event.target.value) || 38 })} />
-              </Field>
-              <Field label="Body Size">
-                <Input type="number" min={12} max={24} value={form.home.cta.bodySize} onChange={(event) => updateHome("cta", { bodySize: Number(event.target.value) || 18 })} />
-              </Field>
-              <Field label="Primary Button URL">
-                <Input value={form.home.cta.primaryButtonLink || ""} placeholder="/books" onChange={(event) => updateHome("cta", { primaryButtonLink: event.target.value })} />
-              </Field>
-              <Field label="Secondary Button URL">
-                <Input value={form.home.cta.secondaryButtonLink || ""} placeholder="/free" onChange={(event) => updateHome("cta", { secondaryButtonLink: event.target.value })} />
-              </Field>
-              <Field label="Primary Button Text Color">
-                <Input type="color" value={form.home.cta.primaryButtonTextColor || "#ffffff"} onChange={(event) => updateHome("cta", { primaryButtonTextColor: event.target.value })} />
-              </Field>
-              <Field label="Secondary Button Text Color">
-                <Input type="color" value={form.home.cta.secondaryButtonTextColor || "#ffffff"} onChange={(event) => updateHome("cta", { secondaryButtonTextColor: event.target.value })} />
-              </Field>
-            </div>
-            <Field label="Description">
-              <Textarea rows={3} value={form.home.cta.description} onChange={(event) => updateHome("cta", { description: event.target.value })} />
-            </Field>
           </SectionCard>
         </TabsContent>
       </Tabs>
