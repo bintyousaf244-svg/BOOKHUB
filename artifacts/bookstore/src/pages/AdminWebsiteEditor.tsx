@@ -1265,6 +1265,103 @@ export default function AdminWebsiteEditor() {
             </Field>
           </SectionCard>
 
+          <SectionCard title="Customer Reviews" description="Manage the homepage review cards and the dedicated reviews page content.">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Badge">
+                <Input value={form.home.reviews.badge} onChange={(event) => updateHome("reviews", { badge: event.target.value })} />
+              </Field>
+              <Field label="Section Title">
+                <Input value={form.home.reviews.title} onChange={(event) => updateHome("reviews", { title: event.target.value })} />
+              </Field>
+              <Field label="Button Label">
+                <Input value={form.home.reviews.buttonLabel} onChange={(event) => updateHome("reviews", { buttonLabel: event.target.value })} />
+              </Field>
+              <Field label="Button Link URL">
+                <Input value={form.home.reviews.buttonLink} onChange={(event) => updateHome("reviews", { buttonLink: event.target.value })} />
+              </Field>
+              <Field label="Font Family">
+                <Input value={form.home.reviews.fontFamily} onChange={(event) => updateHome("reviews", { fontFamily: event.target.value })} />
+              </Field>
+              <Field label="Background Color">
+                <Input type="color" value={form.home.reviews.backgroundColor} onChange={(event) => updateHome("reviews", { backgroundColor: event.target.value })} />
+              </Field>
+              <Field label="Card Background">
+                <Input type="color" value={form.home.reviews.cardBackgroundColor} onChange={(event) => updateHome("reviews", { cardBackgroundColor: event.target.value })} />
+              </Field>
+              <Field label="Text Color">
+                <Input type="color" value={form.home.reviews.textColor} onChange={(event) => updateHome("reviews", { textColor: event.target.value })} />
+              </Field>
+              <Field label="Accent Color">
+                <Input type="color" value={form.home.reviews.accentColor} onChange={(event) => updateHome("reviews", { accentColor: event.target.value })} />
+              </Field>
+              <Field label="Title Size">
+                <Input type="number" min={20} max={56} value={form.home.reviews.titleSize} onChange={(event) => updateHome("reviews", { titleSize: Number(event.target.value) || 38 })} />
+              </Field>
+              <Field label="Body Size">
+                <Input type="number" min={12} max={24} value={form.home.reviews.bodySize} onChange={(event) => updateHome("reviews", { bodySize: Number(event.target.value) || 16 })} />
+              </Field>
+              <TextEffectField
+                label="Title Effect"
+                value={form.home.reviews.titleEffect}
+                onChange={(titleEffect) => updateHome("reviews", { titleEffect })}
+                effectColor={form.home.reviews.titleEffectColor}
+                onChangeColor={(titleEffectColor) => updateHome("reviews", { titleEffectColor })}
+                effectIntensity={form.home.reviews.titleEffectIntensity}
+                onChangeIntensity={(titleEffectIntensity) => updateHome("reviews", { titleEffectIntensity })}
+                defaultColor={form.home.reviews.accentColor}
+              />
+              <TextEffectField
+                label="Body Effect"
+                value={form.home.reviews.bodyEffect}
+                onChange={(bodyEffect) => updateHome("reviews", { bodyEffect })}
+                effectColor={form.home.reviews.bodyEffectColor}
+                onChangeColor={(bodyEffectColor) => updateHome("reviews", { bodyEffectColor })}
+                effectIntensity={form.home.reviews.bodyEffectIntensity}
+                onChangeIntensity={(bodyEffectIntensity) => updateHome("reviews", { bodyEffectIntensity })}
+                defaultColor={form.home.reviews.accentColor}
+              />
+            </div>
+            <Field label="Description">
+              <Textarea rows={3} value={form.home.reviews.description} onChange={(event) => updateHome("reviews", { description: event.target.value })} />
+            </Field>
+            <div className="mt-6 pt-6 border-t">
+              <ListEditor
+                items={form.home.reviews.items || []}
+                onChange={(items) => updateHome("reviews", { items })}
+                newItemTemplate={{
+                  customerName: "Customer Name",
+                  location: "City",
+                  bookName: "Book Name",
+                  review: "Share what the customer loved about the book.",
+                  rating: 5,
+                }}
+                label="Customer Review Cards"
+                addButtonLabel="Add Review"
+                renderItemFields={(item, idx, update) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <Field label="Customer Name">
+                      <Input value={item.customerName} onChange={(e) => update({ customerName: e.target.value })} />
+                    </Field>
+                    <Field label="Location">
+                      <Input value={item.location} onChange={(e) => update({ location: e.target.value })} />
+                    </Field>
+                    <Field label="Book Name">
+                      <Input value={item.bookName} onChange={(e) => update({ bookName: e.target.value })} />
+                    </Field>
+                    <Field label="Rating (1-5)">
+                      <Input type="number" min={1} max={5} value={item.rating} onChange={(e) => update({ rating: Number(e.target.value) || 5 })} />
+                    </Field>
+                    <div className="md:col-span-2">
+                      <Field label="Review Text">
+                        <Textarea rows={3} value={item.review} onChange={(e) => update({ review: e.target.value })} />
+                      </Field>
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+          </SectionCard>
+
           <SectionCard title="Bottom CTA" description="Customize the final call-to-action block, including text, colors, and centered or split layout.">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Badge">

@@ -17,6 +17,7 @@ import CartPage from "@/pages/CartPage";
 import Checkout from "@/pages/Checkout";
 import OrderSuccess from "@/pages/OrderSuccess";
 import FreeBooks from "@/pages/FreeBooks";
+import Reviews from "@/pages/Reviews";
 
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -64,6 +65,7 @@ function Router() {
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-success" component={OrderSuccess} />
             <Route path="/free" component={FreeBooks} />
+            <Route path="/reviews" component={Reviews} />
             <Route path="/my-orders" component={MyOrders} />
             <Route component={NotFound} />
           </Switch>

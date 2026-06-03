@@ -40,6 +40,7 @@ export default function Home() {
   const featured = content.home.featured;
   const freeResources = content.home.freeResources;
   const deals = content.home.deals;
+  const reviews = content.home.reviews;
   const cta = content.home.cta;
   const freeResourceSpotlights = freeBooks?.slice(0, 6) ?? [];
 
@@ -421,6 +422,98 @@ export default function Home() {
               </Link>
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="py-20" style={{ background: reviews.backgroundColor }}>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
+            <div className="max-w-2xl">
+              <span
+                className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold mb-3"
+                style={{
+                  background: `${reviews.accentColor}1a`,
+                  color: reviews.accentColor,
+                  ...getTextEffectStyle(reviews.bodyEffect, reviews.accentColor, reviews.accentColor, reviews.bodyEffectColor, reviews.bodyEffectIntensity),
+                }}
+              >
+                {reviews.badge}
+              </span>
+              <h2
+                className="font-bold"
+                style={{
+                  color: reviews.textColor,
+                  fontFamily: reviews.fontFamily,
+                  fontSize: `clamp(2rem, 4vw, ${reviews.titleSize}px)`,
+                  ...getTextEffectStyle(reviews.titleEffect, reviews.accentColor, reviews.textColor, reviews.titleEffectColor, reviews.titleEffectIntensity),
+                }}
+              >
+                {reviews.title}
+              </h2>
+              <p
+                className="mt-2"
+                style={{
+                  color: `${reviews.textColor}bf`,
+                  fontSize: reviews.bodySize,
+                  ...getTextEffectStyle(reviews.bodyEffect, reviews.accentColor, reviews.textColor, reviews.bodyEffectColor, reviews.bodyEffectIntensity),
+                }}
+              >
+                {reviews.description}
+              </p>
+            </div>
+            <Link href={reviews.buttonLink || "/reviews"}>
+              <button
+                className="rounded-full px-5 py-2.5 text-sm font-bold transition-all hover:opacity-90"
+                style={{ background: reviews.accentColor, color: "#ffffff" }}
+              >
+                {reviews.buttonLabel}
+              </button>
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {reviews.items.slice(0, 3).map((item, index) => (
+              <article
+                key={`${item.customerName}-${item.bookName}-${index}`}
+                className="rounded-[1.75rem] border p-6 shadow-sm"
+                style={{
+                  background: reviews.cardBackgroundColor,
+                  borderColor: `${reviews.accentColor}26`,
+                }}
+              >
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: 5 }).map((_, starIndex) => (
+                    <Star
+                      key={starIndex}
+                      className={`h-4 w-4 ${starIndex < item.rating ? "fill-current" : ""}`}
+                      style={{ color: starIndex < item.rating ? reviews.accentColor : `${reviews.accentColor}40` }}
+                    />
+                  ))}
+                </div>
+                <p
+                  className="leading-relaxed mb-5"
+                  style={{
+                    color: `${reviews.textColor}d9`,
+                    fontSize: reviews.bodySize,
+                    ...getTextEffectStyle(reviews.bodyEffect, reviews.accentColor, reviews.textColor, reviews.bodyEffectColor, reviews.bodyEffectIntensity),
+                  }}
+                >
+                  "{item.review}"
+                </p>
+                <div className="pt-4 border-t" style={{ borderColor: `${reviews.accentColor}1f` }}>
+                  <h3 className="font-bold" style={{ color: reviews.textColor, fontFamily: reviews.fontFamily }}>
+                    {item.customerName}
+                  </h3>
+                  <p className="text-sm mt-1" style={{ color: `${reviews.textColor}99` }}>
+                    {item.location}
+                  </p>
+                  <p className="text-sm mt-3" style={{ color: reviews.accentColor }}>
+                    {item.bookName}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

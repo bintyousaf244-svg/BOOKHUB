@@ -7,6 +7,9 @@ import { z } from "zod";
 
 const router = Router();
 const fallbackPath = path.resolve(process.cwd(), "data", "website-content.json");
+const allowFileFallback =
+  process.env.ALLOW_WEBSITE_CONTENT_FILE_FALLBACK === "true" ||
+  process.env.NODE_ENV !== "production";
 
 const updateBody = z.object({
   content: z.record(z.unknown()),
@@ -81,9 +84,18 @@ router.get("/website-content", async (_req, res) => {
       content: settings.content ?? {},
       updatedAt: settings.updatedAt.toISOString(),
     });
-  } catch {
-    const fallback = await readFallbackContent();
-    res.json(fallback);
+  } catch (error) {
+    console.error("Failed to load website content from database", error);
+
+    if (allowFileFallback) {
+      const fallback = await readFallbackContent();
+      res.json(fallback);
+      return;
+    }
+
+    res.status(500).json({
+      error: "Website content database unavailable",
+    });
   }
 });
 
@@ -109,9 +121,18 @@ router.put("/admin/website-content", async (req, res) => {
       content: updated.content ?? {},
       updatedAt: updated.updatedAt.toISOString(),
     });
-  } catch {
-    const fallback = await writeFallbackContent(parsed.data.content);
-    res.json(fallback);
+  } catch (error) {
+    console.error("Failed to save website content to database", error);
+
+    if (allowFileFallback) {
+      const fallback = await writeFallbackContent(parsed.data.content);
+      res.json(fallback);
+      return;
+    }
+
+    res.status(500).json({
+      error: "Website content could not be saved to the database",
+    });
   }
 });
 

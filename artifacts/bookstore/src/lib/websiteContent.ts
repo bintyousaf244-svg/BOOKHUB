@@ -197,6 +197,33 @@ export interface WebsiteContent {
       bodyEffectColor?: string;
       bodyEffectIntensity?: number;
     };
+    reviews: {
+      badge: string;
+      title: string;
+      description: string;
+      backgroundColor: string;
+      cardBackgroundColor: string;
+      textColor: string;
+      accentColor: string;
+      fontFamily: string;
+      titleSize: number;
+      bodySize: number;
+      buttonLabel: string;
+      buttonLink: string;
+      items: Array<{
+        customerName: string;
+        location: string;
+        bookName: string;
+        review: string;
+        rating: number;
+      }>;
+      titleEffect?: TextEffect;
+      titleEffectColor?: string;
+      titleEffectIntensity?: number;
+      bodyEffect?: TextEffect;
+      bodyEffectColor?: string;
+      bodyEffectIntensity?: number;
+    };
     cta: {
       badge: string;
       title: string;
@@ -243,6 +270,7 @@ export const defaultWebsiteContent: WebsiteContent = {
       { href: "/books?ageGroup=Kids", label: "Kids", forceReload: true },
       { href: "/books?ageGroup=Adults", label: "Adults", forceReload: true },
       { href: "/books?ageGroup=All%20Ages", label: "All Ages", forceReload: true },
+      { href: "/reviews", label: "Reviews", forceReload: false },
       { href: "/free", label: "Free Resources", forceReload: false },
       { href: "/my-orders", label: "My Orders", forceReload: false },
     ],
@@ -413,6 +441,45 @@ export const defaultWebsiteContent: WebsiteContent = {
       titleEffect: "none",
       bodyEffect: "none",
     },
+    reviews: {
+      badge: "Happy Readers",
+      title: "What Our Customers Say",
+      description: "Real feedback from parents, students, and families who use Learner's Grove books at home.",
+      backgroundColor: "#fffaf3",
+      cardBackgroundColor: "#ffffff",
+      textColor: "#582C6F",
+      accentColor: "#D97B8F",
+      fontFamily: "Georgia, serif",
+      titleSize: 38,
+      bodySize: 16,
+      buttonLabel: "Read All Reviews",
+      buttonLink: "/reviews",
+      items: [
+        {
+          customerName: "Ayesha M.",
+          location: "Karachi",
+          bookName: "My First Arabic Words",
+          review: "The illustrations kept my daughter engaged, and the Arabic vocabulary felt easy to practice together every evening.",
+          rating: 5,
+        },
+        {
+          customerName: "Fatima R.",
+          location: "Lahore",
+          bookName: "English Reading Skills for Kids",
+          review: "Clear lessons, beautiful design, and activities my son actually wants to finish. It has become part of our weekend routine.",
+          rating: 5,
+        },
+        {
+          customerName: "Omar S.",
+          location: "Islamabad",
+          bookName: "Arabic Writing Practice Book",
+          review: "The step-by-step pages made handwriting practice much less stressful. We noticed progress within the first week.",
+          rating: 5,
+        },
+      ],
+      titleEffect: "none",
+      bodyEffect: "none",
+    },
     cta: {
       badge: "Start Learning",
       title: "Start Learning Today",
@@ -466,5 +533,14 @@ function mergeDeep<T>(base: T, incoming: unknown): T {
 }
 
 export function resolveWebsiteContent(content?: unknown): WebsiteContent {
-  return mergeDeep(defaultWebsiteContent, content ?? {});
+  const merged = mergeDeep(defaultWebsiteContent, content ?? {});
+
+  if (!merged.navbar.links.some((link) => link.href === "/reviews")) {
+    merged.navbar.links = [
+      ...merged.navbar.links,
+      { href: "/reviews", label: "Reviews", forceReload: false },
+    ];
+  }
+
+  return merged;
 }
