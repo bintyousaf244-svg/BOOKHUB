@@ -10,6 +10,8 @@ interface SocialLinks {
   websiteUrl: string;
 }
 
+const SOCIAL_LINKS_CACHE_KEY = "bookhub-social-links";
+
 function FacebookIcon() {
   return (
     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
@@ -58,10 +60,36 @@ export function Footer() {
     : rawAccountLinks;
 
   useEffect(() => {
+    const cached = window.sessionStorage.getItem(SOCIAL_LINKS_CACHE_KEY);
+    if (cached) {
+      try {
+        setSocial(JSON.parse(cached) as SocialLinks);
+      } catch {
+        window.sessionStorage.removeItem(SOCIAL_LINKS_CACHE_KEY);
+      }
+    }
+
+    let cancelled = false;
+
     apiFetch("/api/payment-settings")
       .then((response) => response.json())
-      .then((data) => setSocial({ facebookUrl: data.facebookUrl || "", instagramUrl: data.instagramUrl || "", websiteUrl: data.websiteUrl || "" }))
+      .then((data) => {
+        if (cancelled) return;
+
+        const nextSocial = {
+          facebookUrl: data.facebookUrl || "",
+          instagramUrl: data.instagramUrl || "",
+          websiteUrl: data.websiteUrl || "",
+        };
+
+        setSocial(nextSocial);
+        window.sessionStorage.setItem(SOCIAL_LINKS_CACHE_KEY, JSON.stringify(nextSocial));
+      })
       .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const hasSocial = social.facebookUrl || social.instagramUrl || social.websiteUrl;

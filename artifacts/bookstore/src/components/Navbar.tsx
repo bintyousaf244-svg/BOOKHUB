@@ -6,6 +6,10 @@ import { useWebsiteContent } from "@/context/WebsiteContentContext";
 import { getTextEffectStyle } from "@/lib/textEffects";
 import { ShoppingCart, Menu, User, X, BookOpen } from "lucide-react";
 
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href);
+}
+
 export function Navbar() {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
@@ -54,7 +58,7 @@ export function Navbar() {
 
           <nav className="hidden md:flex items-center gap-1">
             {links.map((link) =>
-              link.forceReload ? (
+              isExternalHref(link.href) ? (
                 <a
                   key={link.href}
                   href={link.href}
@@ -135,7 +139,7 @@ export function Navbar() {
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
               {links.map((link) =>
-                link.forceReload ? (
+                isExternalHref(link.href) ? (
                   <a
                     key={link.href}
                     href={link.href}
